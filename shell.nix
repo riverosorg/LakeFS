@@ -3,15 +3,22 @@
 # SPDX-License-Identifier: 0BSD
 
 # I want this to be a flake at some point, but the complexity seemed high
+#note, shell presently not working to contain dependencies. 
+# FUSE and sqlite3 must be seperately installed
 
 {
   pkgs ? import <nixpkgs> {} 
 }:  pkgs.mkShell {
   nativeBuildInputs = with pkgs.buildPackages; [
-    zig
-    go
-    sqlite
-    fuse
+    gcc
+    meson
+    ninja
+    # fuse
     reuse
+  ];
+
+  buildInputs = with pkgs; [
+    # sqlite
+    fuse
   ];
 }
