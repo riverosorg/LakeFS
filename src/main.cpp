@@ -6,6 +6,7 @@
 
 #include <iostream>
 
+#include "log.hpp"
 #include "fs.hpp"
 
 static const struct fuse_operations operations = {
@@ -34,11 +35,13 @@ static const struct fuse_operations operations = {
 };
 
 auto main() -> int {
-    std::cout << "Initializing LakeFS" << std::endl;
+    LOG("Initializing LakeFS");
     
     // Fuse gets initiated like a program and needs its own args
     fuse_args args = FUSE_ARGS_INIT(0, nullptr);\
 
+    const char* mount_point = "/lakefs";
+    
     // run in foreground
     fuse_opt_add_arg(&args, "-f");
     
@@ -46,7 +49,9 @@ auto main() -> int {
     fuse_opt_add_arg(&args, "-d");
 
     // mount point
-    fuse_opt_add_arg(&args, "/lakefs");
+
+    LOG("Mounting at " << mount_point);
+    fuse_opt_add_arg(&args, mount_point);
 
     int ret = fuse_main(args.argc, args.argv, &operations, nullptr);
 

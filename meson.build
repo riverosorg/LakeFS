@@ -14,7 +14,8 @@ add_project_arguments(['-w', '-std=c++23'], language : 'cpp')
 cpp = meson.get_compiler('cpp')
 
 sources = [
-    'src/sqlite/sqlite3.c'
+    'src/sqlite/sqlite3.c',
+    'src/fs.cpp',
 ]
 
 depends = []

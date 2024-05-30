@@ -12,12 +12,16 @@ extern "C" {
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <errno.h>
 }
 
+#include "log.hpp"
 #include "fs.hpp"
 
 // Gets file attributes at <path>
 int lake_getattr(const char *path, struct stat *stbuf) {
+
+    LOG("Getting attributes for " << path);
 
     stbuf->st_uid = getuid();
 	stbuf->st_gid = getgid();
@@ -34,6 +38,8 @@ int lake_getattr(const char *path, struct stat *stbuf) {
 int lake_readdir(
     const char *path, void *buf, fuse_fill_dir_t filler,
     off_t offset, struct fuse_file_info *fi) {
+
+    LOG("Reading directory " << path);
     
     // Check if path is a query
     // Check if path exists (This will be parsed by the query engine)
@@ -46,6 +52,9 @@ int lake_readdir(
 }
 
 int lake_open(const char *path, struct fuse_file_info *fi) {
+
+    LOG("Opening file " << path);
+
     // Check if file exists
 
     // Determine if file is readable
@@ -58,5 +67,8 @@ int lake_open(const char *path, struct fuse_file_info *fi) {
 
 int lake_read(const char *path, char *buf, size_t size, off_t offset,
                       struct fuse_file_info *fi) {
+
+    LOG("Reading file " << path);
+
     return 0;
 }
