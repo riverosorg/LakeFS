@@ -6,7 +6,10 @@
 
 #include <iostream>
 
+#include "sqlite/sqlite3.h"
+
 #include "log.hpp"
+#include "db.hpp"
 #include "fs.hpp"
 
 static const struct fuse_operations operations = {
@@ -34,7 +37,7 @@ static const struct fuse_operations operations = {
     .ioctl    = nullptr,
 };
 
-auto main() -> int {
+auto main(char** argv, int argc) -> int {
     LOG("Initializing LakeFS");
     
     // Fuse gets initiated like a program and needs its own args
@@ -49,9 +52,16 @@ auto main() -> int {
     fuse_opt_add_arg(&args, "-d");
 
     // mount point
-
     LOG("Mounting at " << mount_point);
     fuse_opt_add_arg(&args, mount_point);
+
+    // Initialize SQLLite
+    int rc = db_init();
+
+    if (rc != SQLITE_OK) {
+        LOG("Failed to initialize SQLite3");
+        return 1;
+    }
 
     int ret = fuse_main(args.argc, args.argv, &operations, nullptr);
 

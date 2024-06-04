@@ -16,6 +16,7 @@ cpp = meson.get_compiler('cpp')
 sources = [
     'src/sqlite/sqlite3.c',
     'src/fs.cpp',
+    'src/db.cpp',
 ]
 
 depends = []

@@ -15,22 +15,30 @@ extern "C" {
 #include <errno.h>
 }
 
+#include <string>
+
 #include "log.hpp"
 #include "fs.hpp"
+#include "db.hpp"
+
+const std::string test_path = "/main/iso/template/iso/FD13LIVE.iso";
 
 // Gets file attributes at <path>
 int lake_getattr(const char *path, struct stat *stbuf) {
 
     LOG("Getting attributes for " << path);
 
-    stbuf->st_uid = getuid();
-	stbuf->st_gid = getgid();
-	stbuf->st_atime = time( NULL );
-	stbuf->st_mtime = time( NULL );
+    // This is going to be more complex. We'll need to effectively reverse search
+    // whatever our query is to get the proper path from the name
 
-    // Hard coding setting to directory
-    stbuf->st_mode = S_IFDIR | 0755;
-    stbuf->st_nlink = 2;
+    if (strcmp(path, "/" ) == 0)
+	{
+		stbuf->st_mode = S_IFDIR | 0755;
+		stbuf->st_nlink = 2;
+        return 0;
+	}
+
+    stat(test_path.c_str(), stbuf);
 
     return 0;
 }
@@ -47,6 +55,12 @@ int lake_readdir(
     // Return items in dir
     filler(buf, ".", nullptr, 0);
     filler(buf, "..", nullptr, 0);
+
+    // todo: we dont want to hardcode this
+    {
+        const std::string file_name = test_path.substr(test_path.find_last_of("/") + 1, test_path.size() - 1);
+        filler(buf, file_name.c_str(), nullptr, 0);
+    }
 
     return 0;
 }
