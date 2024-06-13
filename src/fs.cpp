@@ -21,7 +21,7 @@ extern "C" {
 #include "fs.hpp"
 #include "db.hpp"
 
-const std::string test_path = "/main/iso/template/iso/FD13LIVE.iso";
+const std::string test_path = "/testfile";
 
 // Gets file attributes at <path>
 int lake_getattr(const char *path, struct stat *stbuf) {
@@ -73,9 +73,21 @@ int lake_open(const char *path, struct fuse_file_info *fi) {
 
     // Determine if file is readable
  
-    if ((fi->flags & O_ACCMODE) != O_RDONLY)
-            return -EACCES;
+    // if ((fi->flags & O_ACCMODE) != O_RDONLY)
+    //         return -EACCES;
+
+    fi->fh = open(test_path.c_str(), 0, fi->flags & O_ACCMODE);
     
+    return 0;
+}
+
+int lake_release(const char *path, struct fuse_file_info *fi) {
+    
+    LOG("Releasing file " << path);
+
+    if (close(fi->fh) != 0)
+        return -errno;
+
     return 0;
 }
 
@@ -84,5 +96,27 @@ int lake_read(const char *path, char *buf, size_t size, off_t offset,
 
     LOG("Reading file " << path);
 
-    return 0;
+    // determine our host file via path
+
+    ssize_t bytes_read = pread(fi->fh, buf, size, offset);
+
+    if (bytes_read == -1)
+        return -errno;
+
+    return bytes_read;
+}
+
+int lake_write(const char *path, const char *buf, size_t size, off_t offset,
+            struct fuse_file_info *fi) {
+    
+    LOG("Writing to file " << path);
+
+    // determine our host file via path
+
+    ssize_t bytes_written = pwrite(fi->fh, buf, size, offset);
+
+    if (bytes_written == -1)
+        return -errno;
+
+    return bytes_written;
 }

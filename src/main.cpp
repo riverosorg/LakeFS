@@ -27,9 +27,9 @@ static const struct fuse_operations operations = {
     .truncate = nullptr,
     .open     = lake_open,
     .read     = lake_read,
-    .write    = nullptr,
+    .write    = lake_write,
     .statfs   = nullptr,
-    .release  = nullptr,
+    .release  = lake_release,
     .fsync    = nullptr,
     .readdir  = lake_readdir,
     .access   = nullptr,
@@ -50,6 +50,9 @@ auto main(char** argv, int argc) -> int {
     
     // turn on debug mode
     fuse_opt_add_arg(&args, "-d");
+
+    // so its usable
+    fuse_opt_add_arg(&args, "-oallow_other");
 
     // mount point
     LOG("Mounting at " << mount_point);
