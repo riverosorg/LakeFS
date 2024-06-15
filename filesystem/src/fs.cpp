@@ -20,6 +20,7 @@ extern "C" {
 #include "log.hpp"
 #include "fs.hpp"
 #include "db.hpp"
+#include "ioctl.h"
 
 const std::string test_path = "/testfile";
 
@@ -119,4 +120,44 @@ int lake_write(const char *path, const char *buf, size_t size, off_t offset,
         return -errno;
 
     return bytes_written;
+}
+
+int lake_ioctl(const char *path, unsigned int cmd, void *arg,
+            struct fuse_file_info *fi, unsigned int flags, void *data) {
+
+    LOG("IOCTL " << cmd << " on file " << path);
+
+    // This primarily functions to provide a controlling interface for the db
+
+    if (flags & FUSE_IOCTL_COMPAT)
+        return -ENOSYS;
+
+    int result = 0;
+
+    switch (cmd) {
+
+        case LAKE_ADD_FILE: {
+            std::string file_path((const char *)arg);
+
+            LOG("Adding file " << file_path);
+
+            // Add the file to the db
+            result = db_add_file(file_path);
+
+            break;
+        }
+
+        case LAKE_TAG_FILE: {
+            
+            break;
+        }
+    
+        default: {
+            LOG("Unknown IOCTL command " << cmd);
+
+            result = -ENOSYS;
+        }
+    }
+
+    return result;
 }

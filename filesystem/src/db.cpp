@@ -25,3 +25,9 @@ int db_init() {
 
     return rc;
 }
+
+int db_add_file(const std::string path) {
+    int rc = sqlite3_exec(db, ("INSERT INTO data (path) VALUES ('" + path + "');").c_str(), nullptr, nullptr, nullptr);
+    
+    return rc;
+}

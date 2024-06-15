@@ -4,37 +4,16 @@
 
 project(
     'LakeFS', 
-    ['cpp', 'c'],
+    ['cpp', 'c', 'd'],
     version: '0.0.1',
     license: 'BSD-3-Clause'
 )
 
 add_project_arguments(['-w', '-std=c++23'], language : 'cpp')
 
-cpp = meson.get_compiler('cpp')
+add_project_arguments(['-debug', '-w'], language : 'd')
 
-sources = [
-    'src/sqlite/sqlite3.c',
-    'src/fs.cpp',
-    'src/db.cpp',
-]
+# loading in individual subprojects
 
-depends = []
-
-depends += cpp.find_library('fuse')
-
-executable(
-    'lakefs',
-    sources: ['src/main.cpp', sources],
-    dependencies: depends,
-    install: true
-)
-
-tests_dict = {
-    'sqlite' : ['tests/vendors/sqlite.cpp', sources]
-}
-
-foreach name, src : tests_dict
-  exe = executable(name, src, dependencies : depends, include_directories : ['src/'])
-  test(name, exe)
-endforeach
+subdir('filesystem')
+subdir('cli')
