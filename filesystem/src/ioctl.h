@@ -7,6 +7,8 @@
 extern "C" {
 #endif
 
+#include <stdint.h>
+
 // IOCTL command codes
 
 #define LAKE_ADD_FILE 0

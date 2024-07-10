@@ -4,6 +4,7 @@
 #pragma once
 
 extern "C" {
+// #include <fuse_lowlevel.h>
 #include <fuse.h>
 }
 
@@ -23,5 +24,5 @@ int lake_read(const char *path, char *buf, size_t size, off_t offset,
 int lake_write(const char *path, const char *buf, size_t size, off_t offset,
             struct fuse_file_info *fi);
 
-int lake_ioctl(const char *path, unsigned int cmd, void *arg,
+int lake_ioctl(const char *path, int cmd, void *arg,
             struct fuse_file_info *fi, unsigned int flags, void *data);

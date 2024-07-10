@@ -5,7 +5,6 @@
 // Provides the filesystem interface through FUSE
 
 extern "C" {
-#include <fuse.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <dirent.h>
@@ -16,11 +15,14 @@ extern "C" {
 }
 
 #include <string>
+#include <cstdint>
 
 #include "log.hpp"
 #include "fs.hpp"
 #include "db.hpp"
 #include "ioctl.h"
+
+const std::size_t MAX_PATH = 4096;
 
 const std::string test_path = "/testfile";
 
@@ -122,7 +124,7 @@ int lake_write(const char *path, const char *buf, size_t size, off_t offset,
     return bytes_written;
 }
 
-int lake_ioctl(const char *path, unsigned int cmd, void *arg,
+int lake_ioctl(const char *path, int cmd, void *arg,
             struct fuse_file_info *fi, unsigned int flags, void *data) {
 
     LOG("IOCTL " << cmd << " on file " << path);
@@ -137,7 +139,14 @@ int lake_ioctl(const char *path, unsigned int cmd, void *arg,
     switch (cmd) {
 
         case LAKE_ADD_FILE: {
-            std::string file_path((const char *)arg);
+            // struct iovec iov = { arg, 4096 };
+            // fuse_reply_ioctl_retry();
+
+            LOG("T " << arg << " " << data);
+            LOG(" aa " << *(int*)arg);
+
+            const char* c_file_path = (const char *)arg;
+            std::string file_path(c_file_path);
 
             LOG("Adding file " << file_path);
 

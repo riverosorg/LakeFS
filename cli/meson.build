@@ -3,16 +3,12 @@
 # SPDX-License-Identifier: 0BSD
 
 srcs = [
-    'src/main.d'
+    'src/main.d',
+    'src/ioctl.d',
+    'src/ioctl.c',
 ]
 
 executable('lakefs-cli', [srcs])
 
-test_srcs = {
-    'main' : 'src/main.d'
-}
-
-foreach name, src : test_srcs
-  exe = executable(name, src, d_unittest: true)
-  test(name, exe)
-endforeach
+exe = executable('cli-unit-tests', srcs, d_unittest: true)
+test('cli-unit-tests', exe)

@@ -34,7 +34,7 @@ static const struct fuse_operations operations = {
     .readdir  = lake_readdir,
     .access   = nullptr,
     .create   = nullptr,
-    .ioctl    = nullptr,
+    .ioctl    = lake_ioctl,
 };
 
 auto main(char** argv, int argc) -> int {

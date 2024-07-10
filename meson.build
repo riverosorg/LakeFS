@@ -11,6 +11,8 @@ project(
 
 add_project_arguments(['-w', '-std=c++23'], language : 'cpp')
 
+add_project_arguments(['-w', '-std=c2x'], language : 'c') # c23 so we can use constexpr
+
 add_project_arguments(['-debug', '-w'], language : 'd')
 
 # loading in individual subprojects

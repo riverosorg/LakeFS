@@ -19,3 +19,12 @@ build:
 .PHONY: test
 test:
 	meson test -C $(BUILD_DIR)
+
+.PHONY: run_fs
+run_fs: build
+	-fusermount -u /lakefs
+	$(BUILD_DIR)/filesystem/lakefs
+
+.PHONY: run_cli
+run_cli: build
+	$(BUILD_DIR)/cli/lakefs-cli
