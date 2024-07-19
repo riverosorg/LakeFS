@@ -5,12 +5,14 @@
 #define FUSE_USE_VERSION 31
 
 #include <iostream>
+#include <thread>
 
 #include "sqlite/sqlite3.h"
 
 #include "log.hpp"
 #include "db.hpp"
 #include "fs.hpp"
+#include "control.hpp"
 
 static const struct fuse_operations operations = {
     .getattr  = lake_getattr,
@@ -52,7 +54,7 @@ auto main(char** argv, int argc) -> int {
     fuse_opt_add_arg(&args, "-d");
 
     // so its usable
-    fuse_opt_add_arg(&args, "-oallow_other");
+    // fuse_opt_add_arg(&args, "-oallow_other");
 
     // mount point
     LOG("Mounting at " << mount_point);
@@ -65,6 +67,9 @@ auto main(char** argv, int argc) -> int {
         LOG("Failed to initialize SQLite3");
         return 1;
     }
+
+    // Initialize the control server
+    std::thread control_thread(control_server);
 
     int ret = fuse_main(args.argc, args.argv, &operations, nullptr);
 

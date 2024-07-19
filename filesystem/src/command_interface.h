@@ -7,10 +7,16 @@
 extern "C" {
 #endif
 
-// IOCTL command codes
+// Command Interface
 
 #define LAKE_ADD_FILE 0
 #define LAKE_TAG_FILE 1
+
+typedef struct __attribute__((packed)) lake_command_t {
+    int command;
+    int size;
+    char data[];
+} lake_command_t;
 
 #ifdef __cplusplus
 }
