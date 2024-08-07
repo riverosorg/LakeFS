@@ -13,12 +13,13 @@
     gcc
     meson
     ninja
-    # fuse
     reuse
+    dmd
   ];
 
   buildInputs = with pkgs; [
-    # sqlite
     fuse
+    spdlog
+    fmt
   ];
 }

@@ -5,12 +5,15 @@
 #define FUSE_USE_VERSION 31
 
 #include <iostream>
+#include <thread>
+
+#include <spdlog/spdlog.h>
 
 #include "sqlite/sqlite3.h"
 
-#include "log.hpp"
 #include "db.hpp"
 #include "fs.hpp"
+#include "control.hpp"
 
 static const struct fuse_operations operations = {
     .getattr  = lake_getattr,
@@ -38,7 +41,7 @@ static const struct fuse_operations operations = {
 };
 
 auto main(char** argv, int argc) -> int {
-    LOG("Initializing LakeFS");
+    spdlog::trace("Initializing LakeFS");
     
     // Fuse gets initiated like a program and needs its own args
     fuse_args args = FUSE_ARGS_INIT(0, nullptr);\
@@ -52,19 +55,22 @@ auto main(char** argv, int argc) -> int {
     fuse_opt_add_arg(&args, "-d");
 
     // so its usable
-    fuse_opt_add_arg(&args, "-oallow_other");
+    // fuse_opt_add_arg(&args, "-oallow_other");
 
     // mount point
-    LOG("Mounting at " << mount_point);
+    spdlog::info("Mounting at {0}", mount_point);
     fuse_opt_add_arg(&args, mount_point);
 
     // Initialize SQLLite
     int rc = db_init();
 
     if (rc != SQLITE_OK) {
-        LOG("Failed to initialize SQLite3");
+        spdlog::critical("Failed to initialize SQLite3");
         return 1;
     }
+
+    // Initialize the control server
+    std::thread control_thread(control_server);
 
     int ret = fuse_main(args.argc, args.argv, &operations, nullptr);
 

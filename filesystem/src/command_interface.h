@@ -1,0 +1,24 @@
+// SPDX-FileCopyrightText: 2024 Caleb Depatie
+//
+// SPDX-License-Identifier: BSD-3-Clause
+#pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// Command Interface
+
+#define LAKE_ADD_FILE 0
+#define LAKE_TAG_FILE 1
+
+typedef struct __attribute__((packed)) lake_command_t {
+    int command;
+    int size;
+    char data[];
+} lake_command_t;
+
+#ifdef __cplusplus
+}
+#endif
+

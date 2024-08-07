@@ -3,4 +3,4 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #pragma once
 
-int db_init();
+void control_server();
