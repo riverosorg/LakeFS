@@ -11,15 +11,19 @@ sources = [
     'src/control.cpp'
 ]
 
+add_project_arguments(['-DSPDLOG_FMT_EXTERNAL'], language : 'cpp')
+
 depends = []
 
 depends += cpp.find_library('fuse')
+depends += cpp.find_library('spdlog')
+depends += cpp.find_library('fmt')
 
 executable(
     'lakefs',
     sources: ['src/main.cpp', sources],
     dependencies: depends,
-    install: true
+    install: true,
 )
 
 tests_dict = {

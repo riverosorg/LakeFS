@@ -16,8 +16,8 @@ extern "C" {
 }
 
 #include <string>
+#include <spdlog/spdlog.h>
 
-#include "log.hpp"
 #include "fs.hpp"
 #include "db.hpp"
 #include "command_interface.h"
@@ -27,7 +27,7 @@ const std::string test_path = "/testfile";
 // Gets file attributes at <path>
 int lake_getattr(const char *path, struct stat *stbuf) {
 
-    LOG("Getting attributes for " << path);
+    spdlog::trace("Getting attributes for {0}", path);
 
     // This is going to be more complex. We'll need to effectively reverse search
     // whatever our query is to get the proper path from the name
@@ -48,7 +48,7 @@ int lake_readdir(
     const char *path, void *buf, fuse_fill_dir_t filler,
     off_t offset, struct fuse_file_info *fi) {
 
-    LOG("Reading directory " << path);
+    spdlog::trace("Reading directory {0}", path);
     
     // Check if path is a query
     // Check if path exists (This will be parsed by the query engine)
@@ -62,7 +62,7 @@ int lake_readdir(
     for (const auto& file : files) {
         const std::string file_name = file.substr(file.find_last_of("/") + 1);
         
-        LOG("Will show file " << file << " as " << file_name);
+        spdlog::trace("Will show file {0} as {1}", file, file_name);
         
         filler(buf, file_name.c_str(), nullptr, 0);
     }
@@ -72,7 +72,7 @@ int lake_readdir(
 
 int lake_open(const char *path, struct fuse_file_info *fi) {
 
-    LOG("Opening file " << path);
+    spdlog::trace("Opening file {0}", path);
 
     // Check if file exists
 
@@ -88,7 +88,7 @@ int lake_open(const char *path, struct fuse_file_info *fi) {
 
 int lake_release(const char *path, struct fuse_file_info *fi) {
     
-    LOG("Releasing file " << path);
+    spdlog::trace("Releasing file {0}", path);
 
     if (close(fi->fh) != 0)
         return -errno;
@@ -99,7 +99,7 @@ int lake_release(const char *path, struct fuse_file_info *fi) {
 int lake_read(const char *path, char *buf, size_t size, off_t offset,
                       struct fuse_file_info *fi) {
 
-    LOG("Reading file " << path);
+    spdlog::trace("Reading file {0}", path);
 
     // determine our host file via path
 
@@ -114,7 +114,7 @@ int lake_read(const char *path, char *buf, size_t size, off_t offset,
 int lake_write(const char *path, const char *buf, size_t size, off_t offset,
             struct fuse_file_info *fi) {
     
-    LOG("Writing to file " << path);
+    spdlog::trace("Writing to file {0}", path);
 
     // determine our host file via path
 

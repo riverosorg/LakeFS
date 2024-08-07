@@ -9,10 +9,10 @@
 #include <cstring>
 #include <cstdio>
 #include <unistd.h>
+#include <spdlog/spdlog.h>
 
 #include "command_interface.h"
 #include "control.hpp"
-#include "log.hpp"
 #include "db.hpp"
 #include "sqlite/sqlite3.h"
 
@@ -23,7 +23,7 @@ void control_server() {
     // Create the socket
     int server_fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (server_fd == -1) { 
-        LOG("Failed to create socket");
+        spdlog::critical("Failed to create socket");
 
         exit(1);
     }
@@ -34,14 +34,14 @@ void control_server() {
     strncpy(addr.sun_path, socket_path.c_str(), sizeof(addr.sun_path) - 1);
 
     if (bind(server_fd, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
-        LOG("Failed to bind socket");
+        spdlog::critical("Failed to bind socket");
 
         exit(1);
     }
 
     // Listen on the socket
     if (listen(server_fd, 5) == -1) {
-        LOG("Failed to listen on socket");
+        spdlog::critical("Failed to listen on socket");
 
         exit(1);
     }
@@ -50,7 +50,7 @@ void control_server() {
     while (true) {
         int client_fd = accept(server_fd, nullptr, nullptr);
         if (client_fd == -1) {
-            LOG("Failed to accept connection");
+            spdlog::critical("Failed to accept connection");
 
             exit(1);
         }
@@ -59,7 +59,7 @@ void control_server() {
         char buffer[1024];
         int bytes_read = read(client_fd, buffer, sizeof(buffer));
         if (bytes_read == -1) {
-            LOG("Failed to read from socket");
+            spdlog::critical("Failed to read from socket");
 
             exit(1);
         }
@@ -72,9 +72,9 @@ void control_server() {
                 int rc = db_add_file(path);
 
                 if (rc != SQLITE_OK) {
-                    LOG("Failed to add file to database");
+                    spdlog::error("Failed to add file to database");
                 } else {
-                    LOG("Added file to database: " << path);
+                    spdlog::info("Added file to database: {0}", path);
                 }
 
                 break;
@@ -90,9 +90,9 @@ void control_server() {
                 int rc = db_tag_file(path, tag);
 
                 if (rc != SQLITE_OK) {
-                    LOG("Failed to tag file in database");
+                    spdlog::error("Failed to tag file in database");
                 } else {
-                    LOG("Tagged file in database: " << path << " with tag: " << tag);
+                    spdlog::info("Tagged file in database: {0} with tag: {1}", path, tag);
                 }
              
                 break;
