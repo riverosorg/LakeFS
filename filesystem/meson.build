@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2024 Caleb Depatie
+# SPDX-FileCopyrightText: 2024 Conner Tenn
 #
 # SPDX-License-Identifier: 0BSD
 
@@ -8,7 +9,9 @@ sources = [
     'src/sqlite/sqlite3.c',
     'src/fs.cpp',
     'src/db.cpp',
-    'src/control.cpp'
+    'src/control.cpp',
+    'src/ast.cpp',
+    'src/parser.cpp'
 ]
 
 add_project_arguments(['-DSPDLOG_FMT_EXTERNAL'], language : 'cpp')
