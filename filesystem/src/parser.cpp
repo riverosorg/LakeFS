@@ -4,8 +4,8 @@
 
 #include "parser.hpp"
 
+#include <iostream>
 #include <spdlog/spdlog.h>
-// #include <iostream>
 
 Token::Token() : token("") {
 }
@@ -64,6 +64,7 @@ std::vector<Token> tokenize(std::string expression) {
             switch (character)
             {
             case '&':
+            case '*':
             case '|':
             case '+':
             case '-':
@@ -86,11 +87,52 @@ std::vector<Token> tokenize(std::string expression) {
 }
 
 
-AstNode *parse(std::vector<Token> tokens) {
+AstNode *parse(std::string expression) {
+    std::vector<Token> tokens = tokenize(expression);
+
     std::vector<AstNode *> rpn;
+    std::vector<Operator *> stack;
+
+    auto putStack = [&](Operator *op) {
+        if (stack.size() > 0) {
+            Operator *last = stack.back();
+            //Check if the last operator is equal or higher precedence.
+            //This is done when equal in order to preserve argument ordering.
+            //This ensures {1+2+3 --> 1 2 + 3 +} instead of {1+2+3 --> 1 2 3 + +}
+            if (*last >= *op) {
+                rpn.push_back(last);
+                stack.pop_back();
+            }
+        }
+        stack.push_back(op);
+    };
+
+    for (const auto &token : tokens) {
+        std::string token_str = token.str();
+        std::cout << token_str << std::endl;
+
+        if (token_str == "&" || token_str == "*") {
+            putStack(new Intersection());
+        }
+        else if (token_str == "|" || token_str == "+") {
+            putStack(new Union());
+        }
+        else if (token_str == "!" || token_str == "-") {
+            putStack(new Negation());
+        }
+        else if (token_str == "(") {
+        }
+        else if (token_str == ")") {
+        }
+        else {
+            AstNode *node = new Tag(token_str);
+            rpn.push_back(node);
+        }
+    }
 
 
+    // std::cout << token_str << std::endl;
 
-
+    return 0;
 }
 

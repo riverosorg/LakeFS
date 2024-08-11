@@ -9,33 +9,42 @@
 class AstNode
 {
 private:
-    
 
 public:
     AstNode();
-    virtual ~AstNode();
 };
 
-class BinaryOperator : public AstNode {
+
+class Operator : public AstNode {
+private:
+    int precedence;
+
+public:
+
+    Operator(int precedence);
+
+    bool operator>=(const Operator& other) const;
+};
+
+
+class BinaryOperator : public Operator {
 private:
     AstNode *left_node;
     AstNode *right_node;
 
 public:
 
-    BinaryOperator();
-    ~BinaryOperator();
+    BinaryOperator(int precedence);
 };
 
 
-class UnaryOperator : public AstNode {
+class UnaryOperator : public Operator {
 private:
     AstNode *node;
 
 public:
 
-    UnaryOperator();
-    ~UnaryOperator();
+    UnaryOperator(int precedence);
 };
 
 
@@ -43,7 +52,6 @@ class Union : public BinaryOperator {
 
 public:
     Union();
-    ~Union();
 
 };
 
@@ -52,7 +60,6 @@ class Intersection : public BinaryOperator {
 
 public:
     Intersection();
-    ~Intersection();
 
 };
 
@@ -61,7 +68,6 @@ class Negation : public UnaryOperator {
 
 public:
     Negation();
-    ~Negation();
 
 };
 
@@ -71,8 +77,7 @@ private:
     std::string name;
 
 public:
-    Tag();
-    ~Tag();
+    Tag(std::string name);
 };
 
 

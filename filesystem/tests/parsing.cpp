@@ -37,3 +37,9 @@ TEST_CASE("Tokenize", "[vendor]") {
     });
 }
 
+
+TEST_CASE("parse", "[vendor]") {
+    AstNode *ast;
+
+    ast = parse("a&b");
+}

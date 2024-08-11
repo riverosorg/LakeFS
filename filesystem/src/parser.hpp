@@ -25,4 +25,4 @@ public:
 
 
 std::vector<Token> tokenize(std::string expression);
-AstNode *parse(std::vector<Token> tokens);
+AstNode *parse(std::string expression);
