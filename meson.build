@@ -18,4 +18,3 @@ add_project_arguments(['-debug', '-w'], language : 'd')
 
 subdir('filesystem')
 subdir('cli')
-subdir('query-lang')

@@ -27,7 +27,8 @@ executable(
 )
 
 tests_dict = {
-    'sqlite' : ['tests/vendors/sqlite.cpp', sources]
+    'sqlite' : ['tests/vendors/sqlite.cpp', sources],
+    'parsing' : ['tests/parsing.cpp', sources]
 }
 
 foreach name, src : tests_dict

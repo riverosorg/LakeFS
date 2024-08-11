@@ -7,7 +7,6 @@
 
 #include "ast.hpp"
 
-TEST_CASE("Basic parsing", "[vendor]") {
-
+TEST_CASE("Sanity test", "[vendor]") {
     REQUIRE(1 == 1);
 }
