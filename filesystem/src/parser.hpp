@@ -14,6 +14,7 @@ public:
     Token(std::string str);
 
     friend std::ostream& operator<<(std::ostream &out, const Token &t);
+    friend std::ostream& operator<<(std::ostream &out, const std::vector<Token> &t);
     bool operator==(const Token& other) const;
 
     size_t len() const;

@@ -5,6 +5,7 @@
 #include "parser.hpp"
 
 #include <spdlog/spdlog.h>
+// #include <iostream>
 
 Token::Token() : token("") {
 }
@@ -13,6 +14,14 @@ Token::Token(std::string str) : token(str) {
 
 std::ostream& operator<<(std::ostream &out, const Token &t) {
     out << t.str();
+    return out;
+}
+std::ostream& operator<<(std::ostream &out, const std::vector<Token> &t) {
+    out << "Token{";
+    for (const auto &token : t) {
+        out << token << ", ";
+    }
+    out << "}";
     return out;
 }
 

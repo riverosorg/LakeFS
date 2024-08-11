@@ -16,3 +16,24 @@ TEST_CASE("Token", "[vendor]") {
     REQUIRE_FALSE(Token("abc") == Token("123"));
 }
 
+TEST_CASE("Tokenize", "[vendor]") {
+    std::vector<Token> tokens;
+
+    tokens = tokenize("abc123");
+    std::cout << tokens << std::endl;
+    REQUIRE(tokens == std::vector<Token>{
+        Token("abc123")
+    });
+
+    tokens = tokenize("abc&123+(d)");
+    REQUIRE(tokens == std::vector<Token>{
+        Token("abc"),
+        Token("&"),
+        Token("123"),
+        Token("+"),
+        Token("("),
+        Token("d"),
+        Token(")"),
+    });
+}
+
