@@ -20,7 +20,6 @@ TEST_CASE("Tokenize", "[vendor]") {
     std::vector<Token> tokens;
 
     tokens = tokenize("abc123");
-    std::cout << tokens << std::endl;
     REQUIRE(tokens == std::vector<Token>{
         Token("abc123")
     });
@@ -40,7 +39,22 @@ TEST_CASE("Tokenize", "[vendor]") {
 
 TEST_CASE("parse", "[vendor]") {
     AstNode *ast;
+    AstNode *expected_ast;
 
     ast = parse("a&b");
+    expected_ast = new Intersection(
+        new Tag("a"),
+        new Tag("b")
+    );
+    REQUIRE(ast->match(expected_ast));
+
     ast = parse("a&(b|c)");
+    expected_ast = new Intersection(
+        new Tag("a"),
+        new Union(
+            new Tag("b"),
+            new Tag("c")
+        )
+    );
+    REQUIRE(ast->match(expected_ast));
 }
