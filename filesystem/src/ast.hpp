@@ -17,6 +17,8 @@ public:
     virtual std::string str() const = 0;
     friend std::ostream& operator<<(std::ostream &out, const AstNode &node);
     friend std::ostream& operator<<(std::ostream &out, const std::vector<AstNode *> &nodes);
+
+    virtual void assembleAST(std::vector<AstNode *> *rpn, std::vector<AstNode *>::iterator *rpn_iter) = 0;
 };
 
 
@@ -45,6 +47,8 @@ public:
     BinaryOperator(int precedence);
 
     virtual std::string str() const;
+
+    void assembleAST(std::vector<AstNode *> *rpn, std::vector<AstNode *>::iterator *rpn_iter);
 };
 
 
@@ -57,6 +61,8 @@ public:
     UnaryOperator(int precedence);
 
     virtual std::string str() const;
+
+    void assembleAST(std::vector<AstNode *> *rpn, std::vector<AstNode *>::iterator *rpn_iter);
 };
 
 
@@ -95,6 +101,8 @@ public:
     Tag(std::string name);
 
     virtual std::string str() const;
+
+    void assembleAST(std::vector<AstNode *> *rpn, std::vector<AstNode *>::iterator *rpn_iter);
 };
 
 

@@ -113,7 +113,7 @@ std::vector<AstNode *> parseRpn(std::vector<Token>::iterator *token_iter, std::v
         (*token_iter)++;
 
         std::string token_str = token.str();
-        std::cout << token_str << std::endl;
+        // std::cout << token_str << std::endl;
 
         if (token_str == "&" || token_str == "*") {
             putStack(new Intersection());
@@ -150,13 +150,20 @@ std::vector<AstNode *> parseRpn(std::vector<Token>::iterator *token_iter, std::v
 
 AstNode *parse(std::string expression) {
     std::vector<Token> tokens = tokenize(expression);
-
     std::vector<Token>::iterator token_iter = tokens.begin();
 
+    //Parse the expression and convert to RPN
     std::vector<AstNode *> rpn = parseRpn(&token_iter, tokens.end());
+    std::cout << "RPN: " << rpn << std::endl;
 
-    std::cout << rpn << std::endl;
+    //Convert the RPN representation to an AST
+    std::vector<AstNode *>::iterator rpn_iter = rpn.begin();
+    while (rpn_iter != rpn.end()) {
+        (*rpn_iter)->assembleAST(&rpn, &rpn_iter);
+        rpn_iter += 1;
+    }
+    std::cout << "AST: " << *rpn.back() << std::endl;
 
-    return 0;
+    return rpn.back();
 }
 

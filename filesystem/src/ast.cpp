@@ -4,6 +4,8 @@
 
 #include "ast.hpp"
 
+//== AstNode ==
+
 AstNode::AstNode() {
 }
 
@@ -20,6 +22,8 @@ std::ostream& operator<<(std::ostream &out, const std::vector<AstNode *> &nodes)
     return out;
 }
 
+
+//== Operator ==
 
 Operator::Operator(int precedence) : precedence(precedence) {
 }
@@ -42,6 +46,8 @@ bool Operator::operator>=(const Operator& other) const {
 }
 
 
+//== BinaryOperator ==
+
 BinaryOperator::BinaryOperator(int precedence) : Operator(precedence), left_node(NULL), right_node(NULL) {
 }
 
@@ -57,6 +63,17 @@ std::string BinaryOperator::str() const {
     return "BinaryOperator{" + left_str + "," + right_str + "}";
 }
 
+void BinaryOperator::assembleAST(std::vector<AstNode *> *rpn, std::vector<AstNode *>::iterator *rpn_iter) {
+    //Collect the arguments
+    this->left_node = *((*rpn_iter)-2);
+    this->right_node = *((*rpn_iter)-1);
+
+    rpn->erase((*rpn_iter)-2, (*rpn_iter));
+    (*rpn_iter) -= 2; //2 elements removed
+}
+
+
+//== UnaryOperator ==
 
 UnaryOperator::UnaryOperator(int precedence) : Operator(precedence), node(NULL) {
 }
@@ -69,6 +86,16 @@ std::string UnaryOperator::str() const {
     return "UnaryOperator{" + node_str + "}";
 }
 
+void UnaryOperator::assembleAST(std::vector<AstNode *> *rpn, std::vector<AstNode *>::iterator *rpn_iter) {
+    //Collect the arguments
+    this->node = *((*rpn_iter)-1);
+
+    rpn->erase((*rpn_iter)-1, (*rpn_iter));
+    (*rpn_iter) -= 1; //1 element removed
+}
+
+
+//== Union ==
 
 Union::Union() : BinaryOperator(0) {
 }
@@ -78,6 +105,8 @@ std::string Union::str() const {
 }
 
 
+//== Intersection ==
+
 Intersection::Intersection() : BinaryOperator(1) {
 }
 
@@ -85,6 +114,8 @@ std::string Intersection::str() const {
     return "Intersection_" + BinaryOperator::str();
 }
 
+
+//== Negation ==
 
 Negation::Negation() : UnaryOperator(2) {
 }
@@ -94,10 +125,16 @@ std::string Negation::str() const {
 }
 
 
+//== Tag ==
+
 Tag::Tag(std::string name) : name(name) {
 }
 
 std::string Tag::str() const {
     return "Tag{" + this->name + "}";
+}
+
+void Tag::assembleAST(std::vector<AstNode *> *rpn, std::vector<AstNode *>::iterator *rpn_iter) {
+    //Nothing needs to be done
 }
 
