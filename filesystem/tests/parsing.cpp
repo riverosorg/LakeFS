@@ -42,4 +42,5 @@ TEST_CASE("parse", "[vendor]") {
     AstNode *ast;
 
     ast = parse("a&b");
+    ast = parse("a&(b|c)");
 }

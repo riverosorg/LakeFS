@@ -89,9 +89,7 @@ std::vector<Token> tokenize(std::string expression) {
 }
 
 
-AstNode *parse(std::string expression) {
-    std::vector<Token> tokens = tokenize(expression);
-
+std::vector<AstNode *> parseRpn(std::vector<Token>::iterator *token_iter, std::vector<Token>::iterator end_iter) {
     std::vector<AstNode *> rpn;
     std::vector<Operator *> stack;
 
@@ -109,7 +107,11 @@ AstNode *parse(std::string expression) {
         stack.push_back(op);
     };
 
-    for (const auto &token : tokens) {
+    //Loop through the tokens
+    while(*token_iter != end_iter) {
+        Token token = **token_iter;
+        (*token_iter)++;
+
         std::string token_str = token.str();
         std::cout << token_str << std::endl;
 
@@ -123,8 +125,13 @@ AstNode *parse(std::string expression) {
             putStack(new Negation());
         }
         else if (token_str == "(") {
+            //Parse the sub-expression
+            std::vector<AstNode *> sub_expr = parseRpn(token_iter, end_iter);
+            rpn.insert(rpn.end(), sub_expr.begin(), sub_expr.end());
         }
         else if (token_str == ")") {
+            //Exit the for loop
+            break;
         }
         else {
             AstNode *node = new Tag(token_str);
@@ -138,8 +145,17 @@ AstNode *parse(std::string expression) {
         stack.pop_back();
     }
 
+    return rpn;
+}
+
+AstNode *parse(std::string expression) {
+    std::vector<Token> tokens = tokenize(expression);
+
+    std::vector<Token>::iterator token_iter = tokens.begin();
+
+    std::vector<AstNode *> rpn = parseRpn(&token_iter, tokens.end());
+
     std::cout << rpn << std::endl;
-    std::cout << stack << std::endl;
 
     return 0;
 }
