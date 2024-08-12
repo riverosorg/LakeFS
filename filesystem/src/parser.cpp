@@ -4,21 +4,21 @@
 
 #include "parser.hpp"
 
-#include <iostream>
-#include <spdlog/spdlog.h>
+#include <sstream>
+
 
 Token::Token() : token("") {
 }
 Token::Token(std::string str) : token(str) {
 }
 
-std::ostream& operator<<(std::ostream &out, const Token &t) {
-    out << t.str();
+std::ostream& operator<<(std::ostream &out, const Token &token) {
+    out << token.str();
     return out;
 }
-std::ostream& operator<<(std::ostream &out, const std::vector<Token> &t) {
-    out << "Token{";
-    for (const auto &token : t) {
+std::ostream& operator<<(std::ostream &out, const std::vector<Token> &tokens) {
+    out << "Tokens{";
+    for (const auto &token : tokens) {
         out << token << ", ";
     }
     out << "}";
@@ -77,7 +77,9 @@ std::vector<Token> tokenize(std::string expression) {
                 break;
 
             default:
-                spdlog::trace("Unexpected Character {0}", character);
+                std::ostringstream msg;
+                msg << "Unexpected Character " << character;
+                throw std::runtime_error(msg.str());
                 break;
             }
         }
@@ -130,8 +132,14 @@ AstNode *parse(std::string expression) {
         }
     }
 
+    //Remove all remaining items from the stack
+    while (stack.size() > 0) {
+        rpn.push_back(stack.back());
+        stack.pop_back();
+    }
 
-    // std::cout << token_str << std::endl;
+    std::cout << rpn << std::endl;
+    std::cout << stack << std::endl;
 
     return 0;
 }

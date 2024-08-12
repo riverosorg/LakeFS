@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 
 class AstNode
 {
@@ -12,6 +13,10 @@ private:
 
 public:
     AstNode();
+
+    virtual std::string str() const = 0;
+    friend std::ostream& operator<<(std::ostream &out, const AstNode &node);
+    friend std::ostream& operator<<(std::ostream &out, const std::vector<AstNode *> &nodes);
 };
 
 
@@ -22,6 +27,9 @@ private:
 public:
 
     Operator(int precedence);
+
+    virtual std::string str() const;
+    friend std::ostream& operator<<(std::ostream &out, const std::vector<Operator *> &nodes);
 
     bool operator>=(const Operator& other) const;
 };
@@ -35,6 +43,8 @@ private:
 public:
 
     BinaryOperator(int precedence);
+
+    virtual std::string str() const;
 };
 
 
@@ -45,6 +55,8 @@ private:
 public:
 
     UnaryOperator(int precedence);
+
+    virtual std::string str() const;
 };
 
 
@@ -53,6 +65,7 @@ class Union : public BinaryOperator {
 public:
     Union();
 
+    virtual std::string str() const;
 };
 
 
@@ -61,6 +74,7 @@ class Intersection : public BinaryOperator {
 public:
     Intersection();
 
+    virtual std::string str() const;
 };
 
 
@@ -69,6 +83,7 @@ class Negation : public UnaryOperator {
 public:
     Negation();
 
+    virtual std::string str() const;
 };
 
 
@@ -78,6 +93,8 @@ private:
 
 public:
     Tag(std::string name);
+
+    virtual std::string str() const;
 };
 
 
