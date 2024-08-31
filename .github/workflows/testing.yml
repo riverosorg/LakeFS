@@ -26,3 +26,4 @@ jobs:
         if: success() || failure()
         with:
           report_paths: '**build/meson-logs/*.junit.xml'
+          include_passed: true
