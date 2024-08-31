@@ -105,16 +105,14 @@ std::string db_create_query(const AstNode* ast) {
     return query;
 }
 
-
-
-// ---------------------------------------
-
-// TODO: This will be gonezo
-std::vector<std::string> db_tmp_query() {
+// TODO: return a file struct containing the unique file ID
+std::vector<std::string> db_run_query(const AstNode* ast) {
     std::vector<std::string> results;
 
+    std::string query = db_create_query(ast);
+
     sqlite3_stmt *stmt;
-    sqlite3_prepare_v2(db, "SELECT path FROM data WHERE id IN (SELECT data_id FROM tags WHERE tag_value = 'default');", -1, &stmt, nullptr);
+    sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr);
 
     while (sqlite3_step(stmt) == SQLITE_ROW) {
         results.push_back(std::string(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0))));

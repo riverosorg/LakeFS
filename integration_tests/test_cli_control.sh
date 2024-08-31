@@ -14,21 +14,25 @@ cli=../build/cli/lakefs-cli
 test_dir=/tmp/lakefs_test
 
 # start up the FS
+fusermount -u $lake_dir
+rm /tmp/lakefs.sock
+
 sudo $fs > /dev/null 2>&1 &
 
 sleep 0.2
 
 # Create a test directory
 mkdir -p $test_dir
-cd $test_dir
 
 # test adding a file
 rng=$RANDOM
 
-echo "$rng" > test_file
+echo "$rng" > $test_dir/test_file
 
-$cli add test_file
-$cli tag test_file default
+# TODO: current limitation, i need to pass the full path
+
+$cli add $(pwd)/test_file
+$cli tag $(pwd)/test_file default
 
 dir=$(ls $lake_dir | grep test_file)
 
@@ -51,5 +55,7 @@ sudo killall -SIGINT $fs_prog
 
 wait
 
-cd ..
+fusermount -u $lake_dir
+
+rm /tmp/lakefs.sock
 rm -rf $test_dir

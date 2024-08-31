@@ -49,10 +49,7 @@ auto main(char** argv, int argc) -> int {
     const char* mount_point = "/lakefs";
     
     // run in foreground
-    // fuse_opt_add_arg(&args, "-f");
-    if (argc > 1) {
-        fuse_opt_add_arg(&args, argv[1]); // replacing manually adding -f. will be changed
-    }
+    fuse_opt_add_arg(&args, "-f");
 
     // turn on debug mode
     fuse_opt_add_arg(&args, "-d");

@@ -18,19 +18,18 @@ extern "C" {
 #include <string>
 #include <spdlog/spdlog.h>
 
+#include "ast.hpp"
+#include "parser.hpp"
 #include "fs.hpp"
 #include "db.hpp"
 #include "command_interface.h"
 
-const std::string test_path = "/testfile";
+std::string reverse_query(const char* path);
 
 // Gets file attributes at <path>
 int lake_getattr(const char *path, struct stat *stbuf) {
 
     spdlog::trace("Getting attributes for {0}", path);
-
-    // This is going to be more complex. We'll need to effectively reverse search
-    // whatever our query is to get the proper path from the name
 
     if (strcmp(path, "/" ) == 0)
 	{
@@ -39,7 +38,12 @@ int lake_getattr(const char *path, struct stat *stbuf) {
         return 0;
 	}
 
-    stat(test_path.c_str(), stbuf);
+    auto file = reverse_query(path);
+
+    if (file.empty())
+        return -ENOENT;
+
+    stat(file.c_str(), stbuf);
 
     return 0;
 }
@@ -57,7 +61,7 @@ int lake_readdir(
     filler(buf, ".", nullptr, 0);
     filler(buf, "..", nullptr, 0);
 
-    auto files = db_tmp_query();
+    auto files = db_run_query(parse("default"));
 
     for (const auto& file : files) {
         const std::string file_name = file.substr(file.find_last_of("/") + 1);
@@ -81,7 +85,12 @@ int lake_open(const char *path, struct fuse_file_info *fi) {
     // if ((fi->flags & O_ACCMODE) != O_RDONLY)
     //         return -EACCES;
 
-    fi->fh = open(test_path.c_str(), 0, fi->flags & O_ACCMODE);
+    auto file_path = reverse_query(path);
+
+    if (file_path.empty())
+        return -ENOENT;
+
+    fi->fh = open(file_path.c_str(), 0, fi->flags & O_ACCMODE);
     
     return 0;
 }
@@ -124,4 +133,29 @@ int lake_write(const char *path, const char *buf, size_t size, off_t offset,
         return -errno;
 
     return bytes_written;
+}
+
+std::string reverse_query(const char* path) {
+    auto path_s = std::string(path);
+
+    // TODO:
+    auto query_files = db_run_query(parse("default"));
+
+    // Get the file path by comparing the file name to the query results
+    std::string file_path;
+
+    const std::string looking_for_file = 
+        std::string(path_s).substr(std::string(path_s).find_last_of("/") + 1);
+
+    for (const auto& query_file : query_files) {
+        const std::string query_file_name = 
+            query_file.substr(query_file.find_last_of("/") + 1);
+
+        if (query_file_name == looking_for_file) {
+            file_path = query_file;
+            break;
+        }
+    }
+
+    return file_path;
 }
