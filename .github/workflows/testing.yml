@@ -19,7 +19,6 @@ jobs:
         uses: dx-oss/nix-shell-action@v11
         with:
           script: |
-            cd src
             make setup
             make test
       - name: Publish Results
