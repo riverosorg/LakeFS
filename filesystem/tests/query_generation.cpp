@@ -21,7 +21,39 @@ TEST_CASE("Basic Tag Retrieval", "[parsing][query]") {
         ast = parse("tag");
         query = db_create_query(ast);
         expected_query = 
-            "SELECT path FROM data WHERE id IN (SELECT data_id FROM tags WHERE tag_value in ('tag'));";
+            "SELECT path FROM data WHERE id IN "
+            "(SELECT data_id FROM tags WHERE tag_value = 'tag');";
+        
+        REQUIRE(query == expected_query);
+    }
+
+    SECTION("Negation") {
+        ast = parse("!tag");
+        query = db_create_query(ast);
+        expected_query = 
+            "SELECT path FROM data WHERE id IN "
+            "(SELECT data_id FROM tags WHERE tag_value != 'tag');";
+        
+        REQUIRE(query == expected_query);
+    }
+
+    SECTION("Union Retrieval") {
+        ast = parse("tag1|tag2");
+        query = db_create_query(ast);
+        expected_query = 
+            "SELECT path FROM data WHERE id IN "
+            "(SELECT data_id FROM tags WHERE tag_value IN ('tag1', 'tag2'));";
+        REQUIRE(query == expected_query);
+    }
+
+    SECTION("Intersection Retrieval") {
+        ast = parse("a&b");
+        query = db_create_query(ast);
+        expected_query = 
+            "SELECT path FROM data WHERE id IN "
+            "(SELECT data_id FROM tags WHERE tag_value = 'a') "
+            "AND id IN "
+            "(SELECT data_id FROM tags WHERE tag_value = 'b');";
         
         REQUIRE(query == expected_query);
     }

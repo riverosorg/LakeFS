@@ -40,15 +40,46 @@ int db_tag_file(const std::string path, const std::string tag) {
     return rc;
 }
 
-// Recursively generate a SQL query string for the 'in ()' clause of the standard query
+// Recursively generate a SQL query string for WHERE clause of the standard query
 std::string db_query_helper(const AstNode* ast) {
     std::string query_part;
 
     // Determine AST type
     if (auto tag = dynamic_cast<const Tag*>(ast)) {
         query_part += "'" + tag->name + "'";
-    } 
+    
+    } else if (auto union_op = dynamic_cast<const Union*>(ast)) {
+        query_part += "IN (";
+        query_part += db_query_helper(union_op->left_node);
+        query_part += ", ";
+        query_part += db_query_helper(union_op->right_node);
+        query_part += ")";
+    
+    } else if (auto intersection_op = dynamic_cast<const Intersection*>(ast)) {
+        if  (auto tag = dynamic_cast<const Tag*>(intersection_op->left_node)){
+            query_part += "= '" + tag->name + "'";
+        
+        } else {
+            query_part += db_query_helper(intersection_op->left_node);
+        }
 
+        query_part += ") AND id IN (SELECT data_id FROM tags WHERE tag_value ";
+
+        if  (auto tag = dynamic_cast<const Tag*>(intersection_op->right_node)){
+            query_part += "= '" + tag->name + "'";
+        
+        } else {
+            query_part += db_query_helper(intersection_op->right_node);
+        }
+
+    } else if (auto negation_op = dynamic_cast<const Negation*>(ast)) {
+        query_part += "!= ";
+        query_part += db_query_helper(negation_op->node);
+    
+    } else {
+        throw std::runtime_error("Unknown AST type");
+    }
+     
     return query_part;
 }
 
@@ -58,11 +89,18 @@ std::string db_create_query(const AstNode* ast) {
 
     // Tag selection preamble
     query += "SELECT path ";
-    query += "FROM data WHERE id IN (SELECT data_id FROM tags WHERE tag_value in (";
+    query += "FROM data WHERE id IN (SELECT data_id FROM tags WHERE tag_value ";
 
-    query += db_query_helper(ast);
+    if  (auto tag = dynamic_cast<const Tag*>(ast)){
+        // TODO: This is a special case and i hate it
+        query += "= '" + tag->name + "'";
+    
+    } else {
+        query += db_query_helper(ast);
+    }
 
-    query += "));";
+
+    query += ");";
 
     return query;
 }

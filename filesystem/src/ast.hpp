@@ -38,11 +38,9 @@ public:
 
 
 class BinaryOperator : public Operator {
-protected:
+public:
     AstNode *left_node;
     AstNode *right_node;
-
-public:
 
     BinaryOperator(int precedence);
     BinaryOperator(int precedence, AstNode *left, AstNode *right);
@@ -54,10 +52,8 @@ public:
 
 
 class UnaryOperator : public Operator {
-protected:
-    AstNode *node;
-
 public:
+    AstNode *node;
 
     UnaryOperator(int precedence);
     UnaryOperator(int precedence, AstNode *node);
