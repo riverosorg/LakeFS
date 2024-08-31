@@ -18,3 +18,6 @@ add_project_arguments(['-debug', '-w'], language : 'd')
 
 subdir('filesystem')
 subdir('cli')
+
+# The I testing should be loaded last to ensure that all other subprojects are built first
+subdir('integration_tests')

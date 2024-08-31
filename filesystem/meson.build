@@ -37,7 +37,7 @@ tests_dict = {
 }
 
 foreach name, src : tests_dict
-  exe = executable(
+    exe = executable(
         name, 
         src, 
         dependencies : depends, include_directories : ['src/'],

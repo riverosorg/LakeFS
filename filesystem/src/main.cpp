@@ -44,13 +44,16 @@ auto main(char** argv, int argc) -> int {
     spdlog::trace("Initializing LakeFS");
     
     // Fuse gets initiated like a program and needs its own args
-    fuse_args args = FUSE_ARGS_INIT(0, nullptr);\
+    fuse_args args = FUSE_ARGS_INIT(0, nullptr);
 
     const char* mount_point = "/lakefs";
     
     // run in foreground
-    fuse_opt_add_arg(&args, "-f");
-    
+    // fuse_opt_add_arg(&args, "-f");
+    if (argc > 1) {
+        fuse_opt_add_arg(&args, argv[1]); // replacing manually adding -f. will be changed
+    }
+
     // turn on debug mode
     fuse_opt_add_arg(&args, "-d");
 
