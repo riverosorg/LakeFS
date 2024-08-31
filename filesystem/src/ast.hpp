@@ -102,10 +102,9 @@ public:
 
 
 class Tag : public AstNode {
-private:
+public:
     std::string name;
 
-public:
     Tag(std::string name);
 
     virtual std::string str() const;

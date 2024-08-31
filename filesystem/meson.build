@@ -31,7 +31,8 @@ executable(
 
 tests_dict = {
     'sqlite' : ['tests/vendors/sqlite.cpp', sources],
-    'parsing' : ['tests/parsing.cpp', sources]
+    'parsing' : ['tests/parsing.cpp', sources],
+    'SQL generation' : ['tests/query_generation.cpp', sources],
 }
 
 foreach name, src : tests_dict

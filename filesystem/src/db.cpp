@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
+#include <string>
+
 #include "sqlite/sqlite3.h"
 #include "db.hpp"
 
@@ -38,6 +40,38 @@ int db_tag_file(const std::string path, const std::string tag) {
     return rc;
 }
 
+// Recursively generate a SQL query string for the 'in ()' clause of the standard query
+std::string db_query_helper(const AstNode* ast) {
+    std::string query_part;
+
+    // Determine AST type
+    if (auto tag = dynamic_cast<const Tag*>(ast)) {
+        query_part += "'" + tag->name + "'";
+    } 
+
+    return query_part;
+}
+
+// Creates a syntactically valid SQLite3 query from an ASTNode
+std::string db_create_query(const AstNode* ast) {
+    std::string query;
+
+    // Tag selection preamble
+    query += "SELECT path ";
+    query += "FROM data WHERE id IN (SELECT data_id FROM tags WHERE tag_value in (";
+
+    query += db_query_helper(ast);
+
+    query += "));";
+
+    return query;
+}
+
+
+
+// ---------------------------------------
+
+// TODO: This will be gonezo
 std::vector<std::string> db_tmp_query() {
     std::vector<std::string> results;
 
