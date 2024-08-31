@@ -1,27 +1,23 @@
 // SPDX-FileCopyrightText: 2024 Conner Tenn
+// SPDX-FileCopyrightText: 2024 Caleb Depatie
 //
-// SPDX-License-Identifier: 0BSD
+// SPDX-License-Identifier: BSD-3-Clause
 
 #include "parser.hpp"
 
 #include <sstream>
 
+#include <spdlog/spdlog.h>
+#include <spdlog/fmt/ostr.h>
 
-Token::Token() : token("") {
-}
-Token::Token(std::string str) : token(str) {
-}
+Token::Token() 
+    : token("") {}
+
+Token::Token(std::string str) 
+    : token(str) {}
 
 std::ostream& operator<<(std::ostream &out, const Token &token) {
     out << token.str();
-    return out;
-}
-std::ostream& operator<<(std::ostream &out, const std::vector<Token> &tokens) {
-    out << "Tokens{";
-    for (const auto &token : tokens) {
-        out << token << ", ";
-    }
-    out << "}";
     return out;
 }
 
@@ -57,7 +53,7 @@ std::vector<Token> tokenize(std::string expression) {
         if (isspace(character)) {
             captureToken();
         }
-        else if (isalnum(character)) {
+        else if (isalnum(character) || character == '_') {
             token_accum.append(character);
         }
         else {
@@ -113,7 +109,6 @@ std::vector<AstNode *> parseRpn(std::vector<Token>::iterator *token_iter, std::v
         (*token_iter)++;
 
         std::string token_str = token.str();
-        // std::cout << token_str << std::endl;
 
         if (token_str == "&" || token_str == "*") {
             putStack(new Intersection());
@@ -154,16 +149,28 @@ AstNode *parse(std::string expression) {
 
     //Parse the expression and convert to RPN
     std::vector<AstNode *> rpn = parseRpn(&token_iter, tokens.end());
-    std::cout << "RPN: " << rpn << std::endl;
-
+    
     //Convert the RPN representation to an AST
     std::vector<AstNode *>::iterator rpn_iter = rpn.begin();
     while (rpn_iter != rpn.end()) {
+        spdlog::trace("RPN: {0}", (*rpn_iter)->str());
+
+        // TODO: manipulating an iterator like this (deleting elements) is undefined behaviour
         (*rpn_iter)->assembleAST(&rpn, &rpn_iter);
+        
         rpn_iter += 1;
     }
-    std::cout << "AST: " << *rpn.back() << std::endl;
+
+    spdlog::trace("AST: {0}", rpn.back()->str());
 
     return rpn.back();
 }
 
+std::ostream& operator<<(std::ostream &out, const std::vector<Token> &tokens) {
+    out << "Tokens{";
+    for (const auto &token : tokens) {
+        out << token << ", ";
+    }
+    out << "}";
+    return out;
+}

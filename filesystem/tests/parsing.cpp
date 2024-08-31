@@ -1,4 +1,5 @@
 // SPDX-FileCopyrightText: 2024 Conner Tenn
+// SPDX-FileCopyrightText: 2024 Caleb Depatie
 //
 // SPDX-License-Identifier: 0BSD
 
@@ -7,21 +8,17 @@
 
 #include "parser.hpp"
 
-TEST_CASE("Sanity test", "[vendor]") {
-    REQUIRE(1 == 1);
-}
-
-TEST_CASE("Token", "[vendor]") {
+TEST_CASE("Simple Token operators", "[parsing]") {
     REQUIRE(Token("abc123") == Token("abc123"));
     REQUIRE_FALSE(Token("abc") == Token("123"));
 }
 
-TEST_CASE("Tokenize", "[vendor]") {
+TEST_CASE("Tokenizing", "[parsing]") {
     std::vector<Token> tokens;
 
     tokens = tokenize("abc123");
     REQUIRE(tokens == std::vector<Token>{
-        Token("abc123")
+        Token("abc123"),
     });
 
     tokens = tokenize("abc&123+(d)");
@@ -34,10 +31,15 @@ TEST_CASE("Tokenize", "[vendor]") {
         Token("d"),
         Token(")"),
     });
+
+    tokens = tokenize("two_words");
+    REQUIRE(tokens == std::vector<Token>{
+        Token("two_words"),
+    });
 }
 
 
-TEST_CASE("parse", "[vendor]") {
+TEST_CASE("Parsing text into a AST query", "[parsing]") {
     AstNode *ast;
     AstNode *expected_ast;
 

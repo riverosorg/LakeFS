@@ -1,44 +1,27 @@
 // SPDX-FileCopyrightText: 2024 Conner Tenn
+// SPDX-FileCopyrightText: 2024 Caleb Depatie
 //
-// SPDX-License-Identifier: 0BSD
+// SPDX-License-Identifier: BSD-3-Clause
 
 #include "ast.hpp"
 
 //== AstNode ==
 
-AstNode::AstNode() {
-}
+AstNode::AstNode() {}
 
 std::ostream& operator<<(std::ostream &out, const AstNode &node) {
     out << node.str();
+    
     return out;
 }
-std::ostream& operator<<(std::ostream &out, const std::vector<AstNode *> &nodes) {
-    out << "AstNodes{";
-    for (const auto &node : nodes) {
-        out << *node << ", ";
-    }
-    out << "}";
-    return out;
-}
-
 
 //== Operator ==
 
-Operator::Operator(int precedence) : precedence(precedence) {
-}
+Operator::Operator(int precedence) 
+    : precedence(precedence) {}
 
 std::string Operator::str() const {
     return "Operator";
-}
-
-std::ostream& operator<<(std::ostream &out, const std::vector<Operator *> &nodes) {
-    out << "Operators{";
-    for (const auto &node : nodes) {
-        out << *node << ", ";
-    }
-    out << "}";
-    return out;
 }
 
 bool Operator::operator>=(const Operator& other) const {
@@ -48,20 +31,24 @@ bool Operator::operator>=(const Operator& other) const {
 
 //== BinaryOperator ==
 
-BinaryOperator::BinaryOperator(int precedence) : Operator(precedence), left_node(NULL), right_node(NULL) {
-}
-BinaryOperator::BinaryOperator(int precedence, AstNode *left, AstNode *right) : Operator(precedence), left_node(left), right_node(right) {
-}
+BinaryOperator::BinaryOperator(int precedence) 
+    : Operator(precedence), left_node(NULL), right_node(NULL) {}
+
+BinaryOperator::BinaryOperator(int precedence, AstNode *left, AstNode *right) 
+    : Operator(precedence), left_node(left), right_node(right) {}
 
 std::string BinaryOperator::str() const {
     std::string left_str = "Null";
     std::string right_str = "Null";
+    
     if (this->left_node != NULL) {
         left_str = this->left_node->str();
     }
+    
     if (this->right_node != NULL) {
         right_str = this->right_node->str();
     }
+    
     return "BinaryOperator{" + left_str + "," + right_str + "}";
 }
 
@@ -77,16 +64,19 @@ void BinaryOperator::assembleAST(std::vector<AstNode *> *rpn, std::vector<AstNod
 
 //== UnaryOperator ==
 
-UnaryOperator::UnaryOperator(int precedence) : Operator(precedence), node(NULL) {
-}
-UnaryOperator::UnaryOperator(int precedence, AstNode *node) : Operator(precedence), node(node) {
-}
+UnaryOperator::UnaryOperator(int precedence) 
+    : Operator(precedence), node(NULL) {}
+
+UnaryOperator::UnaryOperator(int precedence, AstNode *node) 
+    : Operator(precedence), node(node) {}
 
 std::string UnaryOperator::str() const {
     std::string node_str = "Null";
+    
     if (this->node != NULL) {
         node_str = this->node->str();
     }
+    
     return "UnaryOperator{" + node_str + "}";
 }
 
@@ -101,10 +91,11 @@ void UnaryOperator::assembleAST(std::vector<AstNode *> *rpn, std::vector<AstNode
 
 //== Union ==
 
-Union::Union() : BinaryOperator(0) {
-}
-Union::Union(AstNode *left, AstNode *right) : BinaryOperator(0, left, right) {
-}
+Union::Union() 
+    : BinaryOperator(0) {}
+
+Union::Union(AstNode *left, AstNode *right) 
+    : BinaryOperator(0, left, right) {}
 
 std::string Union::str() const {
     return "Union_" + BinaryOperator::str();
@@ -112,19 +103,23 @@ std::string Union::str() const {
 
 bool Union::match(const AstNode *other) const {
     const Union *other_union = dynamic_cast<const Union *>(other);
+    
     if (other_union != NULL) {
-        return this->left_node->match(other_union->left_node) && this->right_node->match(other_union->right_node);
+        return this->left_node->match(other_union->left_node) 
+            && this->right_node->match(other_union->right_node);
     }
+    
     return false;
 }
 
 
 //== Intersection ==
 
-Intersection::Intersection() : BinaryOperator(1) {
-}
-Intersection::Intersection(AstNode *left, AstNode *right) : BinaryOperator(0, left, right) {
-}
+Intersection::Intersection() 
+    : BinaryOperator(1) {}
+
+Intersection::Intersection(AstNode *left, AstNode *right) 
+    : BinaryOperator(0, left, right) {}
 
 std::string Intersection::str() const {
     return "Intersection_" + BinaryOperator::str();
@@ -132,19 +127,23 @@ std::string Intersection::str() const {
 
 bool Intersection::match(const AstNode *other) const {
     const Intersection *other_intersection = dynamic_cast<const Intersection *>(other);
+    
     if (other_intersection != NULL) {
-        return this->left_node->match(other_intersection->left_node) && this->right_node->match(other_intersection->right_node);
+        return this->left_node->match(other_intersection->left_node) 
+            && this->right_node->match(other_intersection->right_node);
     }
+    
     return false;
 }
 
 
 //== Negation ==
 
-Negation::Negation() : UnaryOperator(2) {
-}
-Negation::Negation(AstNode *node) : UnaryOperator(0, node) {
-}
+Negation::Negation() 
+    : UnaryOperator(2) {}
+
+Negation::Negation(AstNode *node) 
+    : UnaryOperator(0, node) {}
 
 std::string Negation::str() const {
     return "Negation_" + UnaryOperator::str();
@@ -152,17 +151,19 @@ std::string Negation::str() const {
 
 bool Negation::match(const AstNode *other) const {
     const Negation *other_negation = dynamic_cast<const Negation *>(other);
+    
     if (other_negation != NULL) {
         return this->node == other_negation->node;
     }
+    
     return false;
 }
 
 
 //== Tag ==
 
-Tag::Tag(std::string name) : name(name) {
-}
+Tag::Tag(std::string name) 
+    : name(name) {}
 
 std::string Tag::str() const {
     return "Tag{" + this->name + "}";
@@ -174,9 +175,36 @@ void Tag::assembleAST(std::vector<AstNode *> *rpn, std::vector<AstNode *>::itera
 
 bool Tag::match(const AstNode *other) const {
     const Tag *other_tag = dynamic_cast<const Tag *>(other);
+    
     if (other_tag != NULL) {
         return this->name == other_tag->name;
     }
+    
     return false;
 }
 
+// == Loose functions ==
+
+std::ostream& operator<<(std::ostream &out, const std::vector<AstNode *> &nodes) {
+    out << "AstNodes{";
+    
+    for (const auto &node : nodes) {
+        out << *node << ", ";
+    }
+    
+    out << "}";
+    
+    return out;
+}
+
+std::ostream& operator<<(std::ostream &out, const std::vector<Operator *> &nodes) {
+    out << "Operators{";
+    
+    for (const auto &node : nodes) {
+        out << *node << ", ";
+    }
+    
+    out << "}";
+    
+    return out;
+}

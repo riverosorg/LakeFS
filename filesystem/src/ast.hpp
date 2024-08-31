@@ -1,25 +1,25 @@
 // SPDX-FileCopyrightText: 2024 Conner Tenn
+// SPDX-FileCopyrightText: 2024 Caleb Depatie
 //
-// SPDX-License-Identifier: 0BSD
+// SPDX-License-Identifier: BSD-3-Clause
 #pragma once
 
 #include <vector>
 #include <string>
 #include <iostream>
 
-class AstNode
-{
+class AstNode {
 private:
 
 public:
     AstNode();
 
     virtual std::string str() const = 0;
-    friend std::ostream& operator<<(std::ostream &out, const AstNode &node);
-    friend std::ostream& operator<<(std::ostream &out, const std::vector<AstNode *> &nodes);
+    
     virtual bool match(const AstNode *other) const = 0;
-
     virtual void assembleAST(std::vector<AstNode *> *rpn, std::vector<AstNode *>::iterator *rpn_iter) = 0;
+    
+    friend std::ostream& operator<<(std::ostream &out, const AstNode &node);
 };
 
 
@@ -32,7 +32,6 @@ public:
     Operator(int precedence);
 
     virtual std::string str() const;
-    friend std::ostream& operator<<(std::ostream &out, const std::vector<Operator *> &nodes);
 
     bool operator>=(const Operator& other) const;
 };
@@ -115,5 +114,5 @@ public:
     void assembleAST(std::vector<AstNode *> *rpn, std::vector<AstNode *>::iterator *rpn_iter);
 };
 
-
-
+std::ostream& operator<<(std::ostream &out, const std::vector<AstNode *> &nodes);
+std::ostream& operator<<(std::ostream &out, const std::vector<Operator *> &nodes);
