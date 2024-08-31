@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: 2024 Caleb Depatie
+#
+# SPDX-License-Identifier: 0BSD
+
+name: Testing Suite
+
+on: [ push, pull_request ]
+
+jobs:
+  unit_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v18
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      - name: Run Tests
+        uses: dx-oss/nix-shell-action@v11
+        with:
+          script: |
+            make setup
+            make test
+      - name: Publish Results
+        uses: mikepenz/action-junit-report@v4
+        if: success() || failure()
+        with:
+          report_paths: '**build/meson-logs/*.junit.xml'
+          include_passed: true
