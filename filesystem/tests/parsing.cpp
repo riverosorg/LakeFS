@@ -43,20 +43,59 @@ TEST_CASE("Parsing text into a AST query", "[parsing]") {
     AstNode *ast;
     AstNode *expected_ast;
 
-    ast = parse("a&b");
-    expected_ast = new Intersection(
-        new Tag("a"),
-        new Tag("b")
-    );
-    REQUIRE(ast->match(expected_ast));
+    SECTION("Single Letter Tags") {
+        ast = parse("a&b");
+        expected_ast = new Intersection(
+            new Tag("a"),
+            new Tag("b")
+        );
+        REQUIRE(ast->match(expected_ast));
 
-    ast = parse("a&(b|c)");
-    expected_ast = new Intersection(
-        new Tag("a"),
-        new Union(
-            new Tag("b"),
-            new Tag("c")
-        )
-    );
-    REQUIRE(ast->match(expected_ast));
+        ast = parse("a&(b|c)");
+        expected_ast = new Intersection(
+            new Tag("a"),
+            new Union(
+                new Tag("b"),
+                new Tag("c")
+            )
+        );
+        REQUIRE(ast->match(expected_ast));
+    }
+
+    SECTION("Word Tags") {
+        ast = parse("tag1&tag2");
+        expected_ast = new Intersection(
+            new Tag("tag1"),
+            new Tag("tag2")
+        );
+        REQUIRE(ast->match(expected_ast));
+
+        ast = parse("tag1&(tag2|tag3)");
+        expected_ast = new Intersection(
+            new Tag("tag1"),
+            new Union(
+                new Tag("tag2"),
+                new Tag("tag3")
+            )
+        );
+        REQUIRE(ast->match(expected_ast));
+    }
+
+    SECTION("Complex Queries") {
+        ast = parse("(picture|video)&(year_2014&!digital)");
+        expected_ast = new Intersection(
+            new Union(
+                new Tag("picture"),
+                new Tag("video")
+            ),
+            new Intersection(
+                new Tag("year_2014"),
+                new Negation(
+                    new Tag("digital")
+                )
+            )
+        );
+
+        REQUIRE(ast->match(expected_ast));
+    }
 }
