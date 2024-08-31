@@ -60,6 +60,16 @@ TEST_CASE("Parsing text into a AST query", "[parsing]") {
             )
         );
         REQUIRE(ast->match(expected_ast));
+
+        ast = parse("(b|c)&a");
+        expected_ast = new Intersection(
+            new Union(
+                new Tag("b"),
+                new Tag("c")
+            ),
+            new Tag("a")
+        );
+        REQUIRE(ast->match(expected_ast));
     }
 
     SECTION("Word Tags") {
@@ -82,7 +92,7 @@ TEST_CASE("Parsing text into a AST query", "[parsing]") {
     }
 
     SECTION("Complex Queries") {
-        ast = parse("(picture|video)&(year_2014&!digital)");
+        ast = parse("(picture|video)&(year_2014&(!digital))");
         expected_ast = new Intersection(
             new Union(
                 new Tag("picture"),

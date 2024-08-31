@@ -47,13 +47,13 @@ TEST_CASE("Basic Tag Retrieval", "[parsing][query]") {
     }
 
     SECTION("Intersection Retrieval") {
-        ast = parse("a&b");
+        ast = parse("tag1&tag2");
         query = db_create_query(ast);
         expected_query = 
             "SELECT path FROM data WHERE id IN "
-            "(SELECT data_id FROM tags WHERE tag_value = 'a') "
+            "(SELECT data_id FROM tags WHERE tag_value = 'tag1') "
             "AND id IN "
-            "(SELECT data_id FROM tags WHERE tag_value = 'b');";
+            "(SELECT data_id FROM tags WHERE tag_value = 'tag2');";
         
         REQUIRE(query == expected_query);
     }

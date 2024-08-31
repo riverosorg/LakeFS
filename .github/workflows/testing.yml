@@ -27,3 +27,4 @@ jobs:
         with:
           report_paths: '**build/meson-logs/*.junit.xml'
           include_passed: true
+          detailed_summary: true
