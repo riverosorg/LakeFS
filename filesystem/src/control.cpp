@@ -18,8 +18,6 @@
 
 // Runs the socket server to control the FS
 void control_server() {
-    const std::string socket_path = "/tmp/lakefs.sock";
-
     // Create the socket
     int server_fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (server_fd == -1) { 
@@ -31,7 +29,7 @@ void control_server() {
     // Bind the socket
     struct sockaddr_un addr;
     addr.sun_family = AF_UNIX;
-    strncpy(addr.sun_path, socket_path.c_str(), sizeof(addr.sun_path) - 1);
+    strncpy(addr.sun_path, LAKE_SOCKET_PATH, sizeof(addr.sun_path) - 1);
 
     if (bind(server_fd, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
         spdlog::critical("Failed to bind socket");

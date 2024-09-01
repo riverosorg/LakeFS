@@ -13,9 +13,16 @@ cli=../build/cli/lakefs-cli
 
 test_dir=./lakefs_test
 
+# Cleanup and exit with an error code
+function cleanup_and_exit {
+    fusermount -u $lake_dir
+    rm -rf $test_dir
+
+    exit $1
+}
+
 # start up the FS
 fusermount -u $lake_dir
-rm /tmp/lakefs.sock
 
 sudo $fs > /dev/null 2>&1 &
 
@@ -38,7 +45,8 @@ dir=$(ls $lake_dir | grep test_file)
 
 if [ "$dir" != "test_file" ]; then
     echo "Error: test_file not found in $lake_dir directory"
-    exit 1
+
+    cleanup_and_exit 1
 fi
 
 # test reading the file
@@ -48,14 +56,8 @@ if [ "$rng" != "$results" ]; then
     echo "Error: file contents do not match"
     echo "Expected: $rng"
     echo "Got: $results"
-    exit 1
+
+    cleanup_and_exit 1
 fi
 
-sudo killall $fs_prog
-
-wait
-
-fusermount -u $lake_dir
-
-rm /tmp/lakefs.sock
-rm -rf $test_dir
+cleanup_and_exit 0

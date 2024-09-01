@@ -137,6 +137,16 @@ int lake_write(const char *path, const char *buf, size_t size, off_t offset,
     return bytes_written;
 }
 
+int lake_destroy(void* private_data) {
+    // Clean up the filesystem properly
+
+    db_close();
+
+    unlink(LAKE_SOCKET_PATH);
+
+    return 0;
+}
+
 std::string reverse_query(const char* path) {
     auto path_s = std::string(path);
 
@@ -150,6 +160,7 @@ std::string reverse_query(const char* path) {
         std::string(path_s).substr(std::string(path_s).find_last_of("/") + 1);
 
     for (const auto& query_file : query_files) {
+        
         const std::string query_file_name = 
             query_file.substr(query_file.find_last_of("/") + 1);
 

@@ -9,6 +9,7 @@
 #include "ast.hpp"
 
 int db_init();
+int db_close();
 
 int db_add_file(const std::string path);
 int db_tag_file(const std::string path, const std::string tag);

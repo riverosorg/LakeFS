@@ -21,7 +21,13 @@ int db_init() {
     rc = sqlite3_exec(db, "CREATE TABLE tags (data_id INTEGER, tag_value TEXT);", nullptr, nullptr, nullptr);
 
     rc = sqlite3_exec(db, "CREATE TABLE data (id INTEGER PRIMARY KEY, path TEXT);", nullptr, nullptr, nullptr);
-    
+
+    return rc;
+}
+
+int db_close() {
+    int rc = sqlite3_close(db);
+
     return rc;
 }
 
