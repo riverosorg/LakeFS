@@ -21,10 +21,7 @@ int db_init() {
     rc = sqlite3_exec(db, "CREATE TABLE tags (data_id INTEGER, tag_value TEXT);", nullptr, nullptr, nullptr);
 
     rc = sqlite3_exec(db, "CREATE TABLE data (id INTEGER PRIMARY KEY, path TEXT);", nullptr, nullptr, nullptr);
-
-    rc = sqlite3_exec(db, "INSERT INTO data (id, path) VALUES (1, '/testfile');", nullptr, nullptr, nullptr);
-    rc = sqlite3_exec(db, "INSERT INTO tags (data_id, tag_value) VALUES (1, 'default');", nullptr, nullptr, nullptr);
-
+    
     return rc;
 }
 
