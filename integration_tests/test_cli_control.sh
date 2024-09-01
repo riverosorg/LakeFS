@@ -11,7 +11,7 @@ lake_dir=/lakefs
 
 cli=../build/cli/lakefs-cli
 
-test_dir=/tmp/lakefs_test
+test_dir=./lakefs_test
 
 # start up the FS
 fusermount -u $lake_dir
@@ -29,10 +29,10 @@ rng=$RANDOM
 
 echo "$rng" > $test_dir/test_file
 
-# TODO: current limitation, i need to pass the full path
+# TODO: current limitation, i need to pass the relative path
 
-$cli add $(pwd)/test_file
-$cli tag $(pwd)/test_file default
+$cli add $test_dir/test_file
+$cli tag $test_dir/test_file default
 
 dir=$(ls $lake_dir | grep test_file)
 
@@ -51,7 +51,7 @@ if [ "$rng" != "$results" ]; then
     exit 1
 fi
 
-sudo killall -SIGINT $fs_prog
+sudo killall $fs_prog
 
 wait
 

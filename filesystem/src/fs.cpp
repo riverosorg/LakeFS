@@ -90,6 +90,8 @@ int lake_open(const char *path, struct fuse_file_info *fi) {
     if (file_path.empty())
         return -ENOENT;
 
+    spdlog::trace("Found file {0} to open", file_path);
+
     fi->fh = open(file_path.c_str(), 0, fi->flags & O_ACCMODE);
     
     return 0;

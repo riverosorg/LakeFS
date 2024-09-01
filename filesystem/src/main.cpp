@@ -41,6 +41,8 @@ static const struct fuse_operations operations = {
 };
 
 auto main(char** argv, int argc) -> int {
+    spdlog::set_level(spdlog::level::trace);
+
     spdlog::trace("Initializing LakeFS");
     
     // Fuse gets initiated like a program and needs its own args
