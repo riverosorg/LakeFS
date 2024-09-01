@@ -32,7 +32,7 @@ bool Operator::operator>=(const Operator& other) const {
 //== BinaryOperator ==
 
 BinaryOperator::BinaryOperator(int precedence) 
-    : Operator(precedence), left_node(NULL), right_node(NULL) {}
+    : Operator(precedence), left_node(nullptr), right_node(nullptr) {}
 
 BinaryOperator::BinaryOperator(int precedence, AstNode *left, AstNode *right) 
     : Operator(precedence), left_node(left), right_node(right) {}
@@ -41,11 +41,11 @@ std::string BinaryOperator::str() const {
     std::string left_str = "Null";
     std::string right_str = "Null";
     
-    if (this->left_node != NULL) {
+    if (this->left_node != nullptr) {
         left_str = this->left_node->str();
     }
     
-    if (this->right_node != NULL) {
+    if (this->right_node != nullptr) {
         right_str = this->right_node->str();
     }
     
@@ -65,7 +65,7 @@ void BinaryOperator::assembleAST(std::vector<AstNode *> *rpn, std::vector<AstNod
 //== UnaryOperator ==
 
 UnaryOperator::UnaryOperator(int precedence) 
-    : Operator(precedence), node(NULL) {}
+    : Operator(precedence), node(nullptr) {}
 
 UnaryOperator::UnaryOperator(int precedence, AstNode *node) 
     : Operator(precedence), node(node) {}
@@ -73,7 +73,7 @@ UnaryOperator::UnaryOperator(int precedence, AstNode *node)
 std::string UnaryOperator::str() const {
     std::string node_str = "Null";
     
-    if (this->node != NULL) {
+    if (this->node != nullptr) {
         node_str = this->node->str();
     }
     
@@ -104,7 +104,7 @@ std::string Union::str() const {
 bool Union::match(const AstNode *other) const {
     const Union *other_union = dynamic_cast<const Union *>(other);
     
-    if (other_union != NULL) {
+    if (other_union != nullptr) {
         return this->left_node->match(other_union->left_node) 
             && this->right_node->match(other_union->right_node);
     }
@@ -128,7 +128,7 @@ std::string Intersection::str() const {
 bool Intersection::match(const AstNode *other) const {
     const Intersection *other_intersection = dynamic_cast<const Intersection *>(other);
     
-    if (other_intersection != NULL) {
+    if (other_intersection != nullptr) {
         return this->left_node->match(other_intersection->left_node) 
             && this->right_node->match(other_intersection->right_node);
     }
@@ -152,7 +152,7 @@ std::string Negation::str() const {
 bool Negation::match(const AstNode *other) const {
     const Negation *other_negation = dynamic_cast<const Negation *>(other);
     
-    if (other_negation != NULL) {
+    if (other_negation != nullptr) {
         return this->node == other_negation->node;
     }
     
@@ -176,7 +176,7 @@ void Tag::assembleAST(std::vector<AstNode *> *rpn, std::vector<AstNode *>::itera
 bool Tag::match(const AstNode *other) const {
     const Tag *other_tag = dynamic_cast<const Tag *>(other);
     
-    if (other_tag != NULL) {
+    if (other_tag != nullptr) {
         return this->name == other_tag->name;
     }
     
