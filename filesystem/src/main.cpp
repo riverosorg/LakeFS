@@ -8,6 +8,7 @@
 #include <thread>
 
 #include <spdlog/spdlog.h>
+#include <spdlog/sinks/basic_file_sink.h>
 
 #include "sqlite/sqlite3.h"
 
@@ -35,12 +36,16 @@ static const struct fuse_operations operations = {
     .release  = lake_release,
     .fsync    = nullptr,
     .readdir  = lake_readdir,
+    .destroy  = lake_destroy,
     .access   = nullptr,
     .create   = nullptr,
     .ioctl    = nullptr,
 };
 
 auto main(char** argv, int argc) -> int {
+    // Initialize file logger
+    auto file_logger = spdlog::basic_logger_mt("file_logger", "lakefs.log");
+    spdlog::set_default_logger(file_logger);
     spdlog::set_level(spdlog::level::trace);
 
     spdlog::trace("Initializing LakeFS");
@@ -52,9 +57,9 @@ auto main(char** argv, int argc) -> int {
     
     // run in foreground
     fuse_opt_add_arg(&args, "-f");
-
-    // turn on debug mode
-    fuse_opt_add_arg(&args, "-d");
+    // TODO: We rely on forground running for our control thread.
+    // We may want to fork our own process and run in the background
+    // Giving the caller behaviour expected of launching a filesystem
 
     // so its usable
     // fuse_opt_add_arg(&args, "-oallow_other");

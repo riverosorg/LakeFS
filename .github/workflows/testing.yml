@@ -20,6 +20,7 @@ jobs:
         with:
           script: |
             make setup
+            make build
             make test
       - name: Publish Results
         uses: mikepenz/action-junit-report@v4

@@ -137,14 +137,22 @@ int lake_write(const char *path, const char *buf, size_t size, off_t offset,
     return bytes_written;
 }
 
-int lake_destroy(void* private_data) {
+void lake_destroy(void* private_data) {
     // Clean up the filesystem properly
 
-    db_close();
+    spdlog::trace("Shutting down filesystem");
 
-    unlink(LAKE_SOCKET_PATH);
+    int rc = db_close();
 
-    return 0;
+    if (rc != 0) {
+        spdlog::error("Failed to close SQLite3 DB");
+    }
+
+    rc = unlink(LAKE_SOCKET_PATH);
+
+    if (rc != 0) {
+        spdlog::error("Failed to unlink socket");
+    }
 }
 
 std::string reverse_query(const char* path) {
