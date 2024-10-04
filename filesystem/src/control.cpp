@@ -95,6 +95,14 @@ void control_server() {
              
                 break;
             }
+            case LAKE_SET_DEFAULT_QUERY: {
+                std::string query = std::string(command->data, command->size);
+                spdlog::info("Setting default query to: {0}", query);
+
+                db_set_default_query(query);
+
+                break;
+            }
         };
     }
 }

@@ -61,7 +61,7 @@ int lake_readdir(
     filler(buf, ".", nullptr, 0);
     filler(buf, "..", nullptr, 0);
 
-    auto files = db_run_query(parse("default"));
+    auto files = db_run_default_query(); //db_run_query(parse("default"));
 
     for (const auto& file : files) {
         const std::string file_name = file.substr(file.find_last_of("/") + 1);
@@ -157,7 +157,7 @@ std::string reverse_query(const char* path) {
     auto path_s = std::string(path);
 
     // TODO:
-    auto query_files = db_run_query(parse("default"));
+    auto query_files = db_run_default_query(); //db_run_query(parse("default"));
 
     // Get the file path by comparing the file name to the query results
     std::string file_path;

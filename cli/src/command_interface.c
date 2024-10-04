@@ -8,6 +8,7 @@
 
 const int _LAKE_ADD_FILE = LAKE_ADD_FILE;
 const int _LAKE_TAG_FILE = LAKE_TAG_FILE;
+const int _LAKE_SET_DEFAULT_QUERY = LAKE_SET_DEFAULT_QUERY;
 
 void serialize_data(char* buffer, const int command, const unsigned int size, const char* data) 
 {

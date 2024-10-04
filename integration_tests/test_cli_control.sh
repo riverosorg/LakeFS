@@ -60,6 +60,23 @@ if [ "$rng" != "$results" ]; then
     cleanup_and_exit 1
 fi
 
+# Set a new default query
+echo "test2" >> $test_dir/test_file2
+
+$cli add $test_dir/test_file2
+$cli tag $test_dir/test_file2 not_default
+$cli default "(not_default|default)"
+
+results=$(ls -A /lakefs | wc -l)
+
+if [ "$results" != "2" ]; then
+    echo "Error: changing default query not working"
+    echo "Expected: 2"
+    echo "Got: $results"
+
+    cleanup_and_exit 1
+fi
+
 # TODO: writing currently broken
 # test writing to the tagged file
 # echo "test" >> "$lake_dir/test_file"

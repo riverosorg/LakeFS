@@ -18,6 +18,7 @@ int main(string[] args) {
 
     lakefs_socket.connect(lake_addr);
 
+    // TODO: Cases can be done via metaprogramming
     if (any!"a == \"help\""(args)) {
         printHelp();
 
@@ -36,6 +37,14 @@ int main(string[] args) {
         }
 
         return tagFile(lakefs_socket, args[2], args[3]);
+   
+    } else if (any!"a == \"default\""(args)) {
+        if (args.length < 3) {
+            writeln("Error: default command requires a query argument");
+            return 1;
+        }
+
+        return setDefault(lakefs_socket, args[2]);
 
     } else { // if no command is given, print help
         printHelp();
@@ -78,6 +87,20 @@ int tagFile(ref Socket lake_s, string path, string tag) {
     return 0;
 }
 
+int setDefault(ref Socket lake_s, string query) {
+    import std.stdio: writeln;
+
+    writeln("Setting default query to " ~ query);
+
+    auto data = new char[query.length + 1 + (int.sizeof*2)];
+
+    serialize_data(data.ptr, _LAKE_SET_DEFAULT_QUERY, cast(uint) query.length, toCString(query).ptr);
+
+    lake_s.send(data);
+
+    return 0;
+}
+
 void printHelp() {
     import std.stdio: writeln;
 
@@ -86,15 +109,16 @@ void printHelp() {
     writeln("  lakefs-cli [command] [...arguments]");
     writeln("");
     writeln("Commands:");
-    writeln("  add <path>       - Add a file to the lakefs");
-    writeln("  tag <path> <tag> - Tag a file in the lakefs");
-    writeln("  help             - Print this help message");
+    writeln("  add     <path>       - Add a file to the lakefs");
+    writeln("  tag     <path> <tag> - Tag a file in the lakefs");
+    writeln("  default <query>      - Set the default query for the mounted directory");
+    writeln("  help                 - Print this help message");
 }
 
 string getAbsolutePath(string path) @safe {
     import std.file: getcwd;
 
-    return getcwd() ~ "/" ~ path; // TOD we will probably want to do full path resolution here
+    return getcwd() ~ "/" ~ path; // TODO we will probably want to do full path resolution here
 }
 
 string toCString(string str) pure @safe {

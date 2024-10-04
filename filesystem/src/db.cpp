@@ -6,8 +6,11 @@
 
 #include "sqlite/sqlite3.h"
 #include "db.hpp"
+#include "parser.hpp"
 
 static const char* db_file_name = ":memory:";
+
+std::string default_query = "default";
 
 // The global database connection.
 // Perhaps better served by a singleton pattern.
@@ -106,6 +109,16 @@ std::string db_create_query(const AstNode* ast) {
     query += ");";
 
     return query;
+}
+
+void db_set_default_query(const std::string query) {
+    default_query = query;
+}
+
+// TODO: I dont want the DB owning the default query, this was just easy for now
+// (im sleepy, sorry future me)
+std::vector<std::string> db_run_default_query() {
+    return db_run_query(parse(default_query));
 }
 
 // TODO: return a file struct containing the unique file ID
