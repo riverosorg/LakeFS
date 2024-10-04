@@ -106,6 +106,9 @@ TEST_CASE("Parsing text into a AST query", "[parsing]") {
             )
         );
 
+        std::cout << ast->str() << std::endl;
+        std::cout << expected_ast->str() << std::endl;
+
         REQUIRE(ast->match(expected_ast));
     }
 }

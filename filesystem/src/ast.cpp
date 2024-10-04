@@ -153,7 +153,7 @@ bool Negation::match(const AstNode *other) const {
     const Negation *other_negation = dynamic_cast<const Negation *>(other);
     
     if (other_negation != nullptr) {
-        return this->node == other_negation->node;
+        return this->node->match(other_negation->node);
     }
     
     return false;

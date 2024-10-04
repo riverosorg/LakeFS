@@ -81,9 +81,6 @@ int lake_open(const char *path, struct fuse_file_info *fi) {
     // Check if file exists
 
     // Determine if file is readable
- 
-    // if ((fi->flags & O_ACCMODE) != O_RDONLY)
-    //         return -EACCES;
 
     auto file_path = reverse_query(path);
 
@@ -99,10 +96,12 @@ int lake_open(const char *path, struct fuse_file_info *fi) {
 
 int lake_release(const char *path, struct fuse_file_info *fi) {
     
-    spdlog::trace("Releasing file {0}", path);
+    spdlog::trace("Releasing file {0} at FD {1}", path, fi->fh);
 
     if (close(fi->fh) != 0)
         return -errno;
+
+    fi->fh = -1;
 
     return 0;
 }
@@ -110,7 +109,7 @@ int lake_release(const char *path, struct fuse_file_info *fi) {
 int lake_read(const char *path, char *buf, size_t size, off_t offset,
                       struct fuse_file_info *fi) {
 
-    spdlog::trace("Reading file {0}", path);
+    spdlog::trace("Reading file {0} at fd {1}", path, fi->fh);
 
     // determine our host file via path
 
@@ -125,10 +124,9 @@ int lake_read(const char *path, char *buf, size_t size, off_t offset,
 int lake_write(const char *path, const char *buf, size_t size, off_t offset,
             struct fuse_file_info *fi) {
     
-    spdlog::trace("Writing to file {0}", path);
+    spdlog::trace("Writing to file {0} at fd {1}", path, fi->fh);
 
-    // determine our host file via path
-
+    // permissions issue? read works
     ssize_t bytes_written = pwrite(fi->fh, buf, size, offset);
 
     if (bytes_written == -1)

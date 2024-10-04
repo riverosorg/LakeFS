@@ -44,8 +44,8 @@ static const struct fuse_operations operations = {
 
 auto main(char** argv, int argc) -> int {
     // Initialize file logger
-    auto file_logger = spdlog::basic_logger_mt("file_logger", "lakefs.log");
-    spdlog::set_default_logger(file_logger);
+    // auto file_logger = spdlog::basic_logger_mt("file_logger", "lakefs.log");
+    // spdlog::set_default_logger(file_logger);
     spdlog::set_level(spdlog::level::trace);
 
     spdlog::trace("Initializing LakeFS");
@@ -57,12 +57,13 @@ auto main(char** argv, int argc) -> int {
     
     // run in foreground
     fuse_opt_add_arg(&args, "-f");
-    // TODO: We rely on forground running for our control thread.
+    fuse_opt_add_arg(&args, "-d");
+    // TODO: We rely on foreground running for our control thread.
     // We may want to fork our own process and run in the background
-    // Giving the caller behaviour expected of launching a filesystem
+    // Giving the caller behaviour expected of launching a
 
-    // so its usable
-    // fuse_opt_add_arg(&args, "-oallow_other");
+    // 
+    fuse_opt_add_arg(&args, "-odefault_permissions");
 
     // mount point
     spdlog::info("Mounting at {0}", mount_point);
