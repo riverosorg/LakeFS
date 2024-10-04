@@ -17,7 +17,7 @@ build:
 	meson compile -C $(BUILD_DIR)
 
 .PHONY: test
-test:
+test: build
 	meson test -C $(BUILD_DIR)
 
 .PHONY: clean

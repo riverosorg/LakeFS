@@ -24,7 +24,7 @@ function cleanup_and_exit {
 # start up the FS
 fusermount -u $lake_dir
 
-sudo $fs > /dev/null 2>&1 &
+sudo $fs &
 
 sleep 0.2
 
@@ -59,5 +59,18 @@ if [ "$rng" != "$results" ]; then
 
     cleanup_and_exit 1
 fi
+
+# TODO: writing currently broken
+# test writing to the tagged file
+# echo "test" >> "$lake_dir/test_file"
+# results=$(tail -n 1 $lake_dir/test_file)
+
+# if [ "$results" != "test" ]; then
+#     echo "Error: Could not add contents to file"
+#     echo "Expected: test"
+#     echo "Got: $results"
+
+#     cleanup_and_exit 1
+# fi
 
 cleanup_and_exit 0
