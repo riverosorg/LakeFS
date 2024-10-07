@@ -60,11 +60,35 @@ if [ "$rng" != "$results" ]; then
     cleanup_and_exit 1
 fi
 
-# Set a new default query
+# Arbitrary tag query
 echo "test2" >> $test_dir/test_file2
 
 $cli add $test_dir/test_file2
 $cli tag $test_dir/test_file2 not_default
+
+results=$(ls -A /lakefs/'(not_default)' | wc -l)
+
+if [ "$results" != "1" ]; then
+    echo "Error: Arbitrarily querying tags not working"
+    echo "Expected: 1"
+    echo "Got: $results"
+
+    cleanup_and_exit 1
+fi
+
+# reading from query
+results=$(cat /lakefs/'(not_default)'/test_file2)
+
+if [ "$results" != "test2" ]; then
+    echo "Error: Reading from arbitrarily querying tags not working"
+    echo "Expected: test2"
+    echo "Got: $results"
+
+    cleanup_and_exit 1
+fi
+
+
+# Set a new default query
 $cli default "(not_default|default)"
 
 results=$(ls -A /lakefs | wc -l)

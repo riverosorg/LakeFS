@@ -22,17 +22,19 @@ extern "C" {
 #include "parser.hpp"
 #include "fs.hpp"
 #include "db.hpp"
+#include "control.hpp"
 #include "command_interface.h"
 
 std::string reverse_query(const char* path);
+std::string extract_query(const char* path);
 
 // Gets file attributes at <path>
 int lake_getattr(const char *path, struct stat *stbuf) {
 
     spdlog::trace("Getting attributes for {0}", path);
 
-    if (strcmp(path, "/" ) == 0)
-	{
+    if ((strcmp(path, "/") == 0) || (path[strlen(path) - 1] == ')'))
+    {
 		stbuf->st_mode = S_IFDIR | 0755;
 		stbuf->st_nlink = 2;
         return 0;
@@ -54,14 +56,22 @@ int lake_readdir(
 
     spdlog::trace("Reading directory {0}", path);
     
-    // Check if path is a query
-    // Check if path exists (This will be parsed by the query engine)
 
     // Return items in dir
     filler(buf, ".", nullptr, 0);
     filler(buf, "..", nullptr, 0);
 
-    auto files = db_run_default_query(); //db_run_query(parse("default"));
+    std::vector<std::string> files;
+
+    // Check if path is a query
+    if (path[strlen(path) - 1] == ')') {
+        std::string query = extract_query(path);
+
+        files = db_run_query(parse(query));
+
+    } else {
+        files = db_run_default_query();
+    }
 
     for (const auto& file : files) {
         const std::string file_name = file.substr(file.find_last_of("/") + 1);
@@ -156,8 +166,16 @@ void lake_destroy(void* private_data) {
 std::string reverse_query(const char* path) {
     auto path_s = std::string(path);
 
-    // TODO:
-    auto query_files = db_run_default_query(); //db_run_query(parse("default"));
+    std::vector<std::string> query_files;
+
+    if (path_s.find_first_of('(') == std::string::npos) {
+        query_files = db_run_default_query();
+
+    } else {
+        std::string query = extract_query(path);
+
+        query_files = db_run_query(parse(query));
+    }
 
     // Get the file path by comparing the file name to the query results
     std::string file_path;
@@ -177,4 +195,10 @@ std::string reverse_query(const char* path) {
     }
 
     return file_path;
+}
+
+std::string extract_query(const char* path) {
+    auto path_s = std::string(path);
+
+    return path_s.substr(path_s.find_last_of('('), path_s.find_last_of(')') - path_s.find_last_of('('));
 }

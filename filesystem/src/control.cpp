@@ -16,6 +16,8 @@
 #include "db.hpp"
 #include "sqlite/sqlite3.h"
 
+std::string mount_point = "/lakefs";
+
 // Runs the socket server to control the FS
 void control_server() {
     // Create the socket

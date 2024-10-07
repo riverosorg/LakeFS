@@ -52,8 +52,6 @@ auto main(char** argv, int argc) -> int {
     
     // Fuse gets initiated like a program and needs its own args
     fuse_args args = FUSE_ARGS_INIT(0, nullptr);
-
-    const char* mount_point = "/lakefs";
     
     // run in foreground
     fuse_opt_add_arg(&args, "-f");
@@ -67,7 +65,7 @@ auto main(char** argv, int argc) -> int {
 
     // mount point
     spdlog::info("Mounting at {0}", mount_point);
-    fuse_opt_add_arg(&args, mount_point);
+    fuse_opt_add_arg(&args, mount_point.c_str());
 
     // Initialize SQLLite
     int rc = db_init();
