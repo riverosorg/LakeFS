@@ -7,6 +7,8 @@
 #include <iostream>
 #include <thread>
 
+#include <argparse/argparse.hpp>
+
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/basic_file_sink.h>
 
@@ -42,7 +44,30 @@ static const struct fuse_operations operations = {
     .ioctl    = nullptr,
 };
 
-auto main(char** argv, int argc) -> int {
+const std::string VERSION = "0.1.0";
+
+auto main(int argc, char** argv) -> int {
+    // Set up the CLI args
+
+    argparse::ArgumentParser program("lakefs", VERSION);
+    program.add_description("LakeFS - A tag based abstraction over the filesystem");
+
+    program.add_argument("mount_point")
+        .required()
+        .help("The directory to mount the filesystem at");
+
+    try {
+		program.parse_args(argc, argv);
+
+	} catch (const std::runtime_error& err) {
+		std::cerr << err.what() << std::endl;
+		std::cerr << program;
+		exit(1);
+	}
+
+    // Extract arguments
+    mount_point = program.get<std::string>("mount_point");
+
     // Initialize file logger
     // auto file_logger = spdlog::basic_logger_mt("file_logger", "lakefs.log");
     // spdlog::set_default_logger(file_logger);

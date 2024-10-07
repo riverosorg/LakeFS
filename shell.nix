@@ -18,6 +18,7 @@
   ];
 
   buildInputs = with pkgs; [
+    argparse
     fuse
     spdlog
     fmt

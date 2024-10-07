@@ -7,7 +7,7 @@
 fs=../build/filesystem/lakefs
 fs_prog=$(basename $fs)
 
-lake_dir=/lakefs
+lake_dir=./lakefs
 
 cli=../build/cli/lakefs-cli
 
@@ -24,12 +24,14 @@ function cleanup_and_exit {
 # start up the FS
 fusermount -u $lake_dir
 
-sudo $fs &
+sudo $fs $lake_dir &
 
 sleep 0.2
 
 # Create a test directory
 mkdir -p $test_dir
+
+mkdir -p $lake_dir
 
 # test adding a file
 rng=$RANDOM
@@ -66,7 +68,7 @@ echo "test2" >> $test_dir/test_file2
 $cli add $test_dir/test_file2
 $cli tag $test_dir/test_file2 not_default
 
-results=$(ls -A /lakefs/'(not_default)' | wc -l)
+results=$(ls -A $lake_dir/'(not_default)' | wc -l)
 
 if [ "$results" != "1" ]; then
     echo "Error: Arbitrarily querying tags not working"
@@ -77,7 +79,7 @@ if [ "$results" != "1" ]; then
 fi
 
 # reading from query
-results=$(cat /lakefs/'(not_default)'/test_file2)
+results=$(cat $lake_dir/'(not_default)'/test_file2)
 
 if [ "$results" != "test2" ]; then
     echo "Error: Reading from arbitrarily querying tags not working"
@@ -91,7 +93,7 @@ fi
 # Set a new default query
 $cli default "(not_default|default)"
 
-results=$(ls -A /lakefs | wc -l)
+results=$(ls -A $lake_dir | wc -l)
 
 if [ "$results" != "2" ]; then
     echo "Error: changing default query not working"
