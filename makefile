@@ -18,7 +18,7 @@ build:
 
 .PHONY: test
 test: build
-	meson test -C $(BUILD_DIR)
+	meson test -C $(BUILD_DIR) --print-errorlogs
 
 .PHONY: clean
 clean:
