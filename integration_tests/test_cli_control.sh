@@ -21,17 +21,16 @@ function cleanup_and_exit {
     exit $1
 }
 
+# Create a needed test dirs
+mkdir -p $test_dir
+mkdir -p $lake_dir
+
 # start up the FS
 fusermount -u $lake_dir
 
 sudo $fs $lake_dir &
 
 sleep 0.2
-
-# Create a test directory
-mkdir -p $test_dir
-
-mkdir -p $lake_dir
 
 # test adding a file
 rng=$RANDOM
