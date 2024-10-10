@@ -47,22 +47,22 @@ int db_tag_file(const std::string path, const std::string tag) {
 }
 
 // Recursively generate a SQL query string for WHERE clause of the standard query
-std::string db_query_helper(const AstNode* ast) {
+std::string db_query_helper(const std::shared_ptr<AstNode> ast) {
     std::string query_part;
 
     // Determine AST type
-    if (auto tag = dynamic_cast<const Tag*>(ast)) {
+    if (auto tag = std::dynamic_pointer_cast<Tag>(ast)) {
         query_part += "'" + tag->name + "'";
     
-    } else if (auto union_op = dynamic_cast<const Union*>(ast)) {
+    } else if (auto union_op = std::dynamic_pointer_cast<Union>(ast)) {
         query_part += "IN (";
         query_part += db_query_helper(union_op->left_node);
         query_part += ", ";
         query_part += db_query_helper(union_op->right_node);
         query_part += ")";
     
-    } else if (auto intersection_op = dynamic_cast<const Intersection*>(ast)) {
-        if  (auto tag = dynamic_cast<const Tag*>(intersection_op->left_node)){
+    } else if (auto intersection_op = std::dynamic_pointer_cast<Intersection>(ast)) {
+        if  (auto tag = std::dynamic_pointer_cast<Tag>(intersection_op->left_node)){
             query_part += "= '" + tag->name + "'";
         
         } else {
@@ -71,14 +71,14 @@ std::string db_query_helper(const AstNode* ast) {
 
         query_part += ") AND id IN (SELECT data_id FROM tags WHERE tag_value ";
 
-        if  (auto tag = dynamic_cast<const Tag*>(intersection_op->right_node)){
+        if  (auto tag = std::dynamic_pointer_cast<Tag>(intersection_op->right_node)){
             query_part += "= '" + tag->name + "'";
         
         } else {
             query_part += db_query_helper(intersection_op->right_node);
         }
 
-    } else if (auto negation_op = dynamic_cast<const Negation*>(ast)) {
+    } else if (auto negation_op = std::dynamic_pointer_cast<Negation>(ast)) {
         query_part += "!= ";
         query_part += db_query_helper(negation_op->node);
     
@@ -90,14 +90,14 @@ std::string db_query_helper(const AstNode* ast) {
 }
 
 // Creates a syntactically valid SQLite3 query from an ASTNode
-std::string db_create_query(const AstNode* ast) {
+std::string db_create_query(const std::shared_ptr<AstNode> ast) {
     std::string query;
 
     // Tag selection preamble
     query += "SELECT path ";
     query += "FROM data WHERE id IN (SELECT data_id FROM tags WHERE tag_value ";
 
-    if  (auto tag = dynamic_cast<const Tag*>(ast)){
+    if  (auto tag = std::dynamic_pointer_cast<Tag>(ast)){
         // TODO: This is a special case and i hate it
         query += "= '" + tag->name + "'";
     
@@ -122,7 +122,7 @@ std::vector<std::string> db_run_default_query() {
 }
 
 // TODO: return a file struct containing the unique file ID
-std::vector<std::string> db_run_query(const AstNode* ast) {
+std::vector<std::string> db_run_query(const std::shared_ptr<AstNode> ast) {
     std::vector<std::string> results;
 
     std::string query = db_create_query(ast);

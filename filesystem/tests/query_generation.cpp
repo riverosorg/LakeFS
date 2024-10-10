@@ -13,7 +13,7 @@
 // Will be more robust and easier to translate to a different DB in the future
 
 TEST_CASE("Basic Tag Retrieval", "[parsing][query]") {
-    AstNode *ast;
+    std::shared_ptr<AstNode> ast;
     std::string query;
     std::string expected_query;
 

@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #pragma once
 
+#include <memory>
+
 #include "ast.hpp"
 
 class Token {
@@ -26,4 +28,4 @@ public:
 std::ostream& operator<<(std::ostream &out, const std::vector<Token> &tokens);
 
 std::vector<Token> tokenize(std::string expression);
-AstNode *parse(std::string expression);
+std::shared_ptr<AstNode> parse(std::string expression);

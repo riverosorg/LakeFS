@@ -6,6 +6,7 @@
 #include "parser.hpp"
 
 #include <sstream>
+#include <memory>
 
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
@@ -84,18 +85,17 @@ std::vector<Token> tokenize(std::string expression) {
     return token_list;
 }
 
+std::vector<std::shared_ptr<AstNode>> parseRpn(std::vector<Token>::iterator* token_iter, std::vector<Token>::iterator end_iter) {
+    std::vector<std::shared_ptr<AstNode>> rpn;
+    std::vector<std::shared_ptr<Operator>> stack;
 
-std::vector<AstNode *> parseRpn(std::vector<Token>::iterator *token_iter, std::vector<Token>::iterator end_iter) {
-    std::vector<AstNode *> rpn;
-    std::vector<Operator *> stack;
-
-    auto putStack = [&](Operator *op) {
+    auto putStack = [&](std::shared_ptr<Operator> op) {
         if (stack.size() > 0) {
-            Operator *last = stack.back();
+            auto last = stack.back();
             //Check if the last operator is equal or higher precedence.
             //This is done when equal in order to preserve argument ordering.
             //This ensures {1+2+3 --> 1 2 + 3 +} instead of {1+2+3 --> 1 2 3 + +}
-            if (*last >= *op) {
+            if (last >= op) {
                 rpn.push_back(last);
                 stack.pop_back();
             }
@@ -111,17 +111,17 @@ std::vector<AstNode *> parseRpn(std::vector<Token>::iterator *token_iter, std::v
         std::string token_str = token.str();
 
         if (token_str == "&" || token_str == "*") {
-            putStack(new Intersection());
+            putStack(std::make_shared<Intersection>());
         }
         else if (token_str == "|" || token_str == "+") {
-            putStack(new Union());
+            putStack(std::make_shared<Union>());
         }
         else if (token_str == "!" || token_str == "-") {
-            putStack(new Negation());
+            putStack(std::make_shared<Negation>());
         }
         else if (token_str == "(") {
             //Parse the sub-expression
-            std::vector<AstNode *> sub_expr = parseRpn(token_iter, end_iter);
+            auto sub_expr = parseRpn(token_iter, end_iter);
             rpn.insert(rpn.end(), sub_expr.begin(), sub_expr.end());
         }
         else if (token_str == ")") {
@@ -129,7 +129,7 @@ std::vector<AstNode *> parseRpn(std::vector<Token>::iterator *token_iter, std::v
             break;
         }
         else {
-            AstNode *node = new Tag(token_str);
+            auto node = std::make_shared<Tag>(token_str);
             rpn.push_back(node);
         }
     }
@@ -143,15 +143,15 @@ std::vector<AstNode *> parseRpn(std::vector<Token>::iterator *token_iter, std::v
     return rpn;
 }
 
-AstNode *parse(std::string expression) {
+std::shared_ptr<AstNode> parse(std::string expression) {
     std::vector<Token> tokens = tokenize(expression);
     std::vector<Token>::iterator token_iter = tokens.begin();
 
     //Parse the expression and convert to RPN
-    std::vector<AstNode *> rpn = parseRpn(&token_iter, tokens.end());
+    std::vector<std::shared_ptr<AstNode>> rpn = parseRpn(&token_iter, tokens.end());
     
     //Convert the RPN representation to an AST
-    std::vector<AstNode *>::iterator rpn_iter = rpn.begin();
+    std::vector<std::shared_ptr<AstNode>>::iterator rpn_iter = rpn.begin();
     while (rpn_iter != rpn.end()) {
         spdlog::trace("RPN: {0}", (*rpn_iter)->str());
 

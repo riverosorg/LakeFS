@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <memory>
 
 class AstNode {
 private:
@@ -16,10 +17,10 @@ public:
 
     virtual std::string str() const = 0;
     
-    virtual bool match(const AstNode *other) const = 0;
-    virtual void assembleAST(std::vector<AstNode *> *rpn, std::vector<AstNode *>::iterator *rpn_iter) = 0;
+    virtual bool match(const std::shared_ptr<AstNode> other) const = 0;
+    virtual void assembleAST(std::vector<std::shared_ptr<AstNode>> *rpn, std::vector<std::shared_ptr<AstNode>>::iterator *rpn_iter) = 0;
     
-    friend std::ostream& operator<<(std::ostream &out, const AstNode &node);
+    friend std::ostream& operator<<(std::ostream &out, const std::shared_ptr<AstNode> node);
 };
 
 
@@ -33,34 +34,34 @@ public:
 
     virtual std::string str() const;
 
-    bool operator>=(const Operator& other) const;
+    bool operator>=(const std::shared_ptr<Operator> other) const;
 };
 
 
 class BinaryOperator : public Operator {
 public:
-    AstNode *left_node;
-    AstNode *right_node;
+    std::shared_ptr<AstNode> left_node;
+    std::shared_ptr<AstNode> right_node;
 
     BinaryOperator(int precedence);
-    BinaryOperator(int precedence, AstNode *left, AstNode *right);
+    BinaryOperator(int precedence, std::shared_ptr<AstNode> left, std::shared_ptr<AstNode> right);
 
     virtual std::string str() const;
 
-    void assembleAST(std::vector<AstNode *> *rpn, std::vector<AstNode *>::iterator *rpn_iter);
+    void assembleAST(std::vector<std::shared_ptr<AstNode>> *rpn, std::vector<std::shared_ptr<AstNode>>::iterator *rpn_iter);
 };
 
 
 class UnaryOperator : public Operator {
 public:
-    AstNode *node;
+    std::shared_ptr<AstNode> node;
 
     UnaryOperator(int precedence);
-    UnaryOperator(int precedence, AstNode *node);
+    UnaryOperator(int precedence, std::shared_ptr<AstNode> node);
 
     virtual std::string str() const;
 
-    void assembleAST(std::vector<AstNode *> *rpn, std::vector<AstNode *>::iterator *rpn_iter);
+    void assembleAST(std::vector<std::shared_ptr<AstNode>> *rpn, std::vector<std::shared_ptr<AstNode>>::iterator *rpn_iter);
 };
 
 
@@ -68,10 +69,10 @@ class Union : public BinaryOperator {
 
 public:
     Union();
-    Union(AstNode *left, AstNode *right);
+    Union(std::shared_ptr<AstNode> left, std::shared_ptr<AstNode> right);
 
     virtual std::string str() const;
-    virtual bool match(const AstNode *other) const;
+    virtual bool match(const std::shared_ptr<AstNode> other) const;
 };
 
 
@@ -79,10 +80,10 @@ class Intersection : public BinaryOperator {
 
 public:
     Intersection();
-    Intersection(AstNode *left, AstNode *right);
+    Intersection(std::shared_ptr<AstNode> left, std::shared_ptr<AstNode> right);
 
     virtual std::string str() const;
-    virtual bool match(const AstNode *other) const;
+    virtual bool match(const std::shared_ptr<AstNode> other) const;
 };
 
 
@@ -90,10 +91,10 @@ class Negation : public UnaryOperator {
 
 public:
     Negation();
-    Negation(AstNode *node);
+    Negation(std::shared_ptr<AstNode> node);
 
     virtual std::string str() const;
-    virtual bool match(const AstNode *other) const;
+    virtual bool match(const std::shared_ptr<AstNode> other) const;
 };
 
 
@@ -104,10 +105,10 @@ public:
     Tag(std::string name);
 
     virtual std::string str() const;
-    virtual bool match(const AstNode *other) const;
+    virtual bool match(const std::shared_ptr<AstNode> other) const;
 
-    void assembleAST(std::vector<AstNode *> *rpn, std::vector<AstNode *>::iterator *rpn_iter);
+    void assembleAST(std::vector<std::shared_ptr<AstNode>> *rpn, std::vector<std::shared_ptr<AstNode>>::iterator *rpn_iter);
 };
 
-std::ostream& operator<<(std::ostream &out, const std::vector<AstNode *> &nodes);
-std::ostream& operator<<(std::ostream &out, const std::vector<Operator *> &nodes);
+std::ostream& operator<<(std::ostream &out, const std::vector<std::shared_ptr<AstNode>> &nodes);
+std::ostream& operator<<(std::ostream &out, const std::vector<std::shared_ptr<Operator>> &nodes);

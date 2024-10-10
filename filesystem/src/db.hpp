@@ -16,8 +16,8 @@ int db_tag_file(const std::string path, const std::string tag);
 
 void db_set_default_query(const std::string query);
 
-std::vector<std::string> db_run_query(const AstNode* ast);
+std::vector<std::string> db_run_query(const std::shared_ptr<AstNode> ast);
 std::vector<std::string> db_run_default_query();
 
 // Exposed for testing
-std::string db_create_query(const AstNode* ast_list);
+std::string db_create_query(const std::shared_ptr<AstNode> ast_list);
