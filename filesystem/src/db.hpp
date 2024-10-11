@@ -8,7 +8,7 @@
 
 #include "ast.hpp"
 
-int db_init();
+int db_init(const std::string db_file_path);
 int db_close();
 
 int db_add_file(const std::string path);

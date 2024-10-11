@@ -6,6 +6,8 @@
 
 #include <iostream>
 #include <thread>
+#include <unordered_map>
+#include <fstream>
 
 #include <argparse/argparse.hpp>
 
@@ -17,6 +19,8 @@
 #include "db.hpp"
 #include "fs.hpp"
 #include "control.hpp"
+
+auto etc_conf_reader(std::string path) -> std::unordered_map<std::string, std::string>;
 
 static const struct fuse_operations operations = {
     .getattr  = lake_getattr,
@@ -47,6 +51,14 @@ static const struct fuse_operations operations = {
 const std::string VERSION = "0.1.0";
 
 auto main(int argc, char** argv) -> int {
+    // Get our configuration
+    auto config = etc_conf_reader("/etc/lakefs.conf");
+
+    if (config.empty()) {
+        spdlog::error("Failed to read configuration file");
+        return 1;
+    }
+
     // Set up the CLI args
 
     argparse::ArgumentParser program("lakefs", VERSION);
@@ -93,7 +105,7 @@ auto main(int argc, char** argv) -> int {
     fuse_opt_add_arg(&args, mount_point.c_str());
 
     // Initialize SQLLite
-    int rc = db_init();
+    int rc = db_init(config["database_dir"]);
 
     if (rc != SQLITE_OK) {
         spdlog::critical("Failed to initialize SQLite3");
@@ -108,4 +120,35 @@ auto main(int argc, char** argv) -> int {
     fuse_opt_free_args(&args);
 
     return ret;
+}
+
+auto etc_conf_reader(std::string path) -> std::unordered_map<std::string, std::string> {
+    std::unordered_map<std::string, std::string> config;
+
+    std::ifstream file(path);
+
+    if (!file.is_open()) {
+        spdlog::error("Failed to open {0}", path);
+        return config;
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        if (line[0] == '#') {
+            continue;
+        }
+
+        std::string key;
+        std::string value;
+
+        std::istringstream line_stream(line);
+        std::getline(line_stream, key, '=');
+        std::getline(line_stream, value);
+
+        config[key] = value;
+
+        spdlog::debug("Config line: {0}={1}", key, value);
+    }
+
+    return config;
 }

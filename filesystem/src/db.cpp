@@ -8,16 +8,14 @@
 #include "db.hpp"
 #include "parser.hpp"
 
-static const char* db_file_name = ":memory:";
-
 std::string default_query = "default";
 
 // The global database connection.
 // Perhaps better served by a singleton pattern.
 static sqlite3 *db;
 
-int db_init() {
-    int rc = sqlite3_open(db_file_name, &db);
+int db_init(const std::string db_file_path) {
+    int rc = sqlite3_open((db_file_path + "/current.db").c_str(), &db);
 
     // Temporarily hardcoding the DB
 
