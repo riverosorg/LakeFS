@@ -110,6 +110,24 @@ void control_server() {
 
                 break;
             }
+            case LAKE_REMOVE_TAG: {
+                std::string cmd_data = std::string(command->data, command->size);
+
+                const std::string delimiter = "\n";
+                size_t pos = cmd_data.find(delimiter);
+                std::string path = cmd_data.substr(0, pos);
+                std::string tag = cmd_data.substr(pos + delimiter.length());
+                 
+                spdlog::info("Removing tag from file in database: {0} with tag: {1}", path, tag);
+
+                int rc = db_remove_tag(path, tag);
+
+                if (rc != SQLITE_OK) {
+                    spdlog::error("Failed to remove tag from file in database: {0}", rc);
+                }
+             
+                break;
+            }
             case LAKE_SET_DEFAULT_QUERY: {
                 std::string query = std::string(command->data, command->size);
                 spdlog::info("Setting default query to: {0}", query);

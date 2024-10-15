@@ -58,6 +58,12 @@ int db_remove_file(const std::string path) {
     return rc;
 }
 
+int db_remove_tag(const std::string path, const std::string tag) {
+    int rc = sqlite3_exec(db, ("DELETE FROM tags WHERE data_id = (SELECT id FROM data WHERE path = '" + path + "') AND tag_value = '" + tag + "';").c_str(), nullptr, nullptr, nullptr);
+
+    return rc;
+}
+
 // Recursively generate a SQL query string for WHERE clause of the standard query
 std::string db_query_helper(const std::shared_ptr<AstNode> ast) {
     std::string query_part;

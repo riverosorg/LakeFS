@@ -102,8 +102,22 @@ if [ "$results" != "2" ]; then
     cleanup_and_exit 1
 fi
 
+# Remove a tag
+$cli del-tag $test_dir/test_file2 not_default
+
+results=$(ls -A $lake_dir | wc -l)
+
+if [ "$results" != "1" ]; then
+    echo "Error: removing tag not working"
+    echo "Expected: 1"
+    echo "Got: $results"
+
+    cleanup_and_exit 1
+fi
+
 # Remove a file
-$cli remove $test_dir/test_file2
+$cli tag $test_dir/test_file2 not_default # have to add the tag back so it would show up in the query
+$cli del $test_dir/test_file2
 
 results=$(ls $lake_dir | wc -l)
 
