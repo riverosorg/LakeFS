@@ -5,66 +5,48 @@
 .. Man page for the LakeFS CLI
 
 ==========
-LakeFS CLI
+lakefs-cli
 ==========
 
-RST Man page format
+-------------------------------------------------
+Interact with the LakeFS tags and file references
+-------------------------------------------------
 
-.. Synopsis can show the command variations and its options.
+:Author: Caleb Depatie
+:Copyright: CC-BY-4.0
+:Version: 0.1.0
+:Manual section: 1
+:Manual group: LakeFS
 
 SYNOPSIS
 ========
 
-| command [OPTION]... ARG
-| command [OPTION]... DIFFERENT_ARG ARG
+| **lakefs-cli help**
+| **lakefs-cli add** PATH
+| **lakefs-cli tag** PATH TAG
+| **lakefs-cli del** PATH
+| **lakefs-cli del-tag** PATH TAG
+| **lakefs-cli default** QUERY
 
-.. Explain in more depth 
 
 DESCRIPTION
 ===========
 
-I do stuff!
-Ideally this is well detailed.
+**lakefs-cli** provides a CLI for controlling a running LakeFS instance.
+It gives LakeFS commands that will modify the database. Any **PATH** given should be relative to your current working directory.
 
-EXAMPLES
-========
+**add** - Adds a file to tracking. No tags are added so this file will not be included in any queries yet.
 
-.. Detailed explanations about the possivle switch options, for CLI commands
+**tag** - Adds a tag to a file. This will allow you to query for this file.
 
-OPTIONS
-=======
+**del** - Removes a file from tracking. This will remove all tags associated with this file.
 
--V, --version
-    Display version information and exit.
+**del-tag** - Removes a single tage from a file.
 
--h, --help
-    Display help information and exit.
+**default** - Changes the default query at the LakeFS mount point. **QUERY** should be passed in quotes.
 
-.. If theres environment variables / globals that effect the output
-
-ENVIRONMENT
-===========
-
-EXAMPLE_VAR
-    This variable does something.
-
-.. Any known bugs or issues that the user should be aware of.
-
-BUGS
-====
-
-.. Let people know the document and software licensing information
-
-LICENSE
-=======
-
-0BSD
-
-.. Related man pages that might be useful for the user.
 
 SEE ALSO
 ========
 
-.. Theres some other sections that also can appear, but these ones are common.
-.. One last thing to note is the numbered section of the page. This is a convention among
-.. unix systems and atleast for now it should be followed.
+**lakefs(1)** **lakefs.conf(5)**
