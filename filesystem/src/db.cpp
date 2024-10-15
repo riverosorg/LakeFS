@@ -52,7 +52,8 @@ int db_tag_file(const std::string path, const std::string tag) {
 }
 
 int db_remove_file(const std::string path) {
-    int rc = sqlite3_exec(db, ("DELETE FROM data WHERE path = '" + path + "';").c_str(), nullptr, nullptr, nullptr);
+    int rc = sqlite3_exec(db, ("DELETE FROM tags WHERE data_id = (SELECT id FROM data WHERE path = '" + path + "');").c_str(), nullptr, nullptr, nullptr);
+    rc = sqlite3_exec(db, ("DELETE FROM data WHERE path = '" + path + "';").c_str(), nullptr, nullptr, nullptr);
 
     return rc;
 }

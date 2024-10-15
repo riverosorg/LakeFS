@@ -69,12 +69,13 @@ void control_server() {
         switch (command->command) {
             case LAKE_ADD_FILE: {
                 std::string path = std::string(command->data, command->size);
+                
+                spdlog::info("Added file to database: {0}", path);
+
                 int rc = db_add_file(path);
 
                 if (rc != SQLITE_OK) {
-                    spdlog::error("Failed to add file to database");
-                } else {
-                    spdlog::info("Added file to database: {0}", path);
+                    spdlog::error("Failed to add file to database: {0}", rc);
                 }
 
                 break;
@@ -87,12 +88,12 @@ void control_server() {
                 std::string path = cmd_data.substr(0, pos);
                 std::string tag = cmd_data.substr(pos + delimiter.length());
                  
+                spdlog::info("Tagging file in database: {0} with tag: {1}", path, tag);
+
                 int rc = db_tag_file(path, tag);
 
                 if (rc != SQLITE_OK) {
-                    spdlog::error("Failed to tag file in database");
-                } else {
-                    spdlog::info("Tagged file in database: {0} with tag: {1}", path, tag);
+                    spdlog::error("Failed to tag file in database: {0}", rc);
                 }
              
                 break;
@@ -101,7 +102,11 @@ void control_server() {
                 std::string path = std::string(command->data, command->size);
                 spdlog::info("Removing file from database: {0}", path);
 
-                db_remove_file(path);
+                int rc = db_remove_file(path);
+
+                if (rc != SQLITE_OK) {
+                    spdlog::error("Failed to remove file from database: {0}", rc);
+                }
 
                 break;
             }
