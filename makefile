@@ -27,7 +27,7 @@ docs/%.1.gz: docs/%.1
 	gzip $<
 
 .PHONY: docs
-docs: docs/lakefs-cli.1.gz docs/lakefs.1.gz
+docs: docs/lakefs-cli.1.gz docs/lakefs.1.gz docs/lakefs.conf.1.gz
 	-mkdir docs/man1
 	mv docs/*.1.gz docs/man1
 

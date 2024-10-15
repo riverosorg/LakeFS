@@ -22,11 +22,11 @@ SYNOPSIS
 ========
 
 | **lakefs-cli help**
-| **lakefs-cli add** PATH
-| **lakefs-cli tag** PATH TAG
-| **lakefs-cli del** PATH
-| **lakefs-cli del-tag** PATH TAG
-| **lakefs-cli default** QUERY
+| **lakefs-cli add** *PATH*
+| **lakefs-cli tag** *PATH TAG*
+| **lakefs-cli del** *PATH*
+| **lakefs-cli del-tag** *PATH TAG*
+| **lakefs-cli default** *QUERY*
 
 
 DESCRIPTION
@@ -41,7 +41,7 @@ It gives LakeFS commands that will modify the database. Any **PATH** given shoul
 
 **del** - Removes a file from tracking. This will remove all tags associated with this file.
 
-**del-tag** - Removes a single tage from a file.
+**del-tag** - Removes a single tag from a file.
 
 **default** - Changes the default query at the LakeFS mount point. **QUERY** should be passed in quotes.
 
