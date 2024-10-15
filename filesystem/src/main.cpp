@@ -105,7 +105,7 @@ auto main(int argc, char** argv) -> int {
     fuse_opt_add_arg(&args, mount_point.c_str());
 
     // Initialize SQLLite
-    int rc = db_init(config["database_dir"]);
+    int rc = db_init(config["dir"]);
 
     if (rc != SQLITE_OK) {
         spdlog::critical("Failed to initialize SQLite3: {0}", rc);
