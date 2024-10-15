@@ -15,6 +15,7 @@
     ninja
     reuse
     dmd
+    docutils
   ];
 
   buildInputs = with pkgs; [

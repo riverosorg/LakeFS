@@ -20,6 +20,17 @@ build:
 test: build
 	meson test -C $(BUILD_DIR) --print-errorlogs
 
+docs/%.1: docs/%.rst
+	rst2man $< $@
+
+docs/%.1.gz: docs/%.1
+	gzip $<
+
+.PHONY: docs
+docs: docs/lakefs-cli.1.gz docs/lakefs.1.gz
+	-mkdir docs/man1
+	mv docs/*.1.gz docs/man1
+
 .PHONY: clean
 clean:
 	meson compile --clean -C $(BUILD_DIR)
