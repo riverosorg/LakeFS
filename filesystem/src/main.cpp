@@ -108,7 +108,7 @@ auto main(int argc, char** argv) -> int {
     int rc = db_init(config["database_dir"]);
 
     if (rc != SQLITE_OK) {
-        spdlog::critical("Failed to initialize SQLite3");
+        spdlog::critical("Failed to initialize SQLite3: {0}", rc);
         return 1;
     }
 

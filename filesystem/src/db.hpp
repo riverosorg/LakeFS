@@ -13,6 +13,7 @@ int db_close();
 
 int db_add_file(const std::string path);
 int db_tag_file(const std::string path, const std::string tag);
+int db_remove_file(const std::string path);
 
 void db_set_default_query(const std::string query);
 

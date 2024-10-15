@@ -102,6 +102,19 @@ if [ "$results" != "2" ]; then
     cleanup_and_exit 1
 fi
 
+# Remove a file
+# $cli remove $lake_dir/test_file
+
+# results=$(ls $lake_dir | wc -l)
+
+# if [ "$results" != "1" ]; then
+#     echo "Error: removing file not working"
+#     echo "Expected: 1"
+#     echo "Got: $results"
+
+#     cleanup_and_exit 1
+# fi
+
 # TODO: writing currently broken
 # test writing to the tagged file
 # echo "test" >> "$lake_dir/test_file"

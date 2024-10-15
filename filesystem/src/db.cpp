@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 #include <string>
+#include <filesystem>
 
 #include "sqlite/sqlite3.h"
 #include "db.hpp"
@@ -15,10 +16,16 @@ std::string default_query = "default";
 static sqlite3 *db;
 
 int db_init(const std::string db_file_path) {
+    // check if DB file exists before opening
+    const bool db_exists = std::filesystem::exists(db_file_path + "/current.db");
+
     int rc = sqlite3_open((db_file_path + "/current.db").c_str(), &db);
 
-    // Temporarily hardcoding the DB
+    if (db_exists) {
+        return rc;
+    }
 
+    // Setting up the DB tables if it doesnt already exist
     rc = sqlite3_exec(db, "CREATE TABLE tags (data_id INTEGER, tag_value TEXT);", nullptr, nullptr, nullptr);
 
     rc = sqlite3_exec(db, "CREATE TABLE data (id INTEGER PRIMARY KEY, path TEXT);", nullptr, nullptr, nullptr);
@@ -40,6 +47,12 @@ int db_add_file(const std::string path) {
 
 int db_tag_file(const std::string path, const std::string tag) {
     int rc = sqlite3_exec(db, ("INSERT INTO tags (data_id, tag_value) VALUES ((SELECT id FROM data WHERE path = '" + path + "'), '" + tag + "');").c_str(), nullptr, nullptr, nullptr);
+
+    return rc;
+}
+
+int db_remove_file(const std::string path) {
+    int rc = sqlite3_exec(db, ("DELETE FROM data WHERE path = '" + path + "';").c_str(), nullptr, nullptr, nullptr);
 
     return rc;
 }

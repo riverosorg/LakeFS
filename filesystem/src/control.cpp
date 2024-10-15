@@ -97,6 +97,14 @@ void control_server() {
              
                 break;
             }
+            case LAKE_REMOVE_FILE: {
+                std::string path = std::string(command->data, command->size);
+                spdlog::info("Removing file from database: {0}", path);
+
+                db_remove_file(path);
+
+                break;
+            }
             case LAKE_SET_DEFAULT_QUERY: {
                 std::string query = std::string(command->data, command->size);
                 spdlog::info("Setting default query to: {0}", query);

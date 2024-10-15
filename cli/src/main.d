@@ -10,6 +10,8 @@ int main(string[] args) {
     import std.stdio: writeln;
     import std.algorithm: any;
 
+    // config = readConfig("/etc/lakefs.conf");
+
     // TODO: err 25 when this is done on the directory
     immutable string socket_path = "/tmp/lakefs.sock";
 
@@ -46,12 +48,36 @@ int main(string[] args) {
 
         return setDefault(lakefs_socket, args[2]);
 
+    } else if (any!"a == \"remove\""(args)) {
+        if (args.length < 3) {
+            writeln("Error: remove command requires a file path argument");
+            return 1;
+        }
+
+        return removeFile(lakefs_socket, args[2]);
+
     } else { // if no command is given, print help
         printHelp();
     }
 
     return 0;
 }
+
+// string[string] readConfig(string path) {
+//     import std.stdio: File, readln;
+//     import std.array: split;
+
+//     auto file = File(path, "r");
+
+//     string[string] config;
+
+//     foreach (line; file.byLine()) {
+//         auto parts = line.split("=");
+//         config[parts[0]] = parts[1];
+//     }
+
+//     return config;
+// }
 
 int addFile(ref Socket lake_s, string path) {
     import std.stdio: writeln;
@@ -87,6 +113,22 @@ int tagFile(ref Socket lake_s, string path, string tag) {
     return 0;
 }
 
+int removeFile(ref Socket lake_s, string path) {
+    import std.stdio: writeln;
+
+    auto absolute_path = getAbsolutePath(path);
+
+    writeln("Removing file " ~ absolute_path);
+
+    auto data = new char[absolute_path.length + 1 + (int.sizeof*2)];;
+
+    serialize_data(data.ptr, _LAKE_REMOVE_FILE, cast(uint) absolute_path.length, toCString(absolute_path).ptr);
+
+    lake_s.send(data);
+
+    return 0;
+}
+
 int setDefault(ref Socket lake_s, string query) {
     import std.stdio: writeln;
 
@@ -109,10 +151,11 @@ void printHelp() {
     writeln("  lakefs-cli [command] [...arguments]");
     writeln("");
     writeln("Commands:");
+    writeln("  help                 - Print this help message");
     writeln("  add     <path>       - Add a file to the lakefs");
     writeln("  tag     <path> <tag> - Tag a file in the lakefs");
+    writeln("  remove  <path>       - Remove a file from the lakefs");
     writeln("  default <query>      - Set the default query for the mounted directory");
-    writeln("  help                 - Print this help message");
 }
 
 string getAbsolutePath(string path) @safe {

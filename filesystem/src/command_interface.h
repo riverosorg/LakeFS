@@ -14,6 +14,7 @@ extern "C" {
 #define LAKE_ADD_FILE 0
 #define LAKE_TAG_FILE 1
 #define LAKE_SET_DEFAULT_QUERY 2
+#define LAKE_REMOVE_FILE 3
 
 typedef struct __attribute__((packed)) lake_command_t {
     int command;
