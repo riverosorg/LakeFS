@@ -9,8 +9,8 @@
 
 AstNode::AstNode() {}
 
-std::ostream& operator<<(std::ostream &out, const AstNode &node) {
-    out << node.str();
+std::ostream& operator<<(std::ostream &out, const std::shared_ptr<AstNode> node) {
+    out << node->str();
     
     return out;
 }
@@ -24,35 +24,35 @@ std::string Operator::str() const {
     return "Operator";
 }
 
-bool Operator::operator>=(const Operator& other) const {
-    return this->precedence >= other.precedence;
+bool Operator::operator>=(const std::shared_ptr<Operator> other) const {
+    return this->precedence >= other->precedence;
 }
 
 
 //== BinaryOperator ==
 
 BinaryOperator::BinaryOperator(int precedence) 
-    : Operator(precedence), left_node(NULL), right_node(NULL) {}
+    : Operator(precedence), left_node(nullptr), right_node(nullptr) {}
 
-BinaryOperator::BinaryOperator(int precedence, AstNode *left, AstNode *right) 
+BinaryOperator::BinaryOperator(int precedence, std::shared_ptr<AstNode> left, std::shared_ptr<AstNode> right) 
     : Operator(precedence), left_node(left), right_node(right) {}
 
 std::string BinaryOperator::str() const {
     std::string left_str = "Null";
     std::string right_str = "Null";
     
-    if (this->left_node != NULL) {
+    if (this->left_node != nullptr) {
         left_str = this->left_node->str();
     }
     
-    if (this->right_node != NULL) {
+    if (this->right_node != nullptr) {
         right_str = this->right_node->str();
     }
     
     return "BinaryOperator{" + left_str + "," + right_str + "}";
 }
 
-void BinaryOperator::assembleAST(std::vector<AstNode *> *rpn, std::vector<AstNode *>::iterator *rpn_iter) {
+void BinaryOperator::assembleAST(std::vector<std::shared_ptr<AstNode>>* rpn, std::vector<std::shared_ptr<AstNode>>::iterator *rpn_iter) {
     //Collect the arguments
     this->left_node = *((*rpn_iter)-2);
     this->right_node = *((*rpn_iter)-1);
@@ -65,22 +65,22 @@ void BinaryOperator::assembleAST(std::vector<AstNode *> *rpn, std::vector<AstNod
 //== UnaryOperator ==
 
 UnaryOperator::UnaryOperator(int precedence) 
-    : Operator(precedence), node(NULL) {}
+    : Operator(precedence), node(nullptr) {}
 
-UnaryOperator::UnaryOperator(int precedence, AstNode *node) 
+UnaryOperator::UnaryOperator(int precedence, std::shared_ptr<AstNode> node) 
     : Operator(precedence), node(node) {}
 
 std::string UnaryOperator::str() const {
     std::string node_str = "Null";
     
-    if (this->node != NULL) {
+    if (this->node != nullptr) {
         node_str = this->node->str();
     }
     
     return "UnaryOperator{" + node_str + "}";
 }
 
-void UnaryOperator::assembleAST(std::vector<AstNode *> *rpn, std::vector<AstNode *>::iterator *rpn_iter) {
+void UnaryOperator::assembleAST(std::vector<std::shared_ptr<AstNode>>* rpn, std::vector<std::shared_ptr<AstNode>>::iterator *rpn_iter) {
     //Collect the arguments
     this->node = *((*rpn_iter)-1);
 
@@ -94,17 +94,17 @@ void UnaryOperator::assembleAST(std::vector<AstNode *> *rpn, std::vector<AstNode
 Union::Union() 
     : BinaryOperator(0) {}
 
-Union::Union(AstNode *left, AstNode *right) 
+Union::Union(std::shared_ptr<AstNode> left, std::shared_ptr<AstNode> right) 
     : BinaryOperator(0, left, right) {}
 
 std::string Union::str() const {
     return "Union_" + BinaryOperator::str();
 }
 
-bool Union::match(const AstNode *other) const {
-    const Union *other_union = dynamic_cast<const Union *>(other);
+bool Union::match(const std::shared_ptr<AstNode> other) const {
+    const auto other_union = std::dynamic_pointer_cast<Union>(other);
     
-    if (other_union != NULL) {
+    if (other_union != nullptr) {
         return this->left_node->match(other_union->left_node) 
             && this->right_node->match(other_union->right_node);
     }
@@ -118,17 +118,17 @@ bool Union::match(const AstNode *other) const {
 Intersection::Intersection() 
     : BinaryOperator(1) {}
 
-Intersection::Intersection(AstNode *left, AstNode *right) 
+Intersection::Intersection(std::shared_ptr<AstNode> left, std::shared_ptr<AstNode> right) 
     : BinaryOperator(0, left, right) {}
 
 std::string Intersection::str() const {
     return "Intersection_" + BinaryOperator::str();
 }
 
-bool Intersection::match(const AstNode *other) const {
-    const Intersection *other_intersection = dynamic_cast<const Intersection *>(other);
+bool Intersection::match(const std::shared_ptr<AstNode> other) const {
+    const auto other_intersection = std::dynamic_pointer_cast<Intersection>(other);
     
-    if (other_intersection != NULL) {
+    if (other_intersection != nullptr) {
         return this->left_node->match(other_intersection->left_node) 
             && this->right_node->match(other_intersection->right_node);
     }
@@ -142,18 +142,18 @@ bool Intersection::match(const AstNode *other) const {
 Negation::Negation() 
     : UnaryOperator(2) {}
 
-Negation::Negation(AstNode *node) 
+Negation::Negation(std::shared_ptr<AstNode> node) 
     : UnaryOperator(0, node) {}
 
 std::string Negation::str() const {
     return "Negation_" + UnaryOperator::str();
 }
 
-bool Negation::match(const AstNode *other) const {
-    const Negation *other_negation = dynamic_cast<const Negation *>(other);
+bool Negation::match(const std::shared_ptr<AstNode> other) const {
+    const auto other_negation = std::dynamic_pointer_cast<Negation>(other);
     
-    if (other_negation != NULL) {
-        return this->node == other_negation->node;
+    if (other_negation != nullptr) {
+        return this->node->match(other_negation->node);
     }
     
     return false;
@@ -169,14 +169,14 @@ std::string Tag::str() const {
     return "Tag{" + this->name + "}";
 }
 
-void Tag::assembleAST(std::vector<AstNode *> *rpn, std::vector<AstNode *>::iterator *rpn_iter) {
+void Tag::assembleAST(std::vector<std::shared_ptr<AstNode>>* rpn, std::vector<std::shared_ptr<AstNode>>::iterator *rpn_iter) {
     //Nothing needs to be done
 }
 
-bool Tag::match(const AstNode *other) const {
-    const Tag *other_tag = dynamic_cast<const Tag *>(other);
+bool Tag::match(const std::shared_ptr<AstNode> other) const {
+    const auto other_tag = std::dynamic_pointer_cast<Tag>(other);
     
-    if (other_tag != NULL) {
+    if (other_tag != nullptr) {
         return this->name == other_tag->name;
     }
     
@@ -185,11 +185,11 @@ bool Tag::match(const AstNode *other) const {
 
 // == Loose functions ==
 
-std::ostream& operator<<(std::ostream &out, const std::vector<AstNode *> &nodes) {
+std::ostream& operator<<(std::ostream &out, const std::vector<std::shared_ptr<AstNode>> &nodes) {
     out << "AstNodes{";
     
     for (const auto &node : nodes) {
-        out << *node << ", ";
+        out << node << ", ";
     }
     
     out << "}";
@@ -197,11 +197,11 @@ std::ostream& operator<<(std::ostream &out, const std::vector<AstNode *> &nodes)
     return out;
 }
 
-std::ostream& operator<<(std::ostream &out, const std::vector<Operator *> &nodes) {
+std::ostream& operator<<(std::ostream &out, const std::vector<std::shared_ptr<Operator>> &nodes) {
     out << "Operators{";
     
     for (const auto &node : nodes) {
-        out << *node << ", ";
+        out << node << ", ";
     }
     
     out << "}";

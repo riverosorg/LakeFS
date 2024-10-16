@@ -10,6 +10,8 @@ int main(string[] args) {
     import std.stdio: writeln;
     import std.algorithm: any;
 
+    // config = readConfig("/etc/lakefs.conf");
+
     // TODO: err 25 when this is done on the directory
     immutable string socket_path = "/tmp/lakefs.sock";
 
@@ -18,6 +20,7 @@ int main(string[] args) {
 
     lakefs_socket.connect(lake_addr);
 
+    // TODO: Cases can be done via metaprogramming
     if (any!"a == \"help\""(args)) {
         printHelp();
 
@@ -36,6 +39,30 @@ int main(string[] args) {
         }
 
         return tagFile(lakefs_socket, args[2], args[3]);
+   
+    } else if (any!"a == \"default\""(args)) {
+        if (args.length < 3) {
+            writeln("Error: default command requires a query argument");
+            return 1;
+        }
+
+        return setDefault(lakefs_socket, args[2]);
+
+    } else if (any!"a == \"del\""(args)) {
+        if (args.length < 3) {
+            writeln("Error: del command requires a file path argument");
+            return 1;
+        }
+
+        return removeFile(lakefs_socket, args[2]);
+
+    } else if (any!"a == \"del-tag\""(args)) {
+        if (args.length < 4) {
+            writeln("Error: del-tag command requires a file path and tag argument");
+            return 1;
+        }
+
+        return removeTag(lakefs_socket, args[2], args[3]);
 
     } else { // if no command is given, print help
         printHelp();
@@ -43,6 +70,22 @@ int main(string[] args) {
 
     return 0;
 }
+
+// string[string] readConfig(string path) {
+//     import std.stdio: File, readln;
+//     import std.array: split;
+
+//     auto file = File(path, "r");
+
+//     string[string] config;
+
+//     foreach (line; file.byLine()) {
+//         auto parts = line.split("=");
+//         config[parts[0]] = parts[1];
+//     }
+
+//     return config;
+// }
 
 int addFile(ref Socket lake_s, string path) {
     import std.stdio: writeln;
@@ -78,6 +121,54 @@ int tagFile(ref Socket lake_s, string path, string tag) {
     return 0;
 }
 
+int removeFile(ref Socket lake_s, string path) {
+    import std.stdio: writeln;
+
+    auto absolute_path = getAbsolutePath(path);
+
+    writeln("Removing file " ~ absolute_path);
+
+    auto data = new char[absolute_path.length + 1 + (int.sizeof*2)];;
+
+    serialize_data(data.ptr, _LAKE_REMOVE_FILE, cast(uint) absolute_path.length, toCString(absolute_path).ptr);
+
+    lake_s.send(data);
+
+    return 0;
+}
+
+int removeTag(ref Socket lake_s, string path, string tag) {
+    import std.stdio: writeln;
+
+    auto absolute_path = getAbsolutePath(path);
+
+    writeln("Removing tag " ~ tag ~ " from file " ~ absolute_path);
+
+    auto cmd_string = absolute_path ~ "\n" ~ tag;
+
+    auto data = new char[cmd_string.length + 1 + (int.sizeof*2)];;
+
+    serialize_data(data.ptr, _LAKE_REMOVE_TAG, cast(uint) cmd_string.length, toCString(cmd_string).ptr);
+
+    lake_s.send(data);
+
+    return 0;
+}
+
+int setDefault(ref Socket lake_s, string query) {
+    import std.stdio: writeln;
+
+    writeln("Setting default query to " ~ query);
+
+    auto data = new char[query.length + 1 + (int.sizeof*2)];
+
+    serialize_data(data.ptr, _LAKE_SET_DEFAULT_QUERY, cast(uint) query.length, toCString(query).ptr);
+
+    lake_s.send(data);
+
+    return 0;
+}
+
 void printHelp() {
     import std.stdio: writeln;
 
@@ -86,15 +177,18 @@ void printHelp() {
     writeln("  lakefs-cli [command] [...arguments]");
     writeln("");
     writeln("Commands:");
-    writeln("  add <path>       - Add a file to the lakefs");
-    writeln("  tag <path> <tag> - Tag a file in the lakefs");
-    writeln("  help             - Print this help message");
+    writeln("  help                 - Print this help message");
+    writeln("  add     <path>       - Add a file to the lakefs");
+    writeln("  tag     <path> <tag> - Tag a file in the lakefs");
+    writeln("  del     <path>       - Remove a file from the lakefs");
+    writeln("  del-tag <path> <tag> - Remove a tag from a file");
+    writeln("  default <query>      - Set the default query for the mounted directory");
 }
 
 string getAbsolutePath(string path) @safe {
     import std.file: getcwd;
 
-    return getcwd() ~ "/" ~ path; // TOD we will probably want to do full path resolution here
+    return getcwd() ~ "/" ~ path; // TODO we will probably want to do full path resolution here
 }
 
 string toCString(string str) pure @safe {

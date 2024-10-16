@@ -27,14 +27,22 @@ executable(
     sources: ['src/main.cpp', sources],
     dependencies: depends,
     install: true,
+    cpp_pch: 'src/pch/pch.hpp',
 )
 
 tests_dict = {
     'sqlite' : ['tests/vendors/sqlite.cpp', sources],
-    'parsing' : ['tests/parsing.cpp', sources]
+    'parsing' : ['tests/parsing.cpp', sources],
+    'SQL generation' : ['tests/query_generation.cpp', sources],
 }
 
 foreach name, src : tests_dict
-  exe = executable(name, src, dependencies : depends, include_directories : ['src/'])
-  test(name, exe)
+    exe = executable(
+        name, 
+        src, 
+        dependencies : depends, include_directories : ['src/'],
+        cpp_pch : 'src/pch/pch.hpp',
+    )
+
+    test(name, exe)
 endforeach

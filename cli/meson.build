@@ -15,7 +15,7 @@ executable(
 )
 
 test_srcs = {
-    'main' : 'src/main.d'
+    'LakeFS-CLI Main' : 'src/main.d'
 }
 
 foreach name, src : test_srcs

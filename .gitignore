@@ -4,3 +4,8 @@
 
 build/
 .vscode/
+core 
+*.log
+*.1
+*.1.gz
+docs/man1

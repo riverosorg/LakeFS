@@ -6,14 +6,21 @@
 
 #include <iostream>
 #include <thread>
+#include <unordered_map>
+#include <fstream>
+
+#include <argparse/argparse.hpp>
 
 #include <spdlog/spdlog.h>
+#include <spdlog/sinks/basic_file_sink.h>
 
 #include "sqlite/sqlite3.h"
 
 #include "db.hpp"
 #include "fs.hpp"
 #include "control.hpp"
+
+auto etc_conf_reader(std::string path) -> std::unordered_map<std::string, std::string>;
 
 static const struct fuse_operations operations = {
     .getattr  = lake_getattr,
@@ -35,37 +42,73 @@ static const struct fuse_operations operations = {
     .release  = lake_release,
     .fsync    = nullptr,
     .readdir  = lake_readdir,
+    .destroy  = lake_destroy,
     .access   = nullptr,
     .create   = nullptr,
     .ioctl    = nullptr,
 };
 
-auto main(char** argv, int argc) -> int {
+const std::string VERSION = "0.1.0";
+
+auto main(int argc, char** argv) -> int {
+    // Get our configuration
+    auto config = etc_conf_reader("/etc/lakefs.conf");
+
+    if (config.empty()) {
+        spdlog::error("Failed to read configuration file");
+        return 1;
+    }
+
+    // Set up the CLI args
+
+    argparse::ArgumentParser program("lakefs", VERSION);
+    program.add_description("LakeFS - A tag based abstraction over the filesystem");
+
+    program.add_argument("mount_point")
+        .required()
+        .help("The directory to mount the filesystem at");
+
+    try {
+		program.parse_args(argc, argv);
+
+	} catch (const std::runtime_error& err) {
+		std::cerr << err.what() << std::endl;
+		std::cerr << program;
+		exit(1);
+	}
+
+    // Extract arguments
+    mount_point = program.get<std::string>("mount_point");
+
+    // Initialize file logger
+    // auto file_logger = spdlog::basic_logger_mt("file_logger", "lakefs.log");
+    // spdlog::set_default_logger(file_logger);
+    spdlog::set_level(spdlog::level::trace);
+
     spdlog::trace("Initializing LakeFS");
     
     // Fuse gets initiated like a program and needs its own args
-    fuse_args args = FUSE_ARGS_INIT(0, nullptr);\
-
-    const char* mount_point = "/lakefs";
+    fuse_args args = FUSE_ARGS_INIT(0, nullptr);
     
     // run in foreground
     fuse_opt_add_arg(&args, "-f");
-    
-    // turn on debug mode
     fuse_opt_add_arg(&args, "-d");
+    // TODO: We rely on foreground running for our control thread.
+    // We may want to fork our own process and run in the background
+    // Giving the caller behaviour expected of launching a
 
-    // so its usable
-    // fuse_opt_add_arg(&args, "-oallow_other");
+    // 
+    fuse_opt_add_arg(&args, "-odefault_permissions");
 
     // mount point
     spdlog::info("Mounting at {0}", mount_point);
-    fuse_opt_add_arg(&args, mount_point);
+    fuse_opt_add_arg(&args, mount_point.c_str());
 
     // Initialize SQLLite
-    int rc = db_init();
+    int rc = db_init(config["dir"]);
 
     if (rc != SQLITE_OK) {
-        spdlog::critical("Failed to initialize SQLite3");
+        spdlog::critical("Failed to initialize SQLite3: {0}", rc);
         return 1;
     }
 
@@ -77,4 +120,35 @@ auto main(char** argv, int argc) -> int {
     fuse_opt_free_args(&args);
 
     return ret;
+}
+
+auto etc_conf_reader(std::string path) -> std::unordered_map<std::string, std::string> {
+    std::unordered_map<std::string, std::string> config;
+
+    std::ifstream file(path);
+
+    if (!file.is_open()) {
+        spdlog::error("Failed to open {0}", path);
+        return config;
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        if (line[0] == '#') {
+            continue;
+        }
+
+        std::string key;
+        std::string value;
+
+        std::istringstream line_stream(line);
+        std::getline(line_stream, key, '=');
+        std::getline(line_stream, value);
+
+        config[key] = value;
+
+        spdlog::debug("Config line: {0}={1}", key, value);
+    }
+
+    return config;
 }

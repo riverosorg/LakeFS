@@ -18,28 +18,34 @@ extern "C" {
 #include <string>
 #include <spdlog/spdlog.h>
 
+#include "ast.hpp"
+#include "parser.hpp"
 #include "fs.hpp"
 #include "db.hpp"
+#include "control.hpp"
 #include "command_interface.h"
 
-const std::string test_path = "/testfile";
+std::string reverse_query(const char* path);
+std::string extract_query(const char* path);
 
 // Gets file attributes at <path>
 int lake_getattr(const char *path, struct stat *stbuf) {
 
     spdlog::trace("Getting attributes for {0}", path);
 
-    // This is going to be more complex. We'll need to effectively reverse search
-    // whatever our query is to get the proper path from the name
-
-    if (strcmp(path, "/" ) == 0)
-	{
+    if ((strcmp(path, "/") == 0) || (path[strlen(path) - 1] == ')'))
+    {
 		stbuf->st_mode = S_IFDIR | 0755;
 		stbuf->st_nlink = 2;
         return 0;
 	}
 
-    stat(test_path.c_str(), stbuf);
+    auto file = reverse_query(path);
+
+    if (file.empty())
+        return -ENOENT;
+
+    stat(file.c_str(), stbuf);
 
     return 0;
 }
@@ -50,14 +56,22 @@ int lake_readdir(
 
     spdlog::trace("Reading directory {0}", path);
     
-    // Check if path is a query
-    // Check if path exists (This will be parsed by the query engine)
 
     // Return items in dir
     filler(buf, ".", nullptr, 0);
     filler(buf, "..", nullptr, 0);
 
-    auto files = db_tmp_query();
+    std::vector<std::string> files;
+
+    // Check if path is a query
+    if (path[strlen(path) - 1] == ')') {
+        std::string query = extract_query(path);
+
+        files = db_run_query(parse(query));
+
+    } else {
+        files = db_run_default_query();
+    }
 
     for (const auto& file : files) {
         const std::string file_name = file.substr(file.find_last_of("/") + 1);
@@ -77,21 +91,27 @@ int lake_open(const char *path, struct fuse_file_info *fi) {
     // Check if file exists
 
     // Determine if file is readable
- 
-    // if ((fi->flags & O_ACCMODE) != O_RDONLY)
-    //         return -EACCES;
 
-    fi->fh = open(test_path.c_str(), 0, fi->flags & O_ACCMODE);
+    auto file_path = reverse_query(path);
+
+    if (file_path.empty())
+        return -ENOENT;
+
+    spdlog::trace("Found file {0} to open", file_path);
+
+    fi->fh = open(file_path.c_str(), 0, fi->flags & O_ACCMODE);
     
     return 0;
 }
 
 int lake_release(const char *path, struct fuse_file_info *fi) {
     
-    spdlog::trace("Releasing file {0}", path);
+    spdlog::trace("Releasing file {0} at FD {1}", path, fi->fh);
 
     if (close(fi->fh) != 0)
         return -errno;
+
+    fi->fh = -1;
 
     return 0;
 }
@@ -99,7 +119,7 @@ int lake_release(const char *path, struct fuse_file_info *fi) {
 int lake_read(const char *path, char *buf, size_t size, off_t offset,
                       struct fuse_file_info *fi) {
 
-    spdlog::trace("Reading file {0}", path);
+    spdlog::trace("Reading file {0} at fd {1}", path, fi->fh);
 
     // determine our host file via path
 
@@ -114,14 +134,71 @@ int lake_read(const char *path, char *buf, size_t size, off_t offset,
 int lake_write(const char *path, const char *buf, size_t size, off_t offset,
             struct fuse_file_info *fi) {
     
-    spdlog::trace("Writing to file {0}", path);
+    spdlog::trace("Writing to file {0} at fd {1}", path, fi->fh);
 
-    // determine our host file via path
-
+    // permissions issue? read works
     ssize_t bytes_written = pwrite(fi->fh, buf, size, offset);
 
     if (bytes_written == -1)
         return -errno;
 
     return bytes_written;
+}
+
+void lake_destroy(void* private_data) {
+    // Clean up the filesystem properly
+
+    spdlog::trace("Shutting down filesystem");
+
+    int rc = db_close();
+
+    if (rc != 0) {
+        spdlog::error("Failed to close SQLite3 DB");
+    }
+
+    rc = unlink(LAKE_SOCKET_PATH);
+
+    if (rc != 0) {
+        spdlog::error("Failed to unlink socket");
+    }
+}
+
+std::string reverse_query(const char* path) {
+    auto path_s = std::string(path);
+
+    std::vector<std::string> query_files;
+
+    if (path_s.find_first_of('(') == std::string::npos) {
+        query_files = db_run_default_query();
+
+    } else {
+        std::string query = extract_query(path);
+
+        query_files = db_run_query(parse(query));
+    }
+
+    // Get the file path by comparing the file name to the query results
+    std::string file_path;
+
+    const std::string looking_for_file = 
+        std::string(path_s).substr(std::string(path_s).find_last_of("/") + 1);
+
+    for (const auto& query_file : query_files) {
+        
+        const std::string query_file_name = 
+            query_file.substr(query_file.find_last_of("/") + 1);
+
+        if (query_file_name == looking_for_file) {
+            file_path = query_file;
+            break;
+        }
+    }
+
+    return file_path;
+}
+
+std::string extract_query(const char* path) {
+    auto path_s = std::string(path);
+
+    return path_s.substr(path_s.find_last_of('('), path_s.find_last_of(')') - path_s.find_last_of('('));
 }

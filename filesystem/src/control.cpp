@@ -16,10 +16,10 @@
 #include "db.hpp"
 #include "sqlite/sqlite3.h"
 
+std::string mount_point;
+
 // Runs the socket server to control the FS
 void control_server() {
-    const std::string socket_path = "/tmp/lakefs.sock";
-
     // Create the socket
     int server_fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (server_fd == -1) { 
@@ -31,7 +31,7 @@ void control_server() {
     // Bind the socket
     struct sockaddr_un addr;
     addr.sun_family = AF_UNIX;
-    strncpy(addr.sun_path, socket_path.c_str(), sizeof(addr.sun_path) - 1);
+    strncpy(addr.sun_path, LAKE_SOCKET_PATH, sizeof(addr.sun_path) - 1);
 
     if (bind(server_fd, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
         spdlog::critical("Failed to bind socket");
@@ -69,12 +69,13 @@ void control_server() {
         switch (command->command) {
             case LAKE_ADD_FILE: {
                 std::string path = std::string(command->data, command->size);
+                
+                spdlog::info("Added file to database: {0}", path);
+
                 int rc = db_add_file(path);
 
                 if (rc != SQLITE_OK) {
-                    spdlog::error("Failed to add file to database");
-                } else {
-                    spdlog::info("Added file to database: {0}", path);
+                    spdlog::error("Failed to add file to database: {0}", rc);
                 }
 
                 break;
@@ -87,14 +88,52 @@ void control_server() {
                 std::string path = cmd_data.substr(0, pos);
                 std::string tag = cmd_data.substr(pos + delimiter.length());
                  
+                spdlog::info("Tagging file in database: {0} with tag: {1}", path, tag);
+
                 int rc = db_tag_file(path, tag);
 
                 if (rc != SQLITE_OK) {
-                    spdlog::error("Failed to tag file in database");
-                } else {
-                    spdlog::info("Tagged file in database: {0} with tag: {1}", path, tag);
+                    spdlog::error("Failed to tag file in database: {0}", rc);
                 }
              
+                break;
+            }
+            case LAKE_REMOVE_FILE: {
+                std::string path = std::string(command->data, command->size);
+                spdlog::info("Removing file from database: {0}", path);
+
+                int rc = db_remove_file(path);
+
+                if (rc != SQLITE_OK) {
+                    spdlog::error("Failed to remove file from database: {0}", rc);
+                }
+
+                break;
+            }
+            case LAKE_REMOVE_TAG: {
+                std::string cmd_data = std::string(command->data, command->size);
+
+                const std::string delimiter = "\n";
+                size_t pos = cmd_data.find(delimiter);
+                std::string path = cmd_data.substr(0, pos);
+                std::string tag = cmd_data.substr(pos + delimiter.length());
+                 
+                spdlog::info("Removing tag from file in database: {0} with tag: {1}", path, tag);
+
+                int rc = db_remove_tag(path, tag);
+
+                if (rc != SQLITE_OK) {
+                    spdlog::error("Failed to remove tag from file in database: {0}", rc);
+                }
+             
+                break;
+            }
+            case LAKE_SET_DEFAULT_QUERY: {
+                std::string query = std::string(command->data, command->size);
+                spdlog::info("Setting default query to: {0}", query);
+
+                db_set_default_query(query);
+
                 break;
             }
         };

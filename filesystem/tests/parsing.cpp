@@ -40,23 +40,75 @@ TEST_CASE("Tokenizing", "[parsing]") {
 
 
 TEST_CASE("Parsing text into a AST query", "[parsing]") {
-    AstNode *ast;
-    AstNode *expected_ast;
+    std::shared_ptr<AstNode> ast;
+    std::shared_ptr<AstNode> expected_ast;
 
-    ast = parse("a&b");
-    expected_ast = new Intersection(
-        new Tag("a"),
-        new Tag("b")
-    );
-    REQUIRE(ast->match(expected_ast));
+    SECTION("Single Letter Tags") {
+        ast = parse("a&b");
+        expected_ast = std::make_shared<Intersection>(
+            std::make_shared<Tag>("a"),
+            std::make_shared<Tag>("b")
+        );
+        REQUIRE(ast->match(expected_ast));
 
-    ast = parse("a&(b|c)");
-    expected_ast = new Intersection(
-        new Tag("a"),
-        new Union(
-            new Tag("b"),
-            new Tag("c")
-        )
-    );
-    REQUIRE(ast->match(expected_ast));
+        ast = parse("a&(b|c)");
+        expected_ast = std::make_shared<Intersection>(
+            std::make_shared<Tag>("a"),
+            std::make_shared<Union>(
+                std::make_shared<Tag>("b"),
+                std::make_shared<Tag>("c")
+            )
+        );
+        REQUIRE(ast->match(expected_ast));
+
+        ast = parse("(b|c)&a");
+        expected_ast = std::make_shared<Intersection>(
+            std::make_shared<Union>(
+                std::make_shared<Tag>("b"),
+                std::make_shared<Tag>("c")
+            ),
+            std::make_shared<Tag>("a")
+        );
+        REQUIRE(ast->match(expected_ast));
+    }
+
+    SECTION("Word Tags") {
+        ast = parse("tag1&tag2");
+        expected_ast = std::make_shared<Intersection>(
+            std::make_shared<Tag>("tag1"),
+            std::make_shared<Tag>("tag2")
+        );
+        REQUIRE(ast->match(expected_ast));
+
+        ast = parse("tag1&(tag2|tag3)");
+        expected_ast = std::make_shared<Intersection>(
+            std::make_shared<Tag>("tag1"),
+            std::make_shared<Union>(
+                std::make_shared<Tag>("tag2"),
+                std::make_shared<Tag>("tag3")
+            )
+        );
+        REQUIRE(ast->match(expected_ast));
+    }
+
+    SECTION("Complex Queries") {
+        ast = parse("(picture|video)&(year_2014&(!digital))");
+        expected_ast = std::make_shared<Intersection>(
+            std::make_shared<Union>(
+                std::make_shared<Tag>("picture"),
+                std::make_shared<Tag>("video")
+            ),
+            std::make_shared<Intersection>(
+                std::make_shared<Tag>("year_2014"),
+                std::make_shared<Negation>(
+                    std::make_shared<Tag>("digital")
+                )
+            )
+        );
+
+        std::cout << ast->str() << std::endl;
+        std::cout << expected_ast->str() << std::endl;
+
+        REQUIRE(ast->match(expected_ast));
+    }
 }
