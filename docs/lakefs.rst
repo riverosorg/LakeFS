@@ -4,67 +4,69 @@
 
 .. Man page for the LakeFS command
 
-===============
-Lake Filesystem
-===============
+======
+lakefs
+======
 
-RST Man page format
+------------------------------
+Initialize a a LakeFS instance
+------------------------------
 
-.. Synopsis can show the command variations and its options.
+:Author: Caleb Depatie
+:Author: Conner Tenn
+:Copyright: CC-BY-4.0
+:Version: 0.1.0
+:Manual section: 1
+:Manual group: LakeFS
 
 SYNOPSIS
 ========
 
-| command [OPTION]... ARG
-| command [OPTION]... DIFFERENT_ARG ARG
+| lakefs [*OPTION*]... *mount_point*
 
-.. Explain in more depth 
 
 DESCRIPTION
 ===========
 
-I do stuff!
-Ideally this is well detailed.
+LakeFS provides a tag based overlay for your filesystem.
+Tags and files can be added to tracking using the **lakefs-cli(1)** tool.
+This command will initialize a LakeFS instance at the given mount point.
 
-EXAMPLES
-========
+QUERYING
+--------
 
-.. Detailed explanations about the possivle switch options, for CLI commands
+The query language is made of a few simple infix operators, which can operate on tags or subqueries.
+Queries are enclosed by parentheses, and are composed of tags, subqueries, and operators.
+
+The operators are:
+
+- **&** - Logical AND, a file needs both right hand side and left.
+- **|** - Logical OR, a file needs either right hand side or left.
+- **!** - Logical NOT, a file cannot have the tag or query.
+
+QUERY EXAMPLES
+--------------
+
+A few examples of queries are:
+
+- **(tag1 & tag2)** - This will return all files that have both tag1 and tag2.
+- **(tag1 | tag2)** - This will return all files that have either tag1 or tag2.
+- **(tag1 & (tag2 | tag3))** - This will return all files that have tag1 and either tag2 or tag3.
 
 OPTIONS
 =======
 
--V, --version
+mount_point
+    Folder to mount the LakeFS instance under.
+
+-v, --version
     Display version information and exit.
 
 -h, --help
     Display help information and exit.
 
-.. If theres environment variables / globals that effect the output
-
-ENVIRONMENT
-===========
-
-EXAMPLE_VAR
-    This variable does something.
-
-.. Any known bugs or issues that the user should be aware of.
-
-BUGS
-====
-
-.. Let people know the document and software licensing information
-
-LICENSE
-=======
-
-0BSD
-
-.. Related man pages that might be useful for the user.
 
 SEE ALSO
 ========
 
-.. Theres some other sections that also can appear, but these ones are common.
-.. One last thing to note is the numbered section of the page. This is a convention among
-.. unix systems and atleast for now it should be followed.
+**lakefs-cli(1)** **lakefs.conf(5)**
