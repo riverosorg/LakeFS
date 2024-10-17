@@ -18,10 +18,7 @@ jobs:
       - name: Run Tests
         uses: dx-oss/nix-shell-action@v11
         with:
-          script: |
-            make setup
-            make build
-            make test
+          script: nix develop --command "make setup; make test"
       - name: Publish Results
         uses: mikepenz/action-junit-report@v4
         if: success() || failure()
