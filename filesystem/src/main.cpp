@@ -68,6 +68,10 @@ auto main(int argc, char** argv) -> int {
         .required()
         .help("The directory to mount the filesystem at");
 
+    program.add_argument("--tempdb")
+        .flag()
+        .help("Use an in-memory database instead of the file");
+
     try {
 		program.parse_args(argc, argv);
 
@@ -105,7 +109,15 @@ auto main(int argc, char** argv) -> int {
     fuse_opt_add_arg(&args, mount_point.c_str());
 
     // Initialize SQLLite
-    int rc = db_init(config["dir"]);
+    int rc;
+
+    if (program.get<bool>("tempdb")) {
+        spdlog::info("Using in-memory database");
+        
+        rc = db_tmp_init();
+    } else {
+        rc = db_init(config["dir"]);
+    }
 
     if (rc != SQLITE_OK) {
         spdlog::critical("Failed to initialize SQLite3: {0}", rc);

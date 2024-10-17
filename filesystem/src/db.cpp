@@ -15,6 +15,17 @@ std::string default_query = "default";
 // Perhaps better served by a singleton pattern.
 static sqlite3 *db;
 
+// Initializes the DB in memory
+int db_tmp_init() {
+    int rc = sqlite3_open(":memory:", &db);
+
+    rc = sqlite3_exec(db, "CREATE TABLE tags (data_id INTEGER, tag_value TEXT);", nullptr, nullptr, nullptr);
+
+    rc = sqlite3_exec(db, "CREATE TABLE data (id INTEGER PRIMARY KEY, path TEXT);", nullptr, nullptr, nullptr);
+
+    return rc;
+}
+
 int db_init(const std::string db_file_path) {
     // check if DB file exists before opening
     const bool db_exists = std::filesystem::exists(db_file_path + "/current.db");

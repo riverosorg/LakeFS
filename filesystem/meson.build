@@ -27,7 +27,6 @@ executable(
     sources: ['src/main.cpp', sources],
     dependencies: depends,
     install: true,
-    cpp_pch: 'src/pch/pch.hpp',
 )
 
 tests_dict = {
@@ -41,7 +40,6 @@ foreach name, src : tests_dict
         name, 
         src, 
         dependencies : depends, include_directories : ['src/'],
-        cpp_pch : 'src/pch/pch.hpp',
     )
 
     test(name, exe)
