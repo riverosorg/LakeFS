@@ -51,14 +51,6 @@ static const struct fuse_operations operations = {
 const std::string VERSION = "0.1.0";
 
 auto main(int argc, char** argv) -> int {
-    // Get our configuration
-    auto config = etc_conf_reader("/etc/lakefs.conf");
-
-    if (config.empty()) {
-        spdlog::error("Failed to read configuration file");
-        return 1;
-    }
-
     // Set up the CLI args
 
     argparse::ArgumentParser program("lakefs", VERSION);
@@ -81,7 +73,15 @@ auto main(int argc, char** argv) -> int {
 		exit(1);
 	}
 
-    // Extract arguments
+    // Get our configuration
+    auto config = etc_conf_reader("/etc/lakefs.conf");
+
+    if (config.empty() && ! program.get<bool>("--tempdb")) {
+        spdlog::error("Failed to read configuration file");
+        return 1;
+    }
+
+    // Extract mount point
     mount_point = program.get<std::string>("mount_point");
 
     // Initialize file logger
@@ -111,7 +111,7 @@ auto main(int argc, char** argv) -> int {
     // Initialize SQLLite
     int rc;
 
-    if (program.get<bool>("tempdb")) {
+    if (program.get<bool>("--tempdb")) {
         spdlog::info("Using in-memory database");
         
         rc = db_tmp_init();
