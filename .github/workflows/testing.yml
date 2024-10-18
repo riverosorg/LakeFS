@@ -15,7 +15,10 @@ jobs:
       - uses: cachix/install-nix-action@v18
         with:
           nix_path: nixpkgs=channel:nixos-unstable
-      - run: nix develop --command "make setup; make test"
+      - name: Setup Meson
+        run: nix develop --command make setup
+      - name: Run Tests
+        run: nix develop --command make test
       - name: Publish Results
         uses: mikepenz/action-junit-report@v4
         if: success() || failure()
