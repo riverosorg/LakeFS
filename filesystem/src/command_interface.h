@@ -9,7 +9,7 @@ extern "C" {
 
 // Command Interface
 
-#define LAKE_SOCKET_PATH "/tmp/lakefs.sock"
+#define LAKE_SOCKET_PATH "/var/run/lakefs.sock"
 
 #define LAKE_ADD_FILE 0
 #define LAKE_TAG_FILE 1

@@ -13,7 +13,8 @@ int main(string[] args) {
     // config = readConfig("/etc/lakefs.conf");
 
     // TODO: err 25 when this is done on the directory
-    immutable string socket_path = "/tmp/lakefs.sock";
+    // TODO: get this from the command interface
+    immutable string socket_path = "/var/run/lakefs.sock";
 
     Socket lakefs_socket = new Socket(AddressFamily.UNIX, SocketType.STREAM, ProtocolType.IP);
     auto lake_addr = new UnixAddress(socket_path);
