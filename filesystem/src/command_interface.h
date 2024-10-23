@@ -9,8 +9,7 @@ extern "C" {
 
 // Command Interface
 
-// CD TODO: This is temporary to allow rootless operation
-#define LAKE_SOCKET_PATH "/var/run/user/1000/lakefs.sock"
+#define LAKE_SOCKET_PATH "/tmp/lakefs.sock"
 
 #define LAKE_ADD_FILE 0
 #define LAKE_TAG_FILE 1
