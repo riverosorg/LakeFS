@@ -28,7 +28,7 @@ mkdir -p $lake_dir
 # start up the FS
 fusermount -u $lake_dir
 
-sudo $fs --tempdb $lake_dir &
+$fs --tempdb $lake_dir &
 
 sleep 0.2
 
@@ -39,8 +39,8 @@ echo "$rng" > $test_dir/test_file
 
 # TODO: current limitation, i need to pass the relative path
 
-sudo $cli add $test_dir/test_file
-sudo $cli tag $test_dir/test_file default
+$cli add $test_dir/test_file
+$cli tag $test_dir/test_file default
 
 dir=$(ls $lake_dir | grep test_file)
 
@@ -64,8 +64,8 @@ fi
 # Arbitrary tag query
 echo "test2" >> $test_dir/test_file2
 
-sudo $cli add $test_dir/test_file2
-sudo $cli tag $test_dir/test_file2 not_default
+$cli add $test_dir/test_file2
+$cli tag $test_dir/test_file2 not_default
 
 results=$(ls -A $lake_dir/'(not_default)' | wc -l)
 
@@ -90,7 +90,7 @@ fi
 
 
 # Set a new default query
-sudo $cli default "(not_default|default)"
+$cli default "(not_default|default)"
 
 results=$(ls -A $lake_dir | wc -l)
 
@@ -103,7 +103,7 @@ if [ "$results" != "2" ]; then
 fi
 
 # Remove a tag
-sudo $cli del-tag $test_dir/test_file2 not_default
+$cli del-tag $test_dir/test_file2 not_default
 
 results=$(ls -A $lake_dir | wc -l)
 
@@ -116,8 +116,8 @@ if [ "$results" != "1" ]; then
 fi
 
 # Remove a file
-sudo $cli tag $test_dir/test_file2 not_default # have to add the tag back so it would show up in the query
-sudo $cli del $test_dir/test_file2
+$cli tag $test_dir/test_file2 not_default # have to add the tag back so it would show up in the query
+$cli del $test_dir/test_file2
 
 results=$(ls $lake_dir | wc -l)
 

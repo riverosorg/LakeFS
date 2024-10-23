@@ -14,11 +14,11 @@ setup:
 
 .PHONY: build
 build:
-	meson compile -C $(BUILD_DIR)
+	meson compile -C $(BUILD_DIR)	
 
 .PHONY: test
 test: build
-	meson test -C $(BUILD_DIR) --print-errorlogs
+	unshare -pfr --user --mount --kill-child meson test -C $(BUILD_DIR) --print-errorlogs
 
 docs/%.1: docs/%.rst
 	rst2man $< $@
