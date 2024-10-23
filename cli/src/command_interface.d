@@ -7,6 +7,7 @@ extern (C) extern __gshared immutable int _LAKE_TAG_FILE;
 extern (C) extern __gshared immutable int _LAKE_SET_DEFAULT_QUERY;
 extern (C) extern __gshared immutable int _LAKE_REMOVE_FILE;
 extern (C) extern __gshared immutable int _LAKE_REMOVE_TAG;
+extern (C) extern __gshared immutable char* _LAKE_SOCKET_PATH;
 
 extern (C) void serialize_data(char* dest, const int command, const uint size, const char* data);
 
