@@ -11,6 +11,7 @@ const int _LAKE_TAG_FILE = LAKE_TAG_FILE;
 const int _LAKE_SET_DEFAULT_QUERY = LAKE_SET_DEFAULT_QUERY;
 const int _LAKE_REMOVE_FILE = LAKE_REMOVE_FILE;
 const int _LAKE_REMOVE_TAG = LAKE_REMOVE_TAG;
+const char* _LAKE_SOCKET_PATH = LAKE_SOCKET_PATH;
 
 void serialize_data(char* buffer, const int command, const unsigned int size, const char* data) 
 {

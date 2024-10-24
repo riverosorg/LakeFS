@@ -19,6 +19,7 @@
 #include "db.hpp"
 #include "fs.hpp"
 #include "control.hpp"
+#include "config.h"
 
 auto etc_conf_reader(std::string path) -> std::unordered_map<std::string, std::string>;
 
@@ -48,25 +49,19 @@ static const struct fuse_operations operations = {
     .ioctl    = nullptr,
 };
 
-const std::string VERSION = "0.1.0";
-
 auto main(int argc, char** argv) -> int {
-    // Get our configuration
-    auto config = etc_conf_reader("/etc/lakefs.conf");
-
-    if (config.empty()) {
-        spdlog::error("Failed to read configuration file");
-        return 1;
-    }
-
     // Set up the CLI args
 
-    argparse::ArgumentParser program("lakefs", VERSION);
+    argparse::ArgumentParser program("lakefs", LAKEFS_VERSION);
     program.add_description("LakeFS - A tag based abstraction over the filesystem");
 
     program.add_argument("mount_point")
         .required()
         .help("The directory to mount the filesystem at");
+
+    program.add_argument("--tempdb")
+        .flag()
+        .help("Use an in-memory database instead of the file");
 
     try {
 		program.parse_args(argc, argv);
@@ -77,7 +72,15 @@ auto main(int argc, char** argv) -> int {
 		exit(1);
 	}
 
-    // Extract arguments
+    // Get our configuration
+    auto config = etc_conf_reader("/etc/lakefs.conf");
+
+    if (config.empty() && ! program.get<bool>("--tempdb")) {
+        spdlog::error("Failed to read configuration file");
+        return 1;
+    }
+
+    // Extract mount point
     mount_point = program.get<std::string>("mount_point");
 
     // Initialize file logger
@@ -105,7 +108,15 @@ auto main(int argc, char** argv) -> int {
     fuse_opt_add_arg(&args, mount_point.c_str());
 
     // Initialize SQLLite
-    int rc = db_init(config["dir"]);
+    int rc;
+
+    if (program.get<bool>("--tempdb")) {
+        spdlog::info("Using in-memory database");
+        
+        rc = db_tmp_init();
+    } else {
+        rc = db_init(config["dir"]);
+    }
 
     if (rc != SQLITE_OK) {
         spdlog::critical("Failed to initialize SQLite3: {0}", rc);

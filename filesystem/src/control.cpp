@@ -4,6 +4,7 @@
 
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <errno.h>
 
 #include <string>
 #include <cstring>
@@ -34,7 +35,7 @@ void control_server() {
     strncpy(addr.sun_path, LAKE_SOCKET_PATH, sizeof(addr.sun_path) - 1);
 
     if (bind(server_fd, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
-        spdlog::critical("Failed to bind socket");
+        spdlog::critical("Failed to bind socket: {0}", strerror(errno));
 
         exit(1);
     }

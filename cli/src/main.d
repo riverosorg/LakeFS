@@ -9,14 +9,12 @@ import src.command_interface;
 int main(string[] args) {
     import std.stdio: writeln;
     import std.algorithm: any;
+    import std.conv: to;
 
     // config = readConfig("/etc/lakefs.conf");
 
-    // TODO: err 25 when this is done on the directory
-    immutable string socket_path = "/tmp/lakefs.sock";
-
     Socket lakefs_socket = new Socket(AddressFamily.UNIX, SocketType.STREAM, ProtocolType.IP);
-    auto lake_addr = new UnixAddress(socket_path);
+    auto lake_addr = new UnixAddress(to!string(_LAKE_SOCKET_PATH));
 
     lakefs_socket.connect(lake_addr);
 
