@@ -17,40 +17,55 @@
       (system:
         let 
           pkgs = nixpkgs.legacyPackages.${system}; 
+
+          build_pkgs = with pkgs; [
+            gcc
+            meson
+            ninja
+            reuse
+            dmd
+            docutils
+
+            argparse
+            fuse
+            spdlog
+          ];
+
+          pkg_meta = with pkgs.lib; {
+            license = [ licenses.bsd3 ];
+            maintainers = [ "Caleb Depatie" "Conner Tenn" ];
+          };
         
         in {
           # Built via `nix build` and run via `nix run`
-
           packages.default = pkgs.stdenv.mkDerivation rec {
-            pname   = "badgestl";
-            version = "0.1.1";
+            pname   = "lakefs";
+            version = "0.1.0";
             
             src = self;
 
-            # postPatch = "ls -la";
-
-            # sourceRoot = self;
-
-            nativeBuildInputs = with pkgs; [
-              gcc
-              meson
-              ninja
-              reuse
-              dmd
-              docutils
-
-              argparse
-              fuse
-              spdlo
-            ];
+            nativeBuildInputs = build_pkgs;
 
             mesonBuildType = "release";
 
             enableParallelBuilding = true;
 
-            meta = with pkgs.lib; {
-              maintainers = [ "Caleb Depatie" "Conner Tenn" ];
-            };
+            meta = pkg_meta;
+          };
+
+          packages.cli = pkgs.stdenv.mkDerivation rec {
+            pname   = "lakefs-cli";
+            version = "0.1.0";
+            
+            src = self;
+
+            nativeBuildInputs = build_pkgs;
+
+            mesonBuildType = "release";
+
+            enableParallelBuilding = true;
+
+            meta = pkg_meta;
           };
 
           # Built via `nix build` and run via `nix run`
@@ -58,19 +73,7 @@
 
           # Entered with `nix develop`
           devShells.default = pkgs.mkShell {
-            packages = with pkgs; [ 
-              gcc
-              meson
-              ninja
-              reuse
-              dmd
-              docutils
-
-              argparse
-              fuse
-              spdlog
-              fmt
-            ];
+            packages = build_pkgs;
           };
         }
       );
