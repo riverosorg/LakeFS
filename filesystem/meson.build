@@ -5,6 +5,17 @@
 
 cpp = meson.get_compiler('cpp')
 
+project_version = meson.project_version()
+
+conf_data = configuration_data()
+conf_data.set('version', project_version)
+
+configure_file(
+    input : 'src/config.h.in',
+    output : 'config.h',
+    configuration : conf_data
+)
+
 sources = [
     'src/sqlite/sqlite3.c',
     'src/fs.cpp',

@@ -19,6 +19,7 @@
 #include "db.hpp"
 #include "fs.hpp"
 #include "control.hpp"
+#include "config.h"
 
 auto etc_conf_reader(std::string path) -> std::unordered_map<std::string, std::string>;
 
@@ -48,12 +49,10 @@ static const struct fuse_operations operations = {
     .ioctl    = nullptr,
 };
 
-const std::string VERSION = "0.1.0";
-
 auto main(int argc, char** argv) -> int {
     // Set up the CLI args
 
-    argparse::ArgumentParser program("lakefs", VERSION);
+    argparse::ArgumentParser program("lakefs", LAKEFS_VERSION);
     program.add_description("LakeFS - A tag based abstraction over the filesystem");
 
     program.add_argument("mount_point")
