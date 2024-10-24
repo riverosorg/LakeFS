@@ -11,7 +11,8 @@ srcs = [
 executable(
   'lakefs-cli', 
   [srcs],
-  include_directories: '../filesystem/src'
+  include_directories: '../filesystem/src',
+  install: true
 )
 
 test_srcs = {

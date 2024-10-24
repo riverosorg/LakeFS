@@ -3,31 +3,32 @@
 # SPDX-License-Identifier: 0BSD
 
 Name:       LakeFS
-Version:    0.0.1
-Release:    1
+Version:    0.1.0
+Release:    1%{?dist}
 Summary:    A tag based fs overlay
 License:    BSD-3-Clause
 
-BuildRequires:
-Requires:
+BuildRequires: gcc dmd ninja meson argparse-devel spdlog-devel fmt-devel fuse3-devel
+Requires: fuse3-libs
 
 %description
 Provides filesystem querying based on 'tags'.
 
 %prep
+nix develop
 make setup
 
 %build
-cat > hello-world.sh <<EOF
-#!/usr/bin/bash
-echo Hello world
-EOF
+make build
 
 %install
 make install
 
+%check
+make test
+
 %files
-# DFffd
+/usr/bin/lakefs-cli /usr/bin/lakefs /etc/lakefs.conf
 
 %changelog
-# let's skip this for now
+#* 0.1.0 - Initial version
