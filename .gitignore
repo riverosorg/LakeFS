@@ -9,3 +9,4 @@ core
 *.1
 *.1.gz
 docs/man1
+.nfs.*

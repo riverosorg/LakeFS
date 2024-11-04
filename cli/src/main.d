@@ -186,7 +186,11 @@ void printHelp() {
 string getAbsolutePath(string path) @safe {
     import std.file: getcwd;
 
-    return getcwd() ~ "/" ~ path; // TODO we will probably want to do full path resolution here
+    if (path[0] == '/') {
+        return path;
+    } else {
+        return getcwd() ~ "/" ~ path;
+    } 
 }
 
 string toCString(string str) pure @safe {
