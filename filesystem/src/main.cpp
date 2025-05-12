@@ -2,8 +2,6 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
-#define FUSE_USE_VERSION 31
-
 #include <iostream>
 #include <thread>
 #include <unordered_map>

@@ -1,8 +1,10 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 # SPDX-FileCopyrightText: 2024 Caleb Depatie
 #
 # SPDX-License-Identifier: 0BSD
+
+echo "Test! Where am I?" $(pwd)
 
 fs=../build/filesystem/lakefs
 fs_prog=$(basename $fs)

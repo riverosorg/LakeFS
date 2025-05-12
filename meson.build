@@ -12,7 +12,7 @@ project(
 
 add_project_arguments(['-w', '-std=c++23'], language : 'cpp')
 
-add_project_arguments(['-debug', '-w'], language : 'd')
+add_project_arguments(['--d-debug', '-w'], language : 'd')
 
 # loading in individual subprojects
 

@@ -5,7 +5,6 @@
 // Provides the filesystem interface through FUSE
 
 extern "C" {
-#include <fuse.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <dirent.h>
@@ -29,7 +28,7 @@ std::string reverse_query(const char* path);
 std::string extract_query(const char* path);
 
 // Gets file attributes at <path>
-int lake_getattr(const char *path, struct stat *stbuf) {
+int lake_getattr(const char *path, struct stat *stbuf, struct fuse_file_info* fi) {
 
     spdlog::trace("Getting attributes for {0}", path);
 
@@ -52,14 +51,14 @@ int lake_getattr(const char *path, struct stat *stbuf) {
 
 int lake_readdir(
     const char *path, void *buf, fuse_fill_dir_t filler,
-    off_t offset, struct fuse_file_info *fi) {
+    off_t offset, struct fuse_file_info *fi, enum fuse_readdir_flags flags) {
 
     spdlog::trace("Reading directory {0}", path);
     
 
     // Return items in dir
-    filler(buf, ".", nullptr, 0);
-    filler(buf, "..", nullptr, 0);
+    filler(buf, ".", nullptr, 0, FUSE_FILL_DIR_PLUS);
+    filler(buf, "..", nullptr, 0, FUSE_FILL_DIR_PLUS);
 
     std::vector<std::string> files;
 
@@ -78,7 +77,7 @@ int lake_readdir(
         
         spdlog::trace("Will show file {0} as {1}", file, file_name);
         
-        filler(buf, file_name.c_str(), nullptr, 0);
+        filler(buf, file_name.c_str(), nullptr, 0, FUSE_FILL_DIR_PLUS);
     }
 
     return 0;

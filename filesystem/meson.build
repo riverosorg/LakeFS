@@ -29,14 +29,18 @@ add_project_arguments(['-DSPDLOG_FMT_EXTERNAL'], language : 'cpp')
 
 depends = []
 
-depends += cpp.find_library('fuse')
+depends += cpp.find_library('fuse3')
 depends += cpp.find_library('spdlog')
 depends += cpp.find_library('fmt')
+depends += dependency('threads')
+
+includes = ['src/', '/usr/local/include', '/usr/local/include/fuse3']
 
 executable(
     'lakefs',
     sources: ['src/main.cpp', sources],
     dependencies: depends,
+    include_directories: includes,
     install: true,
 )
 
@@ -50,7 +54,8 @@ foreach name, src : tests_dict
     exe = executable(
         name, 
         src, 
-        dependencies : depends, include_directories : ['src/'],
+        dependencies : depends, 
+        include_directories : includes,
     )
 
     test(name, exe)
