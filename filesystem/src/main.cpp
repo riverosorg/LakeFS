@@ -73,7 +73,7 @@ auto main(int argc, char** argv) -> int {
     // Get our configuration
     auto config = etc_conf_reader("/etc/lakefs.conf");
 
-    if (config.empty() && ! program.get<bool>("--tempdb")) {
+    if (config.empty() && !program.get<bool>("--tempdb")) {
         spdlog::error("Failed to read configuration file");
         return 1;
     }
