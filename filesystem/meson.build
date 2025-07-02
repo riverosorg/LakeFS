@@ -29,7 +29,16 @@ add_project_arguments(['-DSPDLOG_FMT_EXTERNAL'], language : 'cpp')
 
 depends = []
 
-depends += cpp.find_library('fuse3')
+fuse_dep = cpp.find_library('fuse', required: false)
+fuse3_dep = cpp.find_library('fuse3', required: false)
+
+if not (fuse_dep.found() or fuse3_dep.found())
+    error('Fuse dependency not found')
+endif
+
+depends += fuse3_dep
+depends += fuse_dep
+
 depends += cpp.find_library('spdlog')
 depends += cpp.find_library('fmt')
 depends += dependency('threads')

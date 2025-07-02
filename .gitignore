@@ -11,3 +11,4 @@ core
 *.1.gz
 docs/man1
 .nfs.*
+.cache/
