@@ -43,7 +43,11 @@ depends += cpp.find_library('spdlog')
 depends += cpp.find_library('fmt')
 depends += dependency('threads')
 
-includes = ['src/', '/usr/local/include', '/usr/local/include/fuse3']
+includes = ['src/', '/usr/local/include']
+
+if fuse3_dep.found()
+    includes += '/usr/local/include/fuse3'
+endif
 
 executable(
     'lakefs',
