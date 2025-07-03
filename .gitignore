@@ -12,3 +12,4 @@ core
 docs/man1
 .nfs.*
 .cache/
+work/
