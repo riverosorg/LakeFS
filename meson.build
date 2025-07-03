@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 Caleb Depatie
+# SPDX-FileCopyrightText: 2024-2025 Caleb Depatie
 # SPDX-FileCopyrightText: 2024 Conner Tenn
 #
 # SPDX-License-Identifier: 0BSD
@@ -12,7 +12,7 @@ project(
 
 add_project_arguments(['-w', '-std=c++23'], language : 'cpp')
 
-add_project_arguments(['--d-debug', '-w'], language : 'd')
+add_project_arguments(['-w'], language : 'd')
 
 # loading in individual subprojects
 
