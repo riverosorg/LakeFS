@@ -23,6 +23,11 @@ install:
 
 .PHONY: test
 test: build
+	meson test -C $(BUILD_DIR) --print-errorlogs
+
+# Local test runs unshare to segment the resources and limit the chance of locking up
+.PHONY: local-test
+local-test:
 	unshare -pfr --user --mount --kill-child meson test -C $(BUILD_DIR) --print-errorlogs
 
 docs/%.1: docs/%.rst

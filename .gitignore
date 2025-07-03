@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: 0BSD
 
 build/
+bsd_build/
 .vscode/
 core 
 *.log
@@ -10,3 +11,5 @@ core
 *.1.gz
 docs/man1
 .nfs.*
+.cache/
+work/

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 Caleb Depatie
+# SPDX-FileCopyrightText: 2024-2025 Caleb Depatie
 # SPDX-FileCopyrightText: 2024 Conner Tenn
 #
 # SPDX-License-Identifier: 0BSD
@@ -29,14 +29,31 @@ add_project_arguments(['-DSPDLOG_FMT_EXTERNAL'], language : 'cpp')
 
 depends = []
 
-depends += cpp.find_library('fuse')
+fuse_dep = cpp.find_library('fuse', required: false)
+fuse3_dep = cpp.find_library('fuse3', required: false)
+
+if not (fuse_dep.found() or fuse3_dep.found())
+    error('Fuse dependency not found')
+endif
+
+depends += fuse3_dep
+depends += fuse_dep
+
 depends += cpp.find_library('spdlog')
 depends += cpp.find_library('fmt')
+depends += dependency('threads')
+
+includes = ['src/', '/usr/local/include']
+
+if fuse3_dep.found()
+    includes += '/usr/local/include/fuse3'
+endif
 
 executable(
     'lakefs',
     sources: ['src/main.cpp', sources],
     dependencies: depends,
+    include_directories: includes,
     install: true,
 )
 
@@ -50,7 +67,8 @@ foreach name, src : tests_dict
     exe = executable(
         name, 
         src, 
-        dependencies : depends, include_directories : ['src/'],
+        dependencies : depends, 
+        include_directories : includes,
     )
 
     test(name, exe)

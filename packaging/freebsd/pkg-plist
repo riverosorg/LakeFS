@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: 2025 Caleb Depatie
+#
+# SPDX-License-Identifier: 0BSD
+
+bin/lakefs
+bin/lakefs-cli
+
+man/man1/lakefs.1.gz
+man/man1/lakefs-cli.1.gz
+man/man1/lakefs.conf.1.gz
+
+/etc/lakefs.conf
