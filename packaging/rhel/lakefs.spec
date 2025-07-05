@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: 0BSD
 
 Name:       LakeFS
-Version:    0.1.0
+Version:    0.1.1
 Release:    1%{?dist}
 Summary:    A tag based fs overlay
 License:    BSD-3-Clause
@@ -32,3 +32,5 @@ make test
 
 %changelog
 #* 0.1.0 - Initial version
+
+#* 0.1.1 - Added compatibility for FreeBSD

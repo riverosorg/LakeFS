@@ -1,7 +1,3 @@
-# SPDX-FileCopyrightText: 2025 Caleb Depatie
-#
-# SPDX-License-Identifier: 0BSD
-
 LakeFS provides a tag based overlay for your filesystem.
 Tags and files can be added to tracking using the lakefs-cli(1) tool.
 Tags/files can be queried through the filesystem, using a sql-like system that allows for subqueries.

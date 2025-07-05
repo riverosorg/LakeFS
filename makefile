@@ -30,11 +30,21 @@ test: build
 local-test:
 	unshare -pfr --user --mount --kill-child meson test -C $(BUILD_DIR) --print-errorlogs
 
-docs/%.1: docs/%.rst
-	rst2man $< $@
+docs/lakefs-cli.1: docs/lakefs-cli.rst
+	rst2man docs/lakefs-cli.rst $@
 
-docs/%.1.gz: docs/%.1
-	gzip $<
+docs/lakefs.1: docs/lakefs.rst
+	rst2man docs/lakefs.rst $@
+
+docs/lakefs.conf.1: docs/lakefs.conf.rst
+	rst2man docs/lakefs.conf.rst $@
+
+docs/lakefs-cli.1.gz: docs/lakefs-cli.1
+docs/lakefs.1.gz: docs/lakefs.1
+docs/lakefs.conf.1.gz: docs/lakefs.conf.1
+
+docs/lakefs-cli.1.gz docs/lakefs.1.gz docs/lakefs.conf.1.gz:
+	gzip docs/*.1
 
 .PHONY: docs
 docs: docs/lakefs-cli.1.gz docs/lakefs.1.gz docs/lakefs.conf.1.gz
