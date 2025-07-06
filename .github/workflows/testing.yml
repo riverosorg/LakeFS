@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 Caleb Depatie
+# SPDX-FileCopyrightText: 2024-2025 Caleb Depatie
 #
 # SPDX-License-Identifier: 0BSD
 
@@ -18,7 +18,7 @@ jobs:
       - name: Setup Meson
         run: nix develop --command make setup
       - name: Run Tests
-        run: nix develop --command make test
+        run: nix develop --command make local-test
       - name: Publish Results
         uses: mikepenz/action-junit-report@v4
         if: success() || failure()

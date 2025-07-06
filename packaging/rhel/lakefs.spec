@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: 0BSD
 
 Name:       LakeFS
-Version:    0.1.1
+Version:    0.2.0
 Release:    1%{?dist}
 Summary:    A tag based fs overlay
 License:    BSD-3-Clause

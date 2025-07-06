@@ -1,4 +1,4 @@
-.. SPDX-FileCopyrightText: 2024 Caleb Depatie
+.. SPDX-FileCopyrightText: 2024-2025 Caleb Depatie
 ..
 .. SPDX-License-Identifier: CC-BY-4.0
 
@@ -14,7 +14,7 @@ lakefs.conf
 
 :Author: Caleb Depatie
 :Copyright: CC-BY-4.0
-:Version: 0.1.0
+:Version: 0.2.0
 :Manual section: 5
 :Manual group: LakeFS
 
@@ -30,4 +30,4 @@ Each line of the file is a key-value pair separated by an equals sign and with n
 SEE ALSO
 ========
 
-**lakefs-cli(1)** **lakefs(1)**
+**lakefs-ctl(1)** **lakefs(1)**

@@ -1,28 +1,37 @@
-// SPDX-FileCopyrightText: 2024 Caleb Depatie
+// SPDX-FileCopyrightText: 2024-2025 Caleb Depatie
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
 import std.socket;
 
 import src.command_interface;
+import src.commands;
 
 int main(string[] args) {
     import std.stdio: writeln;
     import std.algorithm: any;
     import std.conv: to;
 
-    // config = readConfig("/etc/lakefs.conf");
+    if (any!"a == \"help\""(args)) {
+        printHelp();
+
+        return 0;
+    }
 
     Socket lakefs_socket = new Socket(AddressFamily.UNIX, SocketType.STREAM, ProtocolType.IP);
     auto lake_addr = new UnixAddress(to!string(_LAKE_SOCKET_PATH));
 
-    lakefs_socket.connect(lake_addr);
+    try {
+        lakefs_socket.connect(lake_addr);
+    } catch (Exception e) {
+        writeln("Error: Could not connect to Lakefs database");
+        writeln("Check if it is running and permissions are correct");
+
+        return 1;
+    }
 
     // TODO: Cases can be done via metaprogramming
-    if (any!"a == \"help\""(args)) {
-        printHelp();
-
-    } else if (any!"a == \"add\""(args)) {
+    if (any!"a == \"add\""(args)) {
         if (args.length < 3) {
             writeln("Error: add command requires a path argument");
             return 1;
@@ -62,107 +71,17 @@ int main(string[] args) {
 
         return removeTag(lakefs_socket, args[2], args[3]);
 
+    } else if (any!"a == \"relink\""(args)) {
+        if (args.length < 4) {
+            writeln("Error: relink command requires an old and new file path");
+            return 1;
+        }
+
+        return relink(lakefs_socket, args[2], args[3]);
+
     } else { // if no command is given, print help
         printHelp();
     }
-
-    return 0;
-}
-
-// string[string] readConfig(string path) {
-//     import std.stdio: File, readln;
-//     import std.array: split;
-
-//     auto file = File(path, "r");
-
-//     string[string] config;
-
-//     foreach (line; file.byLine()) {
-//         auto parts = line.split("=");
-//         config[parts[0]] = parts[1];
-//     }
-
-//     return config;
-// }
-
-int addFile(ref Socket lake_s, string path) {
-    import std.stdio: writeln;
-
-    auto absolute_path = getAbsolutePath(path);
-
-    writeln("Adding file " ~ absolute_path);
-
-    auto data = new char[absolute_path.length + 1 + (int.sizeof*2)];;
-
-    serialize_data(data.ptr, _LAKE_ADD_FILE, cast(uint) absolute_path.length, toCString(absolute_path).ptr);
-
-    lake_s.send(data);
-
-    return 0;
-}
-
-int tagFile(ref Socket lake_s, string path, string tag) {
-    import std.stdio: writeln;
-
-    auto absolute_path = getAbsolutePath(path);
-
-    writeln("Tagging file " ~ absolute_path ~ " with tag " ~ tag);
-
-    auto cmd_string = absolute_path ~ "\n" ~ tag;
-
-    auto data = new char[cmd_string.length + 1 + (int.sizeof*2)];;
-
-    serialize_data(data.ptr, _LAKE_TAG_FILE, cast(uint) cmd_string.length, toCString(cmd_string).ptr);
-
-    lake_s.send(data);
-
-    return 0;
-}
-
-int removeFile(ref Socket lake_s, string path) {
-    import std.stdio: writeln;
-
-    auto absolute_path = getAbsolutePath(path);
-
-    writeln("Removing file " ~ absolute_path);
-
-    auto data = new char[absolute_path.length + 1 + (int.sizeof*2)];;
-
-    serialize_data(data.ptr, _LAKE_REMOVE_FILE, cast(uint) absolute_path.length, toCString(absolute_path).ptr);
-
-    lake_s.send(data);
-
-    return 0;
-}
-
-int removeTag(ref Socket lake_s, string path, string tag) {
-    import std.stdio: writeln;
-
-    auto absolute_path = getAbsolutePath(path);
-
-    writeln("Removing tag " ~ tag ~ " from file " ~ absolute_path);
-
-    auto cmd_string = absolute_path ~ "\n" ~ tag;
-
-    auto data = new char[cmd_string.length + 1 + (int.sizeof*2)];;
-
-    serialize_data(data.ptr, _LAKE_REMOVE_TAG, cast(uint) cmd_string.length, toCString(cmd_string).ptr);
-
-    lake_s.send(data);
-
-    return 0;
-}
-
-int setDefault(ref Socket lake_s, string query) {
-    import std.stdio: writeln;
-
-    writeln("Setting default query to " ~ query);
-
-    auto data = new char[query.length + 1 + (int.sizeof*2)];
-
-    serialize_data(data.ptr, _LAKE_SET_DEFAULT_QUERY, cast(uint) query.length, toCString(query).ptr);
-
-    lake_s.send(data);
 
     return 0;
 }
@@ -175,36 +94,11 @@ void printHelp() {
     writeln("  lakefs-cli [command] [...arguments]");
     writeln("");
     writeln("Commands:");
-    writeln("  help                 - Print this help message");
-    writeln("  add     <path>       - Add a file to the lakefs");
-    writeln("  tag     <path> <tag> - Tag a file in the lakefs");
-    writeln("  del     <path>       - Remove a file from the lakefs");
-    writeln("  del-tag <path> <tag> - Remove a tag from a file");
-    writeln("  default <query>      - Set the default query for the mounted directory");
-}
-
-string getAbsolutePath(string path) @safe {
-    import std.file: getcwd;
-
-    if (path[0] == '/') {
-        return path;
-    } else {
-        return getcwd() ~ "/" ~ path;
-    } 
-}
-
-string toCString(string str) pure @safe {
-    char[] cstr = new char[str.length + 1];
-
-    foreach (i, c; str) {
-        cstr[i] = c;
-    }
-
-    cstr[$-1] = '\0';
-    
-    return cstr;
-}
-
-unittest {
-    assert(toCString("Hello, World!") == "Hello, World!\0");
+    writeln("  help                          - Print this help message");
+    writeln("  add     <path>                - Add a file to the lakefs");
+    writeln("  tag     <path> <tag>          - Tag a file in the lakefs");
+    writeln("  del     <path>                - Remove a file from the lakefs");
+    writeln("  del-tag <path> <tag>          - Remove a tag from a file");
+    writeln("  relink  <old path> <new path> - Transfer tags from an old file location to a new one");
+    writeln("  default <query>               - Set the default query for the mounted directory");
 }
