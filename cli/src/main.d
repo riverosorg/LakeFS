@@ -15,12 +15,21 @@ int main(string[] args) {
 
     if (any!"a == \"help\""(args)) {
         printHelp();
+
+        return 0;
     }
 
     Socket lakefs_socket = new Socket(AddressFamily.UNIX, SocketType.STREAM, ProtocolType.IP);
     auto lake_addr = new UnixAddress(to!string(_LAKE_SOCKET_PATH));
 
-    lakefs_socket.connect(lake_addr);
+    try {
+        lakefs_socket.connect(lake_addr);
+    } catch (Exception e) {
+        writeln("Error: Could not connect to Lakefs database");
+        writeln("Check if it is running and permissions are correct");
+
+        return 1;
+    }
 
     // TODO: Cases can be done via metaprogramming
     if (any!"a == \"add\""(args)) {
@@ -194,7 +203,7 @@ string getAbsolutePath(string path) @safe {
     } 
 }
 
-string toCString(string str) pure @safe {
+string toCString(string str) pure nothrow @safe {
     char[] cstr = new char[str.length + 1];
 
     foreach (i, c; str) {
