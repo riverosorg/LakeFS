@@ -5,6 +5,7 @@
 import std.socket;
 
 import src.command_interface;
+import src.commands;
 
 int main(string[] args) {
     import std.stdio: writeln;
@@ -85,107 +86,6 @@ int main(string[] args) {
     return 0;
 }
 
-int addFile(ref Socket lake_s, string path) {
-    import std.stdio: writeln;
-
-    auto absolute_path = getAbsolutePath(path);
-
-    writeln("Adding file " ~ absolute_path);
-
-    auto data = new char[absolute_path.length + 1 + (int.sizeof*2)];
-
-    serialize_data(data.ptr, _LAKE_ADD_FILE, cast(uint) absolute_path.length, toCString(absolute_path).ptr);
-
-    lake_s.send(data);
-
-    return 0;
-}
-
-int tagFile(ref Socket lake_s, string path, string tag) {
-    import std.stdio: writeln;
-
-    auto absolute_path = getAbsolutePath(path);
-
-    writeln("Tagging file " ~ absolute_path ~ " with tag " ~ tag);
-
-    auto cmd_string = absolute_path ~ "\n" ~ tag;
-
-    auto data = new char[cmd_string.length + 1 + (int.sizeof*2)];
-
-    serialize_data(data.ptr, _LAKE_TAG_FILE, cast(uint) cmd_string.length, toCString(cmd_string).ptr);
-
-    lake_s.send(data);
-
-    return 0;
-}
-
-int removeFile(ref Socket lake_s, string path) {
-    import std.stdio: writeln;
-
-    auto absolute_path = getAbsolutePath(path);
-
-    writeln("Removing file " ~ absolute_path);
-
-    auto data = new char[absolute_path.length + 1 + (int.sizeof*2)];
-
-    serialize_data(data.ptr, _LAKE_REMOVE_FILE, cast(uint) absolute_path.length, toCString(absolute_path).ptr);
-
-    lake_s.send(data);
-
-    return 0;
-}
-
-int removeTag(ref Socket lake_s, string path, string tag) {
-    import std.stdio: writeln;
-
-    auto absolute_path = getAbsolutePath(path);
-
-    writeln("Removing tag " ~ tag ~ " from file " ~ absolute_path);
-
-    auto cmd_string = absolute_path ~ "\n" ~ tag;
-
-    auto data = new char[cmd_string.length + 1 + (int.sizeof*2)];
-
-    serialize_data(data.ptr, _LAKE_REMOVE_TAG, cast(uint) cmd_string.length, toCString(cmd_string).ptr);
-
-    lake_s.send(data);
-
-    return 0;
-}
-
-int relink(ref Socket lake_s, string old_path, string new_path) {
-    import std.stdio: writeln;
-
-    auto absolute_path = getAbsolutePath(old_path);
-    auto absolute_new_path = getAbsolutePath(new_path);
-
-    writeln("Moving " ~ absolute_path ~ " from " ~  absolute_new_path);
-
-    auto cmd_string = absolute_path ~ "\n" ~ absolute_new_path;
-
-    auto data = new char[cmd_string.length + 1 + (int.sizeof*2)];
-
-    serialize_data(data.ptr, _LAKE_RELINK_FILE, cast(uint) cmd_string.length, toCString(cmd_string).ptr);
-
-    lake_s.send(data);
-
-    return 0;
-}
-
-int setDefault(ref Socket lake_s, string query) {
-    import std.stdio: writeln;
-
-    writeln("Setting default query to " ~ query);
-
-    auto data = new char[query.length + 1 + (int.sizeof*2)];
-
-    serialize_data(data.ptr, _LAKE_SET_DEFAULT_QUERY, cast(uint) query.length, toCString(query).ptr);
-
-    lake_s.send(data);
-
-    return 0;
-}
-
 void printHelp() {
     import std.stdio: writeln;
 
@@ -201,30 +101,4 @@ void printHelp() {
     writeln("  del-tag <path> <tag>          - Remove a tag from a file");
     writeln("  relink  <old path> <new path> - Transfer tags from an old file location to a new one");
     writeln("  default <query>               - Set the default query for the mounted directory");
-}
-
-string getAbsolutePath(string path) @safe {
-    import std.file: getcwd;
-
-    if (path[0] == '/') {
-        return path;
-    } else {
-        return getcwd() ~ "/" ~ path;
-    } 
-}
-
-string toCString(string str) pure nothrow @safe {
-    char[] cstr = new char[str.length + 1];
-
-    foreach (i, c; str) {
-        cstr[i] = c;
-    }
-
-    cstr[$-1] = '\0';
-    
-    return cstr;
-}
-
-unittest {
-    assert(toCString("Hello, World!") == "Hello, World!\0");
 }
