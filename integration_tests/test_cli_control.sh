@@ -11,7 +11,7 @@ fs_prog=$(basename $fs)
 
 lake_dir=./lakefs
 
-cli=../build/cli/lakefs-cli
+cli=../build/cli/lakefs-ctl
 
 test_dir=./lakefs_test
 

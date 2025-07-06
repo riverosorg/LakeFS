@@ -6,7 +6,7 @@
 project(
     'LakeFS', 
     ['cpp', 'c', 'd'],
-    version: '0.1.1',
+    version: '0.2.0',
     license: 'BSD-3-Clause'
 )
 

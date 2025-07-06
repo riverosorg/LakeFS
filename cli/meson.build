@@ -9,14 +9,14 @@ srcs = [
 ]
 
 executable(
-  'lakefs-cli', 
+  'lakefs-ctl', 
   [srcs],
   include_directories: '../filesystem/src',
   install: true
 )
 
 test_srcs = {
-    'LakeFS-CLI Main' : 'src/main.d'
+    'LakeFS-Ctl Main' : 'src/main.d'
 }
 
 foreach name, src : test_srcs

@@ -1,4 +1,4 @@
-.. SPDX-FileCopyrightText: 2024 Caleb Depatie
+.. SPDX-FileCopyrightText: 2024-2025 Caleb Depatie
 ..
 .. SPDX-License-Identifier: CC-BY-4.0
 
@@ -9,13 +9,13 @@ lakefs
 ======
 
 ------------------------------
-Initialize a a LakeFS instance
+Initialize a LakeFS instance
 ------------------------------
 
 :Author: Caleb Depatie
 :Author: Conner Tenn
 :Copyright: CC-BY-4.0
-:Version: 0.1.0
+:Version: 0.2.0
 :Manual section: 1
 :Manual group: LakeFS
 
@@ -29,7 +29,7 @@ DESCRIPTION
 ===========
 
 LakeFS provides a tag based overlay for your filesystem.
-Tags and files can be added to tracking using the **lakefs-cli(1)** tool.
+Tags and files can be added to tracking using the **lakefs-ctl(1)** tool.
 This command will initialize a LakeFS instance at the given mount point.
 
 QUERYING
@@ -69,4 +69,4 @@ mount_point
 SEE ALSO
 ========
 
-**lakefs-cli(1)** **lakefs.conf(5)**
+**lakefs-ctl(1)** **lakefs.conf(5)**

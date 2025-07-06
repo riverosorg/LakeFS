@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 Caleb Depatie
+// SPDX-FileCopyrightText: 2024-2025 Caleb Depatie
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
@@ -13,16 +13,17 @@ int main(string[] args) {
 
     // config = readConfig("/etc/lakefs.conf");
 
+    if (any!"a == \"help\""(args)) {
+        printHelp();
+    }
+
     Socket lakefs_socket = new Socket(AddressFamily.UNIX, SocketType.STREAM, ProtocolType.IP);
     auto lake_addr = new UnixAddress(to!string(_LAKE_SOCKET_PATH));
 
     lakefs_socket.connect(lake_addr);
 
     // TODO: Cases can be done via metaprogramming
-    if (any!"a == \"help\""(args)) {
-        printHelp();
-
-    } else if (any!"a == \"add\""(args)) {
+    if (any!"a == \"add\""(args)) {
         if (args.length < 3) {
             writeln("Error: add command requires a path argument");
             return 1;

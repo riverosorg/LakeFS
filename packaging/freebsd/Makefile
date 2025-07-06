@@ -5,7 +5,7 @@
 # For local use to make it easy to install/replace/deinstall lakefs
 
 PORTNAME=LakeFS
-DISTVERSION=0.1.1
+DISTVERSION=0.2.0
 CATEGORIES=sysutils
 MASTER_SITES=https://github.com/riverosorg/LakeFS/archive/refs/tags/
 DISTNAME=v${DISTVERSION}
