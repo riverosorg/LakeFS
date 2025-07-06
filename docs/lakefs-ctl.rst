@@ -26,6 +26,7 @@ SYNOPSIS
 | **lakefs-ctl tag** *PATH TAG*
 | **lakefs-ctl del** *PATH*
 | **lakefs-ctl del-tag** *PATH TAG*
+| **lakefs-ctl relink** *OLD PATH* *NEW PATH*
 | **lakefs-ctl default** *QUERY*
 
 
@@ -42,6 +43,8 @@ It gives LakeFS commands that will modify the database. Any **PATH** given shoul
 **del** - Removes a file from tracking. This will remove all tags associated with this file.
 
 **del-tag** - Removes a single tag from a file.
+
+**relink** - Changes the stored path of a file. Use this if you move a file, transfers all associated tags.
 
 **default** - Changes the default query at the LakeFS mount point. **QUERY** should be passed in quotes.
 

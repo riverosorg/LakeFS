@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 Caleb Depatie
+// SPDX-FileCopyrightText: 2024-2025 Caleb Depatie
 //
 // SPDX-License-Identifier: BSD-3-Clause
 #pragma once
@@ -16,6 +16,7 @@ int db_add_file(const std::string path);
 int db_tag_file(const std::string path, const std::string tag);
 int db_remove_file(const std::string path);
 int db_remove_tag(const std::string path, const std::string tag);
+int db_relink_file(const std::string path, const std::string new_path);
 
 void db_set_default_query(const std::string query);
 

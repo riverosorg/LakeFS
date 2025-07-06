@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# SPDX-FileCopyrightText: 2024 Caleb Depatie
+# SPDX-FileCopyrightText: 2024-2025 Caleb Depatie
 #
 # SPDX-License-Identifier: 0BSD
 
@@ -18,7 +18,7 @@ test_dir=./lakefs_test
 # Cleanup and exit with an error code
 function cleanup_and_exit {
     if [ $(uname) = "FreeBSD" ]; then
-        umount $lake_dir #fusermound not on freebsd, but definitely preferred
+        umount $lake_dir #fusermount not on freebsd, but definitely preferred
     else
         fusermount -u $lake_dir
     fi
@@ -124,9 +124,25 @@ if [ $(echo "$results" | xargs) != "1" ]; then
     cleanup_and_exit 1
 fi
 
-# Remove a file
+# Relink a file
 $cli tag $test_dir/test_file2 not_default # have to add the tag back so it would show up in the query
-$cli del $test_dir/test_file2
+
+mv $test_dir/test_file2 $test_dir/test_file2_1
+$cli relink $test_dir/test_file2 $test_dir/test_file2_1
+
+results=$(ls -A $lake_dir | grep test_file2_1 | wc -l)
+
+if [ $(echo "$results" | xargs) != "1" ]; then
+    echo "Error: relinking not working"
+    echo "Expected: 1"
+    echo "Got: $results"
+    echo "Extra info: $(ls -A $lake_dir)"
+
+    cleanup_and_exit 1
+fi
+
+# Remove a file
+$cli del $test_dir/test_file2_1
 
 results=$(ls $lake_dir | wc -l)
 

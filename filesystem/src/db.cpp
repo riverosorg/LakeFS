@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 Caleb Depatie
+// SPDX-FileCopyrightText: 2024-2025 Caleb Depatie
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
@@ -72,6 +72,12 @@ int db_remove_file(const std::string path) {
 int db_remove_tag(const std::string path, const std::string tag) {
     int rc = sqlite3_exec(db, ("DELETE FROM tags WHERE data_id = (SELECT id FROM data WHERE path = '" + path + "') AND tag_value = '" + tag + "';").c_str(), nullptr, nullptr, nullptr);
 
+    return rc;
+}
+
+int db_relink_file(const std::string path, const std::string new_path) {
+    int rc = sqlite3_exec(db, ("UPDATE data SET path = '" + new_path + "' WHERE data.path = '" + path + "';").c_str(), nullptr, nullptr, nullptr);
+    
     return rc;
 }
 

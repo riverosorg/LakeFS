@@ -11,8 +11,6 @@ int main(string[] args) {
     import std.algorithm: any;
     import std.conv: to;
 
-    // config = readConfig("/etc/lakefs.conf");
-
     if (any!"a == \"help\""(args)) {
         printHelp();
 
@@ -72,28 +70,20 @@ int main(string[] args) {
 
         return removeTag(lakefs_socket, args[2], args[3]);
 
+    } else if (any!"a == \"relink\""(args)) {
+        if (args.length < 4) {
+            writeln("Error: relink command requires an old and new file path");
+            return 1;
+        }
+
+        return relink(lakefs_socket, args[2], args[3]);
+
     } else { // if no command is given, print help
         printHelp();
     }
 
     return 0;
 }
-
-// string[string] readConfig(string path) {
-//     import std.stdio: File, readln;
-//     import std.array: split;
-
-//     auto file = File(path, "r");
-
-//     string[string] config;
-
-//     foreach (line; file.byLine()) {
-//         auto parts = line.split("=");
-//         config[parts[0]] = parts[1];
-//     }
-
-//     return config;
-// }
 
 int addFile(ref Socket lake_s, string path) {
     import std.stdio: writeln;
@@ -102,7 +92,7 @@ int addFile(ref Socket lake_s, string path) {
 
     writeln("Adding file " ~ absolute_path);
 
-    auto data = new char[absolute_path.length + 1 + (int.sizeof*2)];;
+    auto data = new char[absolute_path.length + 1 + (int.sizeof*2)];
 
     serialize_data(data.ptr, _LAKE_ADD_FILE, cast(uint) absolute_path.length, toCString(absolute_path).ptr);
 
@@ -120,7 +110,7 @@ int tagFile(ref Socket lake_s, string path, string tag) {
 
     auto cmd_string = absolute_path ~ "\n" ~ tag;
 
-    auto data = new char[cmd_string.length + 1 + (int.sizeof*2)];;
+    auto data = new char[cmd_string.length + 1 + (int.sizeof*2)];
 
     serialize_data(data.ptr, _LAKE_TAG_FILE, cast(uint) cmd_string.length, toCString(cmd_string).ptr);
 
@@ -136,7 +126,7 @@ int removeFile(ref Socket lake_s, string path) {
 
     writeln("Removing file " ~ absolute_path);
 
-    auto data = new char[absolute_path.length + 1 + (int.sizeof*2)];;
+    auto data = new char[absolute_path.length + 1 + (int.sizeof*2)];
 
     serialize_data(data.ptr, _LAKE_REMOVE_FILE, cast(uint) absolute_path.length, toCString(absolute_path).ptr);
 
@@ -154,9 +144,28 @@ int removeTag(ref Socket lake_s, string path, string tag) {
 
     auto cmd_string = absolute_path ~ "\n" ~ tag;
 
-    auto data = new char[cmd_string.length + 1 + (int.sizeof*2)];;
+    auto data = new char[cmd_string.length + 1 + (int.sizeof*2)];
 
     serialize_data(data.ptr, _LAKE_REMOVE_TAG, cast(uint) cmd_string.length, toCString(cmd_string).ptr);
+
+    lake_s.send(data);
+
+    return 0;
+}
+
+int relink(ref Socket lake_s, string old_path, string new_path) {
+    import std.stdio: writeln;
+
+    auto absolute_path = getAbsolutePath(old_path);
+    auto absolute_new_path = getAbsolutePath(new_path);
+
+    writeln("Moving " ~ absolute_path ~ " from " ~  absolute_new_path);
+
+    auto cmd_string = absolute_path ~ "\n" ~ absolute_new_path;
+
+    auto data = new char[cmd_string.length + 1 + (int.sizeof*2)];
+
+    serialize_data(data.ptr, _LAKE_RELINK_FILE, cast(uint) cmd_string.length, toCString(cmd_string).ptr);
 
     lake_s.send(data);
 
@@ -185,12 +194,13 @@ void printHelp() {
     writeln("  lakefs-cli [command] [...arguments]");
     writeln("");
     writeln("Commands:");
-    writeln("  help                 - Print this help message");
-    writeln("  add     <path>       - Add a file to the lakefs");
-    writeln("  tag     <path> <tag> - Tag a file in the lakefs");
-    writeln("  del     <path>       - Remove a file from the lakefs");
-    writeln("  del-tag <path> <tag> - Remove a tag from a file");
-    writeln("  default <query>      - Set the default query for the mounted directory");
+    writeln("  help                          - Print this help message");
+    writeln("  add     <path>                - Add a file to the lakefs");
+    writeln("  tag     <path> <tag>          - Tag a file in the lakefs");
+    writeln("  del     <path>                - Remove a file from the lakefs");
+    writeln("  del-tag <path> <tag>          - Remove a tag from a file");
+    writeln("  relink  <old path> <new path> - Transfer tags from an old file location to a new one");
+    writeln("  default <query>               - Set the default query for the mounted directory");
 }
 
 string getAbsolutePath(string path) @safe {

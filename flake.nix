@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 Caleb Depatie
+# SPDX-FileCopyrightText: 2024-2025 Caleb Depatie
 #
 # SPDX-License-Identifier: 0BSD
 
@@ -54,7 +54,7 @@
           };
 
           packages.cli = pkgs.stdenv.mkDerivation rec {
-            pname   = "lakefs-cli";
+            pname   = "lakefs-ctl";
             version = "0.1.0";
             
             src = self;

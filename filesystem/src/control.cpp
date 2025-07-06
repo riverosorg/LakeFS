@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 Caleb Depatie
+// SPDX-FileCopyrightText: 2024-2025 Caleb Depatie
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
@@ -57,7 +57,7 @@ void control_server() {
         }
 
         // Read the command
-        char buffer[1024];
+        char buffer[1024]; // TODO: Variable size!!
         int bytes_read = read(client_fd, buffer, sizeof(buffer));
         if (bytes_read == -1) {
             spdlog::critical("Failed to read from socket");
@@ -127,6 +127,22 @@ void control_server() {
                     spdlog::error("Failed to remove tag from file in database: {0}", rc);
                 }
              
+                break;
+            }
+            case LAKE_RELINK_FILE: {
+                std::string cmd_data = std::string(command->data, command->size);
+
+                const std::string delimiter = "\n";
+                size_t pos = cmd_data.find(delimiter);
+                std::string old_path = cmd_data.substr(0, pos);
+                std::string new_path = cmd_data.substr(pos + delimiter.length());
+
+                int rc = db_relink_file(old_path, new_path);
+
+                if (rc != SQLITE_OK) {
+                    spdlog::error("Failed to relink file: {0}", rc);
+                }
+                
                 break;
             }
             case LAKE_SET_DEFAULT_QUERY: {
