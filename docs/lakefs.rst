@@ -59,6 +59,9 @@ OPTIONS
 mount_point
     Folder to mount the LakeFS instance under.
 
+-c, --config
+    Set the config file location. Default is /etc/lakefs.conf
+
 -v, --version
     Display version information and exit.
 

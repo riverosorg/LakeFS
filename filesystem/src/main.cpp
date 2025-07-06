@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 Caleb Depatie
+// SPDX-FileCopyrightText: 2024-2025 Caleb Depatie
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
@@ -61,6 +61,10 @@ auto main(int argc, char** argv) -> int {
         .flag()
         .help("Use an in-memory database instead of the file");
 
+    program.add_argument("--config", "-c")
+        .default_value("/etc/lakefs.conf")
+        .help("Manually set a config location rather than using /etc/lakefs.conf");
+
     try {
 		program.parse_args(argc, argv);
 
@@ -71,10 +75,12 @@ auto main(int argc, char** argv) -> int {
 	}
 
     // Get our configuration
-    auto config = etc_conf_reader("/etc/lakefs.conf");
+    const auto config_path = program.get<std::string>("--config");
+
+    auto config = etc_conf_reader(config_path);
 
     if (config.empty() && !program.get<bool>("--tempdb")) {
-        spdlog::error("Failed to read configuration file");
+        spdlog::error("Failed to read configuration file at {0}", config_path);
         return 1;
     }
 
