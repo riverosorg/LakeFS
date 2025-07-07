@@ -1,0 +1,5 @@
+# SPDX-FileCopyrightText: 2025 Caleb Depatie
+#
+# SPDX-License-Identifier: 0BSD
+
+option('documentation', type: 'boolean', value: true, description: 'Flag to build the documentation')

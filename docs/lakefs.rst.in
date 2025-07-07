@@ -15,7 +15,7 @@ Initialize a LakeFS instance
 :Author: Caleb Depatie
 :Author: Conner Tenn
 :Copyright: CC-BY-4.0
-:Version: 0.2.0
+:Version: @version@
 :Manual section: 1
 :Manual group: LakeFS
 

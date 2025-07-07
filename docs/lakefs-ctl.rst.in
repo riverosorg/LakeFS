@@ -14,7 +14,7 @@ Interact with the LakeFS tags and file references
 
 :Author: Caleb Depatie
 :Copyright: CC-BY-4.0
-:Version: 0.2.0
+:Version: @version@
 :Manual section: 1
 :Manual group: LakeFS
 
