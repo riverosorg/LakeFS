@@ -25,5 +25,5 @@ foreach file_name : doc_files
     pwd = meson.current_build_dir() + '/'
 
     run_command('rst2man', pwd + file_name + '.rst', pwd + file_name + '.1', check: true, env: env)
-    run_command('gzip', pwd + file_name + '.1', check: true, env: env)
+    run_command('gzip', pwd + file_name + '.1', check: false, env: env)
 endforeach
