@@ -81,6 +81,8 @@ int main(string[] args) {
 
     } else { // if no command is given, print help
         printHelp();
+
+        return 1;
     }
 
     return 0;

@@ -5,6 +5,7 @@
 #include <string>
 #include <filesystem>
 
+#include <spdlog/spdlog.h>
 #include "sqlite/sqlite3.h"
 #include "db.hpp"
 #include "parser.hpp"
@@ -87,35 +88,33 @@ std::string db_query_helper(const std::shared_ptr<AstNode> ast) {
 
     // Determine AST type
     if (auto tag = std::dynamic_pointer_cast<Tag>(ast)) {
+        query_part += "SELECT data_id FROM tags WHERE tag_value = ";
         query_part += "'" + tag->name + "'";
     
     } else if (auto union_op = std::dynamic_pointer_cast<Union>(ast)) {
         query_part += "IN (";
         query_part += db_query_helper(union_op->left_node);
-        query_part += ", ";
+        query_part += " UNION ";
         query_part += db_query_helper(union_op->right_node);
-        query_part += ")";
+        // query_part += ")";
     
     } else if (auto intersection_op = std::dynamic_pointer_cast<Intersection>(ast)) {
-        if  (auto tag = std::dynamic_pointer_cast<Tag>(intersection_op->left_node)){
-            query_part += "= '" + tag->name + "'";
+        query_part += "IN (";
         
-        } else {
-            query_part += db_query_helper(intersection_op->left_node);
-        }
+        query_part += db_query_helper(intersection_op->left_node);
 
-        query_part += ") AND id IN (SELECT data_id FROM tags WHERE tag_value ";
+        query_part += ") AND id IN (";
 
-        if  (auto tag = std::dynamic_pointer_cast<Tag>(intersection_op->right_node)){
-            query_part += "= '" + tag->name + "'";
-        
-        } else {
-            query_part += db_query_helper(intersection_op->right_node);
-        }
+        query_part += db_query_helper(intersection_op->right_node);
 
     } else if (auto negation_op = std::dynamic_pointer_cast<Negation>(ast)) {
-        query_part += "!= ";
+        query_part += "NOT IN (";
         query_part += db_query_helper(negation_op->node);
+        
+        // Should be:
+//         WHERE id NOT IN (
+//     SELECT data_id FROM tags WHERE tag_value = 'not_default'
+// );
     
     } else {
         throw std::runtime_error("Unknown AST type");
@@ -130,16 +129,17 @@ std::string db_create_query(const std::shared_ptr<AstNode> ast) {
 
     // Tag selection preamble
     query += "SELECT path ";
-    query += "FROM data WHERE id IN (SELECT data_id FROM tags WHERE tag_value ";
+    query += "FROM data WHERE id "; 
+    //IN (SELECT data_id FROM tags WHERE tag_value ";
 
     if  (auto tag = std::dynamic_pointer_cast<Tag>(ast)){
         // TODO: This is a special case and i hate it
+        query += "IN (SELECT data_id FROM tags WHERE tag_value ";
         query += "= '" + tag->name + "'";
     
     } else {
         query += db_query_helper(ast);
     }
-
 
     query += ");";
 
@@ -161,6 +161,8 @@ std::vector<std::string> db_run_query(const std::shared_ptr<AstNode> ast) {
     std::vector<std::string> results;
 
     std::string query = db_create_query(ast);
+
+    spdlog::debug("Running Query: \n{0}\n", query);
 
     sqlite3_stmt *stmt;
     sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr);

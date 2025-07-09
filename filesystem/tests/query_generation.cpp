@@ -31,8 +31,8 @@ TEST_CASE("Basic Tag Retrieval", "[parsing][query]") {
         ast = parse("!tag");
         query = db_create_query(ast);
         expected_query = 
-            "SELECT path FROM data WHERE id IN "
-            "(SELECT data_id FROM tags WHERE tag_value != 'tag');";
+            "SELECT path FROM data WHERE id NOT IN "
+            "(SELECT data_id FROM tags WHERE tag_value = 'tag');";
         
         REQUIRE(query == expected_query);
     }
@@ -42,7 +42,7 @@ TEST_CASE("Basic Tag Retrieval", "[parsing][query]") {
         query = db_create_query(ast);
         expected_query = 
             "SELECT path FROM data WHERE id IN "
-            "(SELECT data_id FROM tags WHERE tag_value IN ('tag1', 'tag2'));";
+            "(SELECT data_id FROM tags WHERE tag_value = 'tag1' UNION SELECT data_id FROM tags WHERE tag_value = 'tag2');";
         REQUIRE(query == expected_query);
     }
 

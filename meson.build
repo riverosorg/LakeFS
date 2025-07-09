@@ -7,7 +7,8 @@ project(
     'LakeFS', 
     ['cpp', 'c', 'd'],
     version: '0.2.1',
-    license: 'BSD-3-Clause'
+    license: 'BSD-3-Clause',
+    meson_version: '1.7.0'
 )
 
 add_project_arguments(['-w', '-std=c++23'], language : 'cpp')
