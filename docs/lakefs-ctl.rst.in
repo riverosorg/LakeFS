@@ -23,7 +23,7 @@ SYNOPSIS
 
 | **lakefs-ctl help**
 | **lakefs-ctl add** *PATH*
-| **lakefs-ctl tag** *PATH TAG*
+| **lakefs-ctl tag** *PATH TAG...*
 | **lakefs-ctl del** *PATH*
 | **lakefs-ctl del-tag** *PATH TAG*
 | **lakefs-ctl relink** *OLD PATH* *NEW PATH*
@@ -38,7 +38,7 @@ It gives LakeFS commands that will modify the database. Any **PATH** given shoul
 
 **add** - Adds a file to tracking. No tags are added so this file will not be included in any queries yet.
 
-**tag** - Adds a tag to a file. This will allow you to query for this file.
+**tag** - Adds a tag to a file. This will allow you to query for this file. Can add as many space seperated tags as needed.
 
 **del** - Removes a file from tracking. This will remove all tags associated with this file.
 

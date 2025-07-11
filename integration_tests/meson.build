@@ -7,7 +7,8 @@ tests_dict = {
     'Reading Files': 'reading.sh',
     'Writing Files': 'writing.sh',
     'Deleting Files': 'deletion.sh',
-    'Relinking Files': 'relinking.sh'
+    'Relinking Files': 'relinking.sh',
+    'Add multiple tags': 'multiple_tags.sh'
 }
 
 configure_file(

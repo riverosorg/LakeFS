@@ -32,16 +32,27 @@ int addFile(ref Socket lake_s, string path) {
     return sendMessage(lake_s, _LAKE_ADD_FILE, absolute_path);
 }
 
-int tagFile(ref Socket lake_s, string path, string tag) {
+int tagFile(ref Socket lake_s, string path, string[] tags) {
+    import core.thread.osthread: Thread;
+    import core.time: dur;
 
     auto absolute_path = getAbsolutePath(path);
 
-    debug {
-        import std.stdio: writeln;
-        writeln("Tagging file " ~ absolute_path ~ " with tag " ~ tag);
+    int rc = 0;
+
+    foreach(tag; tags) {
+        debug {
+            import std.stdio: writeln;
+            writeln("Tagging file " ~ absolute_path ~ " with tag " ~ tag);
+        }
+
+        // TODO: actually handle RC. mostly ignored and difficult to be zero anyways rn
+        rc = sendMessage(lake_s, _LAKE_TAG_FILE, absolute_path, tag);
+
+        Thread.sleep(dur!("msecs")(10));
     }
 
-    return sendMessage(lake_s, _LAKE_TAG_FILE, absolute_path, tag);
+    return rc;
 }
 
 int removeFile(ref Socket lake_s, string path) {

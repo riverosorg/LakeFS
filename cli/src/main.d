@@ -30,6 +30,10 @@ int main(string[] args) {
         return 1;
     }
 
+    lakefs_socket.setOption(SocketOptionLevel.SOCKET, SocketOption.TCP_NODELAY, 1);
+
+    scope(exit) lakefs_socket.close();
+
     // TODO: Cases can be done via metaprogramming
     if (any!"a == \"add\""(args)) {
         if (args.length < 3) {
@@ -45,7 +49,7 @@ int main(string[] args) {
             return 1;
         }
 
-        return tagFile(lakefs_socket, args[2], args[3]);
+        return tagFile(lakefs_socket, args[2], args[3 .. $]);
    
     } else if (any!"a == \"default\""(args)) {
         if (args.length < 3) {
