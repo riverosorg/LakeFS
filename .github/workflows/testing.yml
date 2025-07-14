@@ -8,7 +8,7 @@ on: [ push, pull_request ]
 
 jobs:
   unit_test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -17,6 +17,8 @@ jobs:
           nix_path: nixpkgs=channel:nixos-unstable
       - name: Setup Meson
         run: nix develop --command make setup
+      - name: Build Programs 
+        run: nix develop --command make build
       - name: Run Tests
         run: nix develop --command make local-test
       - name: Publish Results
