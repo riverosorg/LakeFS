@@ -59,8 +59,14 @@ OPTIONS
 mount_point
     Folder to mount the LakeFS instance under.
 
+-f
+    Run program in foreground rather than as a daemon.
+
 -c, --config
-    Set the config file location. Default is /etc/lakefs.conf
+    Set the config file location. Default is /etc/lakefs.conf.
+
+--tempdb
+    Use an in-memory database rather than a file db.
 
 -v, --version
     Display version information and exit.

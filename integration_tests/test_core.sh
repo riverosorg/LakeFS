@@ -25,6 +25,8 @@ function cleanup_and_exit {
     rm -rf $test_dir
     rm /tmp/lakefs.sock
 
+    pkill lakefs
+
     exit $1
 }
 
@@ -35,6 +37,6 @@ mkdir -p $lake_dir
 # start up the FS
 fusermount -u $lake_dir
 
-$fs --tempdb $lake_dir &
+$fs --tempdb $lake_dir
 
 sleep 0.2
