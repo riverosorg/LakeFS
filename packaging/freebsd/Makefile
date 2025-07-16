@@ -5,7 +5,7 @@
 # For local use to make it easy to install/replace/deinstall lakefs
 
 PORTNAME=LakeFS
-DISTVERSION=0.2.0
+DISTVERSION=0.2.1
 CATEGORIES=sysutils
 MASTER_SITES=https://github.com/riverosorg/LakeFS/archive/refs/tags/
 DISTNAME=v${DISTVERSION}
@@ -40,10 +40,8 @@ WRKSRC=${WRKDIR}/${PORTNAME}-${DISTVERSION}
 do-configure:
 	meson setup ${WRKSRC} ${WRKSRC}/${MESON_BUILD_DIR}
 
-post-stage:
-	cd ${WRKSRC}; make docs
-	
-	cp ${WRKSRC}/docs/man1/* ${STAGEDIR}/${PREFIX}/man/man1/
+post-stage:	
+	cp ${WRKSRC}/${MESON_BUILD_DIR}/docs/*.1.gz ${STAGEDIR}/${PREFIX}/man/man1/
 
 	cp ${WRKSRC}/lakefs.conf ${STAGEDIR}/${PREFIX}/etc/lakefs.conf.sample
 

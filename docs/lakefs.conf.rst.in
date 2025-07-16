@@ -14,7 +14,7 @@ lakefs.conf
 
 :Author: Caleb Depatie
 :Copyright: CC-BY-4.0
-:Version: 0.2.0
+:Version: @version@
 :Manual section: 5
 :Manual group: LakeFS
 

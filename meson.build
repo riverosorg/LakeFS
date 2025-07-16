@@ -6,7 +6,7 @@
 project(
     'LakeFS', 
     ['cpp', 'c', 'd'],
-    version: '0.2.0',
+    version: '0.2.1',
     license: 'BSD-3-Clause'
 )
 
@@ -18,6 +18,10 @@ add_project_arguments(['-w'], language : 'd')
 
 subdir('filesystem')
 subdir('cli')
+
+if get_option('documentation')
+    subdir('docs')
+endif
 
 # The I testing should be loaded last to ensure that all other subprojects are built first
 subdir('integration_tests')

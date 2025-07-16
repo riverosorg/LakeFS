@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
+#include <cstring>
 #include <iostream>
 #include <thread>
 #include <unordered_map>
@@ -11,6 +12,10 @@
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/basic_file_sink.h>
+
+extern "C" { 
+    #include <unistd.h> 
+}
 
 #include "sqlite/sqlite3.h"
 
@@ -65,6 +70,10 @@ auto main(int argc, char** argv) -> int {
         .default_value("/etc/lakefs.conf")
         .help("Manually set a config location rather than using /etc/lakefs.conf");
 
+    program.add_argument("-f")
+        .flag()
+        .help("Run program in foreground rather than as a daemon");
+
     try {
 		program.parse_args(argc, argv);
 
@@ -96,15 +105,14 @@ auto main(int argc, char** argv) -> int {
     
     // Fuse gets initiated like a program and needs its own args
     fuse_args args = FUSE_ARGS_INIT(0, nullptr);
-    
-    // run in foreground
-    fuse_opt_add_arg(&args, "-f");
-    fuse_opt_add_arg(&args, "-d");
-    // TODO: We rely on foreground running for our control thread.
-    // We may want to fork our own process and run in the background
-    // Giving the caller behaviour expected of launching a
 
-    // 
+    // Do not fork fusemain on launch
+    fuse_opt_add_arg(&args, "-f");
+
+    // Debug info
+    fuse_opt_add_arg(&args, "-d");
+
+    // Set FS permissions to default
     fuse_opt_add_arg(&args, "-odefault_permissions");
 
     // mount point
@@ -125,6 +133,19 @@ auto main(int argc, char** argv) -> int {
     if (rc != SQLITE_OK) {
         spdlog::critical("Failed to initialize SQLite3: {0}", rc);
         return 1;
+    }
+
+    const auto is_daemon = !program.get<bool>("-f");
+
+    if (is_daemon) {
+        spdlog::trace("Launching as daemon");
+
+        // Forks program and runs in background
+        const auto rc = daemon(1, 1);
+
+        if (rc < 0) {
+            spdlog::critical("Error starting daemon: %s", strerror(errno));
+        }
     }
 
     // Initialize the control server
