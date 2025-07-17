@@ -77,5 +77,4 @@ if [ $(echo "$results" | xargs) != "1" ]; then
     cleanup_and_exit 1
 fi
 
-
 cleanup_and_exit 0
