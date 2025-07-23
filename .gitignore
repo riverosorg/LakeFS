@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 Caleb Depatie
+# SPDX-FileCopyrightText: 2024-2025 Caleb Depatie
 #
 # SPDX-License-Identifier: 0BSD
 
@@ -13,3 +13,4 @@ docs/man1
 .nfs.*
 .cache/
 work/
+filesystem/target

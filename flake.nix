@@ -24,11 +24,10 @@
             ninja
             reuse
             dmd
+            rustup
             docutils
 
-            argparse
             fuse
-            spdlog
           ];
 
           pkg_meta = with pkgs.lib; {
@@ -75,6 +74,12 @@
           devShells.default = pkgs.mkShell {
             packages = build_pkgs;
           };
+
+          # Required tat to get rust to cross compile
+          shellHook = ''
+            rustup default stable
+            rustup target add aarch64-unknown-none
+          '';
         }
       );
 }

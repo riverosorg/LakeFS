@@ -5,18 +5,15 @@
 
 project(
     'LakeFS', 
-    ['cpp', 'c', 'd'],
-    version: '0.2.1',
+    ['rust', 'c', 'd'],
+    version: '0.3.0',
     license: 'BSD-3-Clause'
 )
-
-add_project_arguments(['-w', '-std=c++23'], language : 'cpp')
 
 add_project_arguments(['-w'], language : 'd')
 
 # loading in individual subprojects
 
-subdir('filesystem')
 subdir('cli')
 
 if get_option('documentation')

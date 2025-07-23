@@ -12,9 +12,15 @@ all: build
 setup:
 	meson setup $(BUILD_DIR)
 
-.PHONY: build
-build:
+.PHONY: build 
+build: build-fs 
 	meson compile -C $(BUILD_DIR)	
+
+.PHONY: build-fs
+build-fs:
+	cd filesystem && cargo build
+	mkdir -p $(BUILD_DIR)/filesystem
+	mv filesystem/target/debug/lakefs $(BUILD_DIR)/filesystem
 
 .PHONY: install
 install:
