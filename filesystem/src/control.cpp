@@ -30,9 +30,9 @@ void control_server() {
     }
 
     // Bind the socket
-    struct sockaddr_un addr;
+    struct sockaddr_un addr = {};
     addr.sun_family = AF_UNIX;
-    addr.sun_len = 0;
+
     strncpy(addr.sun_path, LAKE_SOCKET_PATH, sizeof(addr.sun_path) - 1);
 
     if (bind(server_fd, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
