@@ -5,6 +5,7 @@
 
 #include "parser.hpp"
 
+#include <exception>
 #include <sstream>
 #include <memory>
 
@@ -157,7 +158,6 @@ std::shared_ptr<AstNode> parse(std::string expression) {
 
         // TODO: manipulating an iterator like this (deleting elements) is undefined behaviour
         (*rpn_iter)->assembleAST(&rpn, &rpn_iter);
-        
         rpn_iter += 1;
     }
 

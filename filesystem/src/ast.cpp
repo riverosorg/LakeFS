@@ -1,7 +1,11 @@
 // SPDX-FileCopyrightText: 2024 Conner Tenn
-// SPDX-FileCopyrightText: 2024 Caleb Depatie
+// SPDX-FileCopyrightText: 2024-2025 Caleb Depatie
 //
 // SPDX-License-Identifier: BSD-3-Clause
+
+#include <cassert>
+#include <iterator>
+#include <spdlog/spdlog.h>
 
 #include "ast.hpp"
 
@@ -52,7 +56,17 @@ std::string BinaryOperator::str() const {
     return "BinaryOperator{" + left_str + "," + right_str + "}";
 }
 
-void BinaryOperator::assembleAST(std::vector<std::shared_ptr<AstNode>>* rpn, std::vector<std::shared_ptr<AstNode>>::iterator *rpn_iter) {
+// TODO: I cant remember why these are raw pointers but they should be smart
+void BinaryOperator::assembleAST(std::vector<std::shared_ptr<AstNode>>* rpn, std::vector<std::shared_ptr<AstNode>>::iterator* rpn_iter) {
+    assert(rpn != nullptr);
+    assert(rpn_iter != nullptr);
+    
+    // Check that memory access will be SAFE
+    if (std::distance(rpn->begin(), *rpn_iter) < 2) {
+        spdlog::error("Incorrect AST provided!"); // TODO: Error handling should be better, filter up for more context
+        return; // PANIC
+    }
+    
     //Collect the arguments
     this->left_node = *((*rpn_iter)-2);
     this->right_node = *((*rpn_iter)-1);
@@ -81,6 +95,15 @@ std::string UnaryOperator::str() const {
 }
 
 void UnaryOperator::assembleAST(std::vector<std::shared_ptr<AstNode>>* rpn, std::vector<std::shared_ptr<AstNode>>::iterator *rpn_iter) {
+    assert(rpn != nullptr);
+    assert(rpn_iter != nullptr);
+
+    // Check that memory access will be SAFE
+    if (std::distance(rpn->begin(), *rpn_iter) < 1) {
+        spdlog::error("Incorrect AST provided!"); // TODO: Error handling should be better, filter up for more context
+        return; // PANIC
+    }
+    
     //Collect the arguments
     this->node = *((*rpn_iter)-1);
 

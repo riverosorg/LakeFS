@@ -7,15 +7,15 @@
 source integration_tests/test_core.sh
 
 # Issue #34 :: Exit gracefully with an incorrect query
-results = $(ls $lakfs_dir/'(default & &)')
+results = $(ls $lake_dir/'((default | not_default) & )')
+rc = $?
 
-if [ $? != 1 ]; then
+if [ $rc != 1 ]; then
     echo "Error: lakefs not responding correctly with faulty command"
     echo "Expected: 1"
-    echo "Got: $results"
-    echo "Dir: $(ls -A $lake_dir/'(not_default)')"
+    echo "Got: $rc"
 
-    # cleanup_and_exit 1
+    cleanup_and_exit 1
 fi
 
 # Issue #34 :: NOT operator (!) should be able to be used without a subquery

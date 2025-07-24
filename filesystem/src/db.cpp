@@ -96,7 +96,6 @@ std::string db_query_helper(const std::shared_ptr<AstNode> ast) {
         query_part += db_query_helper(union_op->left_node);
         query_part += " UNION ";
         query_part += db_query_helper(union_op->right_node);
-        // query_part += ")";
     
     } else if (auto intersection_op = std::dynamic_pointer_cast<Intersection>(ast)) {
         query_part += "IN (";
@@ -110,11 +109,6 @@ std::string db_query_helper(const std::shared_ptr<AstNode> ast) {
     } else if (auto negation_op = std::dynamic_pointer_cast<Negation>(ast)) {
         query_part += "NOT IN (";
         query_part += db_query_helper(negation_op->node);
-        
-        // Should be:
-//         WHERE id NOT IN (
-//     SELECT data_id FROM tags WHERE tag_value = 'not_default'
-// );
     
     } else {
         throw std::runtime_error("Unknown AST type");

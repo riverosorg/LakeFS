@@ -144,7 +144,7 @@ auto main(int argc, char** argv) -> int {
         const auto rc = daemon(1, 1);
 
         if (rc < 0) {
-            spdlog::critical("Error starting daemon: %s", strerror(errno));
+            spdlog::critical("Error starting daemon: {0}", strerror(errno));
         }
     }
 
