@@ -57,4 +57,10 @@ TEST_CASE("Basic Tag Retrieval", "[parsing][query]") {
         
         REQUIRE(query == expected_query);
     }
+
+    SECTION("Issue #34: Potential Runtime error") {
+        ast = parse("((tag1 | tag2) &)");
+
+        REQUIRE_NOTHROW(db_create_query(ast));
+    }
 }
