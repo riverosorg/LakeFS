@@ -11,8 +11,8 @@ conf_data = configuration_data()
 conf_data.set('version', project_version)
 
 configure_file(
-    input : 'src/config.h.in',
-    output : 'config.h',
+    input : 'src/metadata.h.in',
+    output : 'metadata.h',
     configuration : conf_data
 )
 
@@ -20,6 +20,7 @@ sources = [
     'src/sqlite/sqlite3.c',
     'src/fs.cpp',
     'src/db.cpp',
+    'src/config.cpp',
     'src/control.cpp',
     'src/query_lang/ast.cpp',
     'src/query_lang/parser.cpp'
@@ -58,8 +59,9 @@ executable(
 )
 
 tests_dict = {
-    'sqlite' : ['tests/vendors/sqlite.cpp', sources],
-    'parsing' : ['tests/parsing.cpp', sources],
+    'SQLite' : ['tests/vendors/sqlite.cpp', sources],
+    'Parsing' : ['tests/parsing.cpp', sources],
+    'Config Reading' : ['tests/config.cpp', sources],
     'SQL generation' : ['tests/query_generation.cpp', sources],
 }
 

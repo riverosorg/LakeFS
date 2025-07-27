@@ -6,7 +6,6 @@
 #include <iostream>
 #include <thread>
 #include <unordered_map>
-#include <fstream>
 
 #include <argparse/argparse.hpp>
 
@@ -22,9 +21,8 @@ extern "C" {
 #include "db.hpp"
 #include "fs.hpp"
 #include "control.hpp"
-#include "config.h"
-
-auto etc_conf_reader(std::string path) -> std::unordered_map<std::string, std::string>;
+#include "config.hpp"
+#include "metadata.h"
 
 static const struct fuse_operations operations = {
     .getattr  = lake_getattr,
@@ -156,35 +154,4 @@ auto main(int argc, char** argv) -> int {
     fuse_opt_free_args(&args);
 
     return ret;
-}
-
-auto etc_conf_reader(std::string path) -> std::unordered_map<std::string, std::string> {
-    std::unordered_map<std::string, std::string> config;
-
-    std::ifstream file(path);
-
-    if (!file.is_open()) {
-        spdlog::error("Failed to open {0}", path);
-        return config;
-    }
-
-    std::string line;
-    while (std::getline(file, line)) {
-        if (line[0] == '#') {
-            continue;
-        }
-
-        std::string key;
-        std::string value;
-
-        std::istringstream line_stream(line);
-        std::getline(line_stream, key, '=');
-        std::getline(line_stream, value);
-
-        config[key] = value;
-
-        spdlog::debug("Config line: {0}={1}", key, value);
-    }
-
-    return config;
 }
