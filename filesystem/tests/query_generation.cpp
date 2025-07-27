@@ -5,8 +5,8 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
-#include "ast.hpp"
-#include "parser.hpp"
+#include "query_lang/ast.hpp"
+#include "query_lang/parser.hpp"
 #include "db.hpp"
 
 // TODO: testing direct string queries like this will be fragile. A SQL AST

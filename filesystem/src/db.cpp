@@ -8,7 +8,7 @@
 #include <spdlog/spdlog.h>
 #include "sqlite/sqlite3.h"
 #include "db.hpp"
-#include "parser.hpp"
+#include "query_lang/parser.hpp"
 
 std::string default_query = "default";
 

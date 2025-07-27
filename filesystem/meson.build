@@ -21,8 +21,8 @@ sources = [
     'src/fs.cpp',
     'src/db.cpp',
     'src/control.cpp',
-    'src/ast.cpp',
-    'src/parser.cpp'
+    'src/query_lang/ast.cpp',
+    'src/query_lang/parser.cpp'
 ]
 
 add_project_arguments(['-DSPDLOG_FMT_EXTERNAL'], language : 'cpp')

@@ -17,8 +17,8 @@ extern "C" {
 #include <string>
 #include <spdlog/spdlog.h>
 
-#include "ast.hpp"
-#include "parser.hpp"
+#include "query_lang/ast.hpp"
+#include "query_lang/parser.hpp"
 #include "fs.hpp"
 #include "db.hpp"
 #include "control.hpp"

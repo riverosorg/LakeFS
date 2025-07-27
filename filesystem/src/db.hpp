@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "ast.hpp"
+#include "query_lang/ast.hpp"
 
 int db_init(const std::string db_file_path);
 int db_tmp_init();
