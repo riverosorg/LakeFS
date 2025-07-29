@@ -12,6 +12,8 @@ int db_init(const std::string db_file_path);
 int db_tmp_init();
 int db_close();
 
+int db_create_backup(const std::string backup_path);
+
 int db_add_file(const std::string path);
 int db_tag_file(const std::string path, const std::string tag);
 int db_remove_file(const std::string path);

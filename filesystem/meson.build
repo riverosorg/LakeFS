@@ -44,6 +44,9 @@ depends += cpp.find_library('spdlog')
 depends += cpp.find_library('fmt')
 depends += dependency('threads')
 
+# Needed to add timer
+add_project_link_arguments('-lrt', language : 'cpp')
+
 includes = ['src/', '/usr/local/include']
 
 if fuse3_dep.found()

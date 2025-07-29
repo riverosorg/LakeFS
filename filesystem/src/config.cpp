@@ -4,12 +4,13 @@
 
 #include "config.hpp"
 
+#include <__chrono/duration.h>
 #include <spdlog/spdlog.h>
 #include <fstream>
 #include <unordered_map>
 #include <utility>
 
-auto etc_conf_reader(std::string path) -> std::unordered_map<std::string, std::string> {
+auto etc_conf_reader(const std::string path) -> std::unordered_map<std::string, std::string> {
     std::unordered_map<std::string, std::string> config;
 
     std::ifstream file(path);
@@ -35,7 +36,7 @@ auto etc_conf_reader(std::string path) -> std::unordered_map<std::string, std::s
     return config;
 }
 
-auto parse_config_line(std::string line) -> std::pair<std::string, std::string> {
+auto parse_config_line(const std::string line) -> std::pair<std::string, std::string> {
     std::string key;
     std::string value;
 
@@ -45,3 +46,36 @@ auto parse_config_line(std::string line) -> std::pair<std::string, std::string> 
 
     return std::make_pair(key, value);
 }
+
+auto parse_interval_value(const std::string interval_string) -> std::chrono::seconds {
+    using namespace std::chrono;
+
+    seconds interval;
+
+    const auto space_loc = interval_string.find_first_of(" ");
+    const auto interval_length = std::stoi(interval_string.substr(0, space_loc));
+    const auto interval_type = interval_string.substr(space_loc+1);
+
+    if (interval_type == "days") {
+        auto day_interval = days(interval_length);
+        interval = duration_cast<seconds>(day_interval);
+
+    } else if (interval_type == "hours") {
+        auto hour_interval = hours(interval_length);
+        interval = duration_cast<seconds>(hour_interval);
+
+    } else if (interval_type == "weeks") {
+        auto week_interval = weeks(interval_length);
+        interval = duration_cast<seconds>(week_interval);
+
+    } else if (interval_type == "months") {
+        auto month_interval = months(interval_length);
+        interval = duration_cast<seconds>(month_interval);
+
+    } else {
+        spdlog::critical("Unknown interval type: {0}", interval_type);
+        // TODO: Pass up an error value
+    }
+
+    return interval;
+}  
