@@ -8,7 +8,7 @@
 #include <spdlog/spdlog.h>
 #include "sqlite/sqlite3.h"
 #include "db.hpp"
-#include "parser.hpp"
+#include "query_lang/parser.hpp"
 
 std::string default_query = "default";
 
@@ -49,6 +49,38 @@ int db_close() {
     int rc = sqlite3_close(db);
 
     return rc;
+}
+
+int db_create_backup(const std::string backup_path) {
+    sqlite3* backup_db;
+    if (sqlite3_open(backup_path.c_str(), &backup_db) != SQLITE_OK) {
+        spdlog::error("Could not open new db at {0} for backup", backup_path);
+        return -1;
+    }
+
+    sqlite3_backup* backup = NULL;
+
+    // Will fail with NULL until we can aquire the read lock
+    while (backup == NULL) {
+        backup = sqlite3_backup_init(backup_db, "main", db, "main");
+
+        // spdlog::error("Could not initialize backup: {0}", sqlite3_errmsg(backup_db));
+    }
+
+    auto remaining_pages = 1;
+
+    while (remaining_pages > 0) {
+        sqlite3_backup_step(backup, remaining_pages);
+
+        remaining_pages = sqlite3_backup_remaining(backup);
+        
+        spdlog::debug("Remaining pages to backup: {0}", remaining_pages);
+    }
+
+    sqlite3_backup_finish(backup);
+    sqlite3_close(backup_db);
+
+    return 0;
 }
 
 int db_add_file(const std::string path) {
