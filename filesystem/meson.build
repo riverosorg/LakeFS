@@ -20,6 +20,7 @@ sources = [
     'src/sqlite/sqlite3.c',
     'src/fs.cpp',
     'src/db.cpp',
+    'src/backups.cpp',
     'src/config.cpp',
     'src/control.cpp',
     'src/query_lang/ast.cpp',
