@@ -14,3 +14,7 @@ docs/man1
 .cache/
 work/
 *.core
+
+subprojects/packagecache/*
+subprojects/sqlite-*
+subprojects/Catch2-*

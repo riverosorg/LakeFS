@@ -6,7 +6,7 @@
 #include <filesystem>
 
 #include <spdlog/spdlog.h>
-#include "sqlite/sqlite3.h"
+#include <sqlite3.h>
 #include "db.hpp"
 #include "query_lang/parser.hpp"
 

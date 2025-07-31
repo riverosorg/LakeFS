@@ -11,11 +11,11 @@
 #include <cstdio>
 #include <unistd.h>
 #include <spdlog/spdlog.h>
+#include <sqlite3.h>
 
 #include "command_interface.h"
 #include "control.hpp"
 #include "db.hpp"
-#include "sqlite/sqlite3.h"
 
 std::string mount_point;
 

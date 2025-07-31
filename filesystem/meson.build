@@ -17,7 +17,6 @@ configure_file(
 )
 
 sources = [
-    'src/sqlite/sqlite3.c',
     'src/fs.cpp',
     'src/db.cpp',
     'src/backups.cpp',
@@ -37,7 +36,6 @@ fuse3_dep = cpp.find_library('fuse3', required: false)
 if not (fuse_dep.found() or fuse3_dep.found())
     error('Fuse dependency not found')
 endif
-
 depends += fuse3_dep
 depends += fuse_dep
 
@@ -54,6 +52,10 @@ if fuse3_dep.found()
     includes += '/usr/local/include/fuse3'
 endif
 
+sqlite3_proj = subproject('sqlite3')
+
+depends += sqlite3_proj.get_variable('sqlite3_dep')
+
 executable(
     'lakefs',
     sources: ['src/main.cpp', sources],
@@ -68,6 +70,10 @@ tests_dict = {
     'Config Reading' : ['tests/config.cpp', sources],
     'SQL generation' : ['tests/query_generation.cpp', sources],
 }
+
+catch2_proj = subproject('catch2')
+
+depends += catch2_proj.get_variable('catch2_with_main_dep')
 
 foreach name, src : tests_dict
     exe = executable(

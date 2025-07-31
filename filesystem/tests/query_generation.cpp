@@ -1,9 +1,9 @@
-// SPDX-FileCopyrightText: 2024 Caleb Depatie
+// SPDX-FileCopyrightText: 2024-2025 Caleb Depatie
 //
 // SPDX-License-Identifier: 0BSD
 
 #define CATCH_CONFIG_MAIN
-#include "catch.hpp"
+#include <catch2/catch_all.hpp>
 
 #include "query_lang/ast.hpp"
 #include "query_lang/parser.hpp"
