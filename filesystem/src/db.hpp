@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+#include <optional>
 
 #include "query_lang/ast.hpp"
 
@@ -26,4 +27,4 @@ std::vector<std::string> db_run_query(const std::shared_ptr<AstNode> ast);
 std::vector<std::string> db_run_default_query();
 
 // Exposed for testing
-std::string db_create_query(const std::shared_ptr<AstNode> ast_list);
+std::optional<std::string> db_create_query(const std::shared_ptr<AstNode> ast_list);

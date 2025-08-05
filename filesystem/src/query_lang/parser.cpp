@@ -1,11 +1,10 @@
 // SPDX-FileCopyrightText: 2024 Conner Tenn
-// SPDX-FileCopyrightText: 2024 Caleb Depatie
+// SPDX-FileCopyrightText: 2024-2025 Caleb Depatie
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
 #include "parser.hpp"
 
-#include <exception>
 #include <sstream>
 #include <memory>
 
@@ -75,9 +74,8 @@ std::vector<Token> tokenize(std::string expression) {
                 break;
 
             default:
-                std::ostringstream msg;
-                msg << "Unexpected Character " << character;
-                throw std::runtime_error(msg.str());
+                spdlog::error("Unexpected character: {0}", character);
+
                 break;
             }
         }

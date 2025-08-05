@@ -14,7 +14,7 @@
 
 TEST_CASE("Basic Tag Retrieval", "[parsing][query]") {
     std::shared_ptr<AstNode> ast;
-    std::string query;
+    std::optional<std::string> query;
     std::string expected_query;
 
     SECTION("Single Tag Retrieval") {
@@ -24,7 +24,8 @@ TEST_CASE("Basic Tag Retrieval", "[parsing][query]") {
             "SELECT path FROM data WHERE id IN "
             "(SELECT data_id FROM tags WHERE tag_value = 'tag');";
         
-        REQUIRE(query == expected_query);
+        REQUIRE(query.has_value());
+        REQUIRE(query.value() == expected_query);
     }
 
     SECTION("Negation") {
@@ -34,7 +35,8 @@ TEST_CASE("Basic Tag Retrieval", "[parsing][query]") {
             "SELECT path FROM data WHERE id NOT IN "
             "(SELECT data_id FROM tags WHERE tag_value = 'tag');";
         
-        REQUIRE(query == expected_query);
+        REQUIRE(query.has_value());
+        REQUIRE(query.value() == expected_query);
     }
 
     SECTION("Union Retrieval") {
@@ -43,7 +45,9 @@ TEST_CASE("Basic Tag Retrieval", "[parsing][query]") {
         expected_query = 
             "SELECT path FROM data WHERE id IN "
             "(SELECT data_id FROM tags WHERE tag_value = 'tag1' UNION SELECT data_id FROM tags WHERE tag_value = 'tag2');";
-        REQUIRE(query == expected_query);
+        
+        REQUIRE(query.has_value());
+        REQUIRE(query.value() == expected_query);
     }
 
     SECTION("Intersection Retrieval") {
@@ -55,12 +59,13 @@ TEST_CASE("Basic Tag Retrieval", "[parsing][query]") {
             "AND id IN "
             "(SELECT data_id FROM tags WHERE tag_value = 'tag2');";
         
-        REQUIRE(query == expected_query);
+        REQUIRE(query.has_value());
+        REQUIRE(query.value() == expected_query);
     }
 
     SECTION("Issue #34: Potential Runtime error") {
         ast = parse("((tag1 | tag2) &)");
 
-        REQUIRE_NOTHROW(db_create_query(ast));
+        REQUIRE_FALSE(db_create_query(ast).has_value());
     }
 }

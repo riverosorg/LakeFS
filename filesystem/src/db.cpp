@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
+#include <iterator>
+#include <optional>
 #include <string>
 #include <filesystem>
 
@@ -115,7 +117,7 @@ int db_relink_file(const std::string path, const std::string new_path) {
 }
 
 // Recursively generate a SQL query string for WHERE clause of the standard query
-std::string db_query_helper(const std::shared_ptr<AstNode> ast) {
+std::optional<std::string> db_query_helper(const std::shared_ptr<AstNode> ast) {
     std::string query_part;
 
     // Determine AST type
@@ -125,32 +127,59 @@ std::string db_query_helper(const std::shared_ptr<AstNode> ast) {
     
     } else if (auto union_op = std::dynamic_pointer_cast<Union>(ast)) {
         query_part += "IN (";
-        query_part += db_query_helper(union_op->left_node);
+        auto tmp_part = db_query_helper(union_op->left_node);
+
+        if (!tmp_part.has_value()) {
+            return tmp_part;
+        }
+
+        query_part += tmp_part.value();
         query_part += " UNION ";
-        query_part += db_query_helper(union_op->right_node);
+        tmp_part = db_query_helper(union_op->right_node);
+
+        if (!tmp_part.has_value()) {
+            return tmp_part;
+        }
+
+        query_part += tmp_part.value();
     
     } else if (auto intersection_op = std::dynamic_pointer_cast<Intersection>(ast)) {
         query_part += "IN (";
-        
-        query_part += db_query_helper(intersection_op->left_node);
+        auto tmp_part = db_query_helper(intersection_op->left_node);
 
+        if (!tmp_part.has_value()) {
+            return tmp_part;
+        }
+
+        query_part += tmp_part.value();
         query_part += ") AND id IN (";
+        tmp_part = db_query_helper(intersection_op->right_node);
 
-        query_part += db_query_helper(intersection_op->right_node);
+        if (!tmp_part.has_value()) {
+            return tmp_part;
+        }
+
+        query_part += tmp_part.value();
 
     } else if (auto negation_op = std::dynamic_pointer_cast<Negation>(ast)) {
         query_part += "NOT IN (";
-        query_part += db_query_helper(negation_op->node);
+        auto tmp_part = db_query_helper(negation_op->node);
+
+        if (!tmp_part.has_value()) {
+            return tmp_part;
+        }
+
+        query_part += tmp_part.value();
     
     } else {
-        throw std::runtime_error("Unknown AST type");
+        return std::optional<std::string>();
     }
      
     return query_part;
 }
 
 // Creates a syntactically valid SQLite3 query from an ASTNode
-std::string db_create_query(const std::shared_ptr<AstNode> ast) {
+std::optional<std::string> db_create_query(const std::shared_ptr<AstNode> ast) {
     std::string query;
 
     // Tag selection preamble
@@ -164,7 +193,13 @@ std::string db_create_query(const std::shared_ptr<AstNode> ast) {
         query += "= '" + tag->name + "'";
     
     } else {
-        query += db_query_helper(ast);
+        const auto query_part = db_query_helper(ast);
+
+        if (!query_part.has_value()) {
+            return std::optional<std::string>();
+        }
+
+        query += query_part.value();
     }
 
     query += ");";
@@ -186,12 +221,16 @@ std::vector<std::string> db_run_default_query() {
 std::vector<std::string> db_run_query(const std::shared_ptr<AstNode> ast) {
     std::vector<std::string> results;
 
-    std::string query = db_create_query(ast);
+    auto query = db_create_query(ast);
 
-    spdlog::debug("Running Query: \n{0}\n", query);
+    if (!query.has_value()) {
+        return results;
+    }
+
+    spdlog::debug("Running Query: \n{0}\n", query.value());
 
     sqlite3_stmt *stmt;
-    sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr);
+    sqlite3_prepare_v2(db, query.value().c_str(), -1, &stmt, nullptr);
 
     while (sqlite3_step(stmt) == SQLITE_ROW) {
         results.push_back(std::string(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0))));
