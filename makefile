@@ -4,9 +4,22 @@
 
 # Here to make things easier when unfamiliar with Meson
 
-BUILD_DIR := build
+BUILD_DIR ?= build
 
-all: build
+.PHONY: help
+help: 
+	@echo "make [BUILD_DIR=] <COMMAND>"
+	@echo ""
+	@echo "Optional Arguments:"
+	@echo "  BUILD_DIR - Sets a custom location for the meson build directory. Default is 'build'"
+	@echo ""
+	@echo "Commands:"
+	@echo "  setup      - Creates the meson build directoy. Must be run once before being able to build the project"
+	@echo "  build      - Builds the project"
+	@echo "  install    - Runs mesons install command. Will overwrite /etc/lakefs.conf"
+	@echo "  test       - Runs all project tests"
+	@echo "  local-test - Runs project tests, but uses unshare to create a seperate cgroup for lakefs. Helps mitigate issues while testing due to fuse locking the filesystem during a failure in lakefs"
+	@echo "  clean      - Cleans mesons build directory"
 
 .PHONY: setup
 setup:
