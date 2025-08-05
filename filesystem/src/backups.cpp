@@ -9,8 +9,6 @@
 #include <optional>
 
 #include <pthread.h>
-#include <sys/_clock_id.h>
-#include <sys/_pthreadtypes.h>
 #include <sys/signal.h>
 #include <time.h>
 

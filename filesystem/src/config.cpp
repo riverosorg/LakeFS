@@ -4,7 +4,6 @@
 
 #include "config.hpp"
 
-#include <__chrono/duration.h>
 #include <spdlog/spdlog.h>
 #include <fstream>
 #include <unordered_map>
