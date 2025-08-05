@@ -17,8 +17,6 @@
 #include "control.hpp"
 #include "db.hpp"
 
-std::string mount_point;
-
 // Runs the socket server to control the FS
 void control_server() {
     // Create the socket

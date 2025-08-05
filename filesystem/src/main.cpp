@@ -7,6 +7,7 @@
 #include <iostream>
 #include <thread>
 #include <unordered_map>
+#include <filesystem>
 
 #include <argparse/argparse.hpp>
 
@@ -84,17 +85,21 @@ auto main(int argc, char** argv) -> int {
 	}
 
     // Get our configuration
-    const auto config_path = program.get<std::string>("--config");
+    const auto config_path = std::filesystem::absolute(
+        program.get<std::string>("--config")
+    );
 
     auto config = etc_conf_reader(config_path);
 
     if (config.empty() && !program.get<bool>("--tempdb")) {
-        spdlog::error("Failed to read configuration file at {0}", config_path);
+        spdlog::error("Failed to read configuration file at {0}", config_path.string());
         return 1;
     }
 
     // Extract mount point
-    mount_point = program.get<std::string>("mount_point");
+    const auto mount_point = std::filesystem::absolute(
+        program.get<std::string>("mount_point")
+    );
 
     // Initialize file logger
     // auto file_logger = spdlog::basic_logger_mt("file_logger", "lakefs.log");
@@ -116,7 +121,7 @@ auto main(int argc, char** argv) -> int {
     fuse_opt_add_arg(&args, "-odefault_permissions");
 
     // mount point
-    spdlog::info("Mounting at {0}", mount_point);
+    spdlog::info("Mounting at {0}", mount_point.string());
     fuse_opt_add_arg(&args, mount_point.c_str());
 
     // Initialize SQLLite
@@ -146,7 +151,7 @@ auto main(int argc, char** argv) -> int {
         spdlog::trace("Launching as daemon");
 
         // Forks program and runs in background
-        const auto rc = daemon(1, 1);
+        const auto rc = daemon(0, 1);
 
         if (rc < 0) {
             spdlog::critical("Error starting daemon: {0}", strerror(errno));
