@@ -37,6 +37,6 @@ mkdir -p $lake_dir
 # start up the FS
 fusermount -u $lake_dir
 
-$fs --tempdb $lake_dir
+$fs --tempdb -d $lake_dir
 
 sleep 0.2

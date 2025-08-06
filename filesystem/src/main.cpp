@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
+#include "spdlog/common.h"
 #include <cstring>
 #include <csignal>
 #include <iostream>
@@ -75,14 +76,20 @@ auto main(int argc, char** argv) -> int {
         .flag()
         .help("Run program in foreground rather than as a daemon");
 
+    program.add_argument("-d")
+        .flag()
+        .help("Output complete debug information while running");
+
     try {
 		program.parse_args(argc, argv);
 
 	} catch (const std::runtime_error& err) {
-		std::cerr << err.what() << std::endl;
-		std::cerr << program;
-		exit(1);
+        spdlog::critical("Error collecting arguments: {0}", err.what());
+
+		return 1;
 	}
+
+    const auto is_debug = program.get<bool>("-d");
 
     // Get our configuration
     const auto config_path = std::filesystem::absolute(
@@ -104,18 +111,24 @@ auto main(int argc, char** argv) -> int {
     // Initialize file logger
     // auto file_logger = spdlog::basic_logger_mt("file_logger", "lakefs.log");
     // spdlog::set_default_logger(file_logger);
-    spdlog::set_level(spdlog::level::trace);
 
-    spdlog::trace("Initializing LakeFS");
-    
     // Fuse gets initiated like a program and needs its own args
     fuse_args args = FUSE_ARGS_INIT(0, nullptr);
 
+    if (is_debug) {
+        spdlog::set_level(spdlog::level::trace);
+        fuse_opt_add_arg(&args, "-d");
+
+    } else {
+        const auto log_level = config["log_level"];
+
+        spdlog::set_level(spdlog::level::from_str(log_level));
+    }
+
+    spdlog::trace("Initializing LakeFS");
+
     // Do not fork fusemain on launch
     fuse_opt_add_arg(&args, "-f");
-
-    // Debug info
-    fuse_opt_add_arg(&args, "-d");
 
     // Set FS permissions to default
     fuse_opt_add_arg(&args, "-odefault_permissions");
