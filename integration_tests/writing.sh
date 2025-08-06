@@ -21,7 +21,7 @@ if [ "$results" != "test" ]; then
     echo "Expected: test"
     echo "Got: $results"
 
-    cleanup_and_exit 77 # TODO: Explicitely skipping the test as this is known broken and not a high priority
+    cleanup_and_exit 1
 fi
 
 cleanup_and_exit 0
