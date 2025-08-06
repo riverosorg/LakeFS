@@ -17,8 +17,8 @@ extern "C" {
 #include <string>
 #include <spdlog/spdlog.h>
 
-#include "ast.hpp"
-#include "parser.hpp"
+#include "query_lang/ast.hpp"
+#include "query_lang/parser.hpp"
 #include "fs.hpp"
 #include "db.hpp"
 #include "control.hpp"
@@ -81,7 +81,11 @@ int lake_readdir(
     if (path[strlen(path) - 1] == ')') {
         std::string query = extract_query(path);
 
-        files = db_run_query(parse(query));
+        try {
+            files = db_run_query(parse(query));
+        } catch (std::exception err) {
+            spdlog::error("Error while parsing: {0}", err.what());
+        }
 
     } else {
         files = db_run_default_query();
@@ -192,7 +196,13 @@ std::string reverse_query(const char* path) {
     } else {
         std::string query = extract_query(path);
 
-        query_files = db_run_query(parse(query));
+        try {
+            query_files = db_run_query(parse(query));
+        
+        } catch (std::exception err) {
+            spdlog::error("Error while parsing: {0}", err.what());
+            // todo: exit?
+        }
     }
 
     // Get the file path by comparing the file name to the query results

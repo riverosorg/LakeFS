@@ -11,18 +11,19 @@ conf_data = configuration_data()
 conf_data.set('version', project_version)
 
 configure_file(
-    input : 'src/config.h.in',
-    output : 'config.h',
+    input : 'src/metadata.h.in',
+    output : 'metadata.h',
     configuration : conf_data
 )
 
 sources = [
-    'src/sqlite/sqlite3.c',
     'src/fs.cpp',
     'src/db.cpp',
+    'src/backups.cpp',
+    'src/config.cpp',
     'src/control.cpp',
-    'src/ast.cpp',
-    'src/parser.cpp'
+    'src/query_lang/ast.cpp',
+    'src/query_lang/parser.cpp'
 ]
 
 add_project_arguments(['-DSPDLOG_FMT_EXTERNAL'], language : 'cpp')
@@ -35,7 +36,6 @@ fuse3_dep = cpp.find_library('fuse3', required: false)
 if not (fuse_dep.found() or fuse3_dep.found())
     error('Fuse dependency not found')
 endif
-
 depends += fuse3_dep
 depends += fuse_dep
 
@@ -43,11 +43,18 @@ depends += cpp.find_library('spdlog')
 depends += cpp.find_library('fmt')
 depends += dependency('threads')
 
+# Needed to add timer
+add_project_link_arguments('-lrt', language : 'cpp')
+
 includes = ['src/', '/usr/local/include']
 
 if fuse3_dep.found()
     includes += '/usr/local/include/fuse3'
 endif
+
+sqlite3_proj = subproject('sqlite3')
+
+depends += sqlite3_proj.get_variable('sqlite3_dep')
 
 executable(
     'lakefs',
@@ -58,10 +65,15 @@ executable(
 )
 
 tests_dict = {
-    'sqlite' : ['tests/vendors/sqlite.cpp', sources],
-    'parsing' : ['tests/parsing.cpp', sources],
+    'SQLite' : ['tests/vendors/sqlite.cpp', sources],
+    'Parsing' : ['tests/parsing.cpp', sources],
+    'Config Reading' : ['tests/config.cpp', sources],
     'SQL generation' : ['tests/query_generation.cpp', sources],
 }
+
+catch2_proj = subproject('catch2')
+
+depends += catch2_proj.get_variable('catch2_with_main_dep')
 
 foreach name, src : tests_dict
     exe = executable(

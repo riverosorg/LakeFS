@@ -25,7 +25,9 @@ LakeFS uses a key-value interface for system configuration.
 Each line of the file is a key-value pair separated by an equals sign and with no space between the equals and the key and value.
 
 **dir** - Path to where the Database is stored. Backups will also be saved here
-
+**max_backups** - The max number of automatic backups to keep
+**backup_interval** - The frequency of backups. A number followed by a period, IE "2 days" or "6 hours". Limited only to a "months", "weeks", "days", or "hours" period
+**log_level** - The stated level and above will all be logged. Possible values are trace, debug, info, warn, err, critical, and off
 
 SEE ALSO
 ========

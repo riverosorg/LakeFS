@@ -4,9 +4,9 @@
 // SPDX-License-Identifier: 0BSD
 
 #define CATCH_CONFIG_MAIN
-#include "catch.hpp"
+#include <catch2/catch_all.hpp>
 
-#include "parser.hpp"
+#include "query_lang/parser.hpp"
 
 TEST_CASE("Simple Token operators", "[parsing]") {
     REQUIRE(Token("abc123") == Token("abc123"));

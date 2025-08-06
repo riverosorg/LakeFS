@@ -8,7 +8,8 @@ tests_dict = {
     'Writing Files': 'writing.sh',
     'Deleting Files': 'deletion.sh',
     'Relinking Files': 'relinking.sh',
-    'Add multiple tags': 'multiple_tags.sh'
+    'Add multiple tags': 'multiple_tags.sh',
+    'Advanced Queries': 'adv_query.sh'
 }
 
 configure_file(

@@ -62,6 +62,9 @@ mount_point
 -f
     Run program in foreground rather than as a daemon.
 
+-d
+    Run in a debug mode, sets full logging regardless of set log level, turns on FUSE debug logging, and will keep logs in the console even when not running in the foreground
+
 -c, --config
     Set the config file location. Default is /etc/lakefs.conf.
 

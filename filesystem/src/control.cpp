@@ -11,13 +11,11 @@
 #include <cstdio>
 #include <unistd.h>
 #include <spdlog/spdlog.h>
+#include <sqlite3.h>
 
 #include "command_interface.h"
 #include "control.hpp"
 #include "db.hpp"
-#include "sqlite/sqlite3.h"
-
-std::string mount_point;
 
 // Runs the socket server to control the FS
 void control_server() {
@@ -30,8 +28,9 @@ void control_server() {
     }
 
     // Bind the socket
-    struct sockaddr_un addr;
+    struct sockaddr_un addr = {};
     addr.sun_family = AF_UNIX;
+
     strncpy(addr.sun_path, LAKE_SOCKET_PATH, sizeof(addr.sun_path) - 1);
 
     if (bind(server_fd, (struct sockaddr*)&addr, sizeof(addr)) == -1) {

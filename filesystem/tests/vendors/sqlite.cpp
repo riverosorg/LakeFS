@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: 0BSD
 
 #define CATCH_CONFIG_MAIN
-#include "../catch.hpp"
+#include <catch2/catch_all.hpp>
 
-#include "sqlite/sqlite3.h"
+#include <sqlite3.h>
 
 TEST_CASE("SQLite3 Initialization", "[vendor]") {
     sqlite3 *db;

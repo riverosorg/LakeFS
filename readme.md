@@ -28,7 +28,3 @@ A few examples of queries are:
 ## Installing
 
 Packaging available and tested for RHEL and FreeBSD systems. Nix Flake untested.
-
----
-
-This project is [REUSE Compliant](https://reuse.software/)

@@ -2,11 +2,13 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
+#include "spdlog/common.h"
 #include <cstring>
+#include <csignal>
 #include <iostream>
 #include <thread>
 #include <unordered_map>
-#include <fstream>
+#include <filesystem>
 
 #include <argparse/argparse.hpp>
 
@@ -17,14 +19,14 @@ extern "C" {
     #include <unistd.h> 
 }
 
-#include "sqlite/sqlite3.h"
+#include <sqlite3.h>
 
 #include "db.hpp"
 #include "fs.hpp"
 #include "control.hpp"
-#include "config.h"
-
-auto etc_conf_reader(std::string path) -> std::unordered_map<std::string, std::string>;
+#include "config.hpp"
+#include "backups.hpp"
+#include "metadata.h"
 
 static const struct fuse_operations operations = {
     .getattr  = lake_getattr,
@@ -74,49 +76,65 @@ auto main(int argc, char** argv) -> int {
         .flag()
         .help("Run program in foreground rather than as a daemon");
 
+    program.add_argument("-d")
+        .flag()
+        .help("Output complete debug information while running");
+
     try {
 		program.parse_args(argc, argv);
 
 	} catch (const std::runtime_error& err) {
-		std::cerr << err.what() << std::endl;
-		std::cerr << program;
-		exit(1);
+        spdlog::critical("Error collecting arguments: {0}", err.what());
+
+		return 1;
 	}
 
+    const auto is_debug = program.get<bool>("-d");
+
     // Get our configuration
-    const auto config_path = program.get<std::string>("--config");
+    const auto config_path = std::filesystem::absolute(
+        program.get<std::string>("--config")
+    );
 
     auto config = etc_conf_reader(config_path);
 
     if (config.empty() && !program.get<bool>("--tempdb")) {
-        spdlog::error("Failed to read configuration file at {0}", config_path);
+        spdlog::error("Failed to read configuration file at {0}", config_path.string());
         return 1;
     }
 
     // Extract mount point
-    mount_point = program.get<std::string>("mount_point");
+    const auto mount_point = std::filesystem::absolute(
+        program.get<std::string>("mount_point")
+    );
 
     // Initialize file logger
     // auto file_logger = spdlog::basic_logger_mt("file_logger", "lakefs.log");
     // spdlog::set_default_logger(file_logger);
-    spdlog::set_level(spdlog::level::trace);
 
-    spdlog::trace("Initializing LakeFS");
-    
     // Fuse gets initiated like a program and needs its own args
     fuse_args args = FUSE_ARGS_INIT(0, nullptr);
 
+    if (is_debug) {
+        spdlog::set_level(spdlog::level::trace);
+        fuse_opt_add_arg(&args, "-d");
+
+    } else {
+        const auto log_level = config["log_level"];
+
+        spdlog::set_level(spdlog::level::from_str(log_level));
+    }
+
+    spdlog::trace("Initializing LakeFS");
+
     // Do not fork fusemain on launch
     fuse_opt_add_arg(&args, "-f");
-
-    // Debug info
-    fuse_opt_add_arg(&args, "-d");
 
     // Set FS permissions to default
     fuse_opt_add_arg(&args, "-odefault_permissions");
 
     // mount point
-    spdlog::info("Mounting at {0}", mount_point);
+    spdlog::info("Mounting at {0}", mount_point.string());
     fuse_opt_add_arg(&args, mount_point.c_str());
 
     // Initialize SQLLite
@@ -128,6 +146,11 @@ auto main(int argc, char** argv) -> int {
         rc = db_tmp_init();
     } else {
         rc = db_init(config["dir"]);
+
+        const auto interval = parse_interval_value(config["backup_interval"]);
+
+        // Create backup timer
+        create_backup_timer(interval, std::stoi(config["max_backups"]), config["dir"]);
     }
 
     if (rc != SQLITE_OK) {
@@ -141,10 +164,10 @@ auto main(int argc, char** argv) -> int {
         spdlog::trace("Launching as daemon");
 
         // Forks program and runs in background
-        const auto rc = daemon(1, 1);
+        const auto rc = daemon(0, 1);
 
         if (rc < 0) {
-            spdlog::critical("Error starting daemon: %s", strerror(errno));
+            spdlog::critical("Error starting daemon: {0}", strerror(errno));
         }
     }
 
@@ -156,35 +179,4 @@ auto main(int argc, char** argv) -> int {
     fuse_opt_free_args(&args);
 
     return ret;
-}
-
-auto etc_conf_reader(std::string path) -> std::unordered_map<std::string, std::string> {
-    std::unordered_map<std::string, std::string> config;
-
-    std::ifstream file(path);
-
-    if (!file.is_open()) {
-        spdlog::error("Failed to open {0}", path);
-        return config;
-    }
-
-    std::string line;
-    while (std::getline(file, line)) {
-        if (line[0] == '#') {
-            continue;
-        }
-
-        std::string key;
-        std::string value;
-
-        std::istringstream line_stream(line);
-        std::getline(line_stream, key, '=');
-        std::getline(line_stream, value);
-
-        config[key] = value;
-
-        spdlog::debug("Config line: {0}={1}", key, value);
-    }
-
-    return config;
 }
