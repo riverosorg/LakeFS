@@ -10,7 +10,7 @@ source integration_tests/test_core.sh
 touch $test_dir/test_file
 
 $cli add $test_dir/test_file
-$cli tag $test_dir/test_file2 default
+$cli tag $test_dir/test_file default
 
 echo "test" >> "$lake_dir/test_file"
 

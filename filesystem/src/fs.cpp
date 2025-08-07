@@ -17,11 +17,9 @@ extern "C" {
 #include <string>
 #include <spdlog/spdlog.h>
 
-#include "query_lang/ast.hpp"
 #include "query_lang/parser.hpp"
 #include "fs.hpp"
 #include "db.hpp"
-#include "control.hpp"
 #include "command_interface.h"
 
 std::string reverse_query(const char* path);
@@ -45,8 +43,11 @@ int lake_getattr(const char *path, struct stat *stbuf) {
 
     auto file = reverse_query(path);
 
-    if (file.empty())
+    if (file.empty()) {
+        spdlog::error("No file found!");
+
         return -ENOENT;
+    }
 
     stat(file.c_str(), stbuf);
 
@@ -121,7 +122,20 @@ int lake_open(const char *path, struct fuse_file_info *fi) {
 
     spdlog::trace("Found file {0} to open", file_path);
 
-    fi->fh = open(file_path.c_str(), 0, fi->flags & O_ACCMODE);
+    fi->fh = open(file_path.c_str(), fi->flags);
+
+    if (fi->fh == -1) {
+        spdlog::error("Could not open file err: {0}", strerror(errno));
+        
+        return -errno;
+    }
+
+    if (fi->flags & O_DIRECT) {
+        fi->direct_io = 1;
+        fi->parallel_direct_writes = 1;
+    }
+
+    spdlog::trace("Created fd {0} while opening file", fi->fh);
     
     return 0;
 }
@@ -158,11 +172,13 @@ int lake_write(const char *path, const char *buf, size_t size, off_t offset,
     
     spdlog::trace("Writing to file {0} at fd {1}", path, fi->fh);
 
-    // permissions issue? read works
     ssize_t bytes_written = pwrite(fi->fh, buf, size, offset);
 
-    if (bytes_written == -1)
+    if (bytes_written == -1) {
+        spdlog::error("Could not write to file, err: {0}", strerror(errno));
+
         return -errno;
+    }
 
     return bytes_written;
 }
