@@ -115,7 +115,12 @@ auto main(int argc, char** argv) -> int {
     // Fuse gets initiated like a program and needs its own args
     fuse_args args = FUSE_ARGS_INIT(0, nullptr);
 
+    // NOTE argv[0] is program name in C!! and is ignored by fuse
+    fuse_opt_add_arg(&args, "lakefs");
+
     if (is_debug) {
+        spdlog::info("Running in debug mode");
+
         spdlog::set_level(spdlog::level::trace);
         fuse_opt_add_arg(&args, "-d");
 
