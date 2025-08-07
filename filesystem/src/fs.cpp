@@ -132,7 +132,6 @@ int lake_open(const char *path, struct fuse_file_info *fi) {
 
     if (fi->flags & O_DIRECT) {
         fi->direct_io = 1;
-        fi->parallel_direct_writes = 1;
     }
 
     spdlog::trace("Created fd {0} while opening file", fi->fh);
