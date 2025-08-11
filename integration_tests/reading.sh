@@ -10,7 +10,6 @@ rng=$RANDOM
 
 echo "$rng" > $test_dir/test_file
 
-$cli add $test_dir/test_file
 $cli tag $test_dir/test_file default
 
 # test reading the file

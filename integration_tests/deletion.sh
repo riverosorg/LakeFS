@@ -7,7 +7,6 @@
 source integration_tests/test_core.sh
 
 touch $test_dir/test_file2_1
-$cli add $test_dir/test_file2_1
 $cli tag $test_dir/test_file2_1 default
 $cli tag $test_dir/test_file2_1 not_default
 

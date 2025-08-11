@@ -9,7 +9,6 @@ source integration_tests/test_core.sh
 # Add multiple tags in one
 echo "test" >> $test_dir/test_file
 
-$cli add $test_dir/test_file
 $cli tag $test_dir/test_file tag1 tag2
 
 results=$(ls -A $lake_dir/'(tag1&tag2)' | wc -l)

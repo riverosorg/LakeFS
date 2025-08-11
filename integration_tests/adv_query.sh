@@ -22,11 +22,9 @@ fi
 echo "test" >> $test_dir/test_file
 echo "test" >> $test_dir/test_file2
 
-$cli add $test_dir/test_file
-$cli add $test_dir/test_file not_default
-$cli add $test_dir/test_file2
-$cli add $test_dir/test_file2 not_default
-$cli add $test_dir/test_file2 default
+$cli tag $test_dir/test_file not_default
+$cli tag $test_dir/test_file2 not_default
+$cli tag $test_dir/test_file2 default
 
 results = $(ls -A $lakfs_dir/'(not_default & !default)' | wc -l)
 

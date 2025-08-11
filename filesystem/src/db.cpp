@@ -18,6 +18,8 @@ std::string default_query = "default";
 // Perhaps better served by a singleton pattern.
 static sqlite3 *db;
 
+bool does_file_exist(const std::string path);
+
 // Initializes the DB in memory
 int db_tmp_init() {
     int rc = sqlite3_open(":memory:", &db);
@@ -92,9 +94,30 @@ int db_add_file(const std::string path) {
 }
 
 int db_tag_file(const std::string path, const std::string tag) {
+    if (!does_file_exist(path)) {
+        db_add_file(path);
+    }
+    
     int rc = sqlite3_exec(db, ("INSERT INTO tags (data_id, tag_value) VALUES ((SELECT id FROM data WHERE path = '" + path + "'), '" + tag + "');").c_str(), nullptr, nullptr, nullptr);
 
     return rc;
+}
+
+bool does_file_exist(const std::string path) {
+    const auto sql = "SELECT id FROM data WHERE path = '" + path + ";";
+
+    struct sqlite3_stmt* stmt;
+
+    const int result = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
+    if (result == SQLITE_OK) {
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            return true;
+        }
+    }
+
+    sqlite3_finalize(stmt);
+
+    return false;
 }
 
 int db_remove_file(const std::string path) {

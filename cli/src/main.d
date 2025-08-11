@@ -33,15 +33,7 @@ int main(string[] args) {
     scope(exit) lakefs_socket.close();
 
     // TODO: Cases can be done via metaprogramming
-    if (any!"a == \"add\""(args)) {
-        if (args.length < 3) {
-            writeln("Error: add command requires a path argument");
-            return 1;
-        }
-
-        return addFile(lakefs_socket, args[2]);
-
-    } else if (any!"a == \"tag\""(args)) {
+    if (any!"a == \"tag\""(args)) {
         if (args.length < 4) {
             writeln("Error: tag command requires a path and tag argument");
             return 1;
@@ -99,7 +91,6 @@ void printHelp() {
     writeln("");
     writeln("Commands:");
     writeln("  help                          - Print this help message");
-    writeln("  add     <path>                - Add a file to the lakefs");
     writeln("  tag     <path> <tag>          - Tag a file in the lakefs");
     writeln("  del     <path>                - Remove a file from the lakefs");
     writeln("  del-tag <path> <tag>          - Remove a tag from a file");

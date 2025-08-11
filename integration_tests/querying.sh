@@ -9,7 +9,6 @@ source integration_tests/test_core.sh
 # Arbitrary tag query
 echo "test2" >> $test_dir/test_file2
 
-$cli add $test_dir/test_file2
 $cli tag $test_dir/test_file2 not_default
 
 results=$(ls -A $lake_dir/'(not_default)' | wc -l)
@@ -39,7 +38,6 @@ fi
 # Test "or" operation
 echo "test2" >> $test_dir/test_file1
 
-$cli add $test_dir/test_file1
 $cli tag $test_dir/test_file1 tag1
 
 results=$(ls -A $lake_dir/'(tag1|tag2)' | wc -l)

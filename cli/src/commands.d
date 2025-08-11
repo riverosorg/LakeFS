@@ -20,18 +20,6 @@ int sendMessage(ref Socket lake_s, const int command, string[] str_list...)
     return 0;
 }
 
-int addFile(ref Socket lake_s, string path) {
-
-    auto absolute_path = getAbsolutePath(path);
-
-    debug {
-        import std.stdio: writeln;
-        writeln("Adding file " ~ absolute_path);
-    }
-
-    return sendMessage(lake_s, _LAKE_ADD_FILE, absolute_path);
-}
-
 int tagFile(ref Socket lake_s, string path, string[] tags) {
     import core.thread.osthread: Thread;
     import core.time: dur;

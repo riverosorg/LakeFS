@@ -9,7 +9,6 @@ source integration_tests/test_core.sh
 # test writing to the tagged file
 touch $test_dir/test_file
 
-$cli add $test_dir/test_file
 $cli tag $test_dir/test_file2 default
 
 echo "test" >> "$lake_dir/test_file"

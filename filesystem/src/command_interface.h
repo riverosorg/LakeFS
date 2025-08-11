@@ -11,7 +11,7 @@ extern "C" {
 
 #define LAKE_SOCKET_PATH "/tmp/lakefs.sock"
 
-#define LAKE_ADD_FILE 0
+#define __REMOVED__ 0
 #define LAKE_TAG_FILE 1
 #define LAKE_SET_DEFAULT_QUERY 2
 #define LAKE_REMOVE_FILE 3

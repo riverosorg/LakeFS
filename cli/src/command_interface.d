@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
-extern (C) extern __gshared immutable int _LAKE_ADD_FILE;
 extern (C) extern __gshared immutable int _LAKE_TAG_FILE;
 extern (C) extern __gshared immutable int _LAKE_SET_DEFAULT_QUERY;
 extern (C) extern __gshared immutable int _LAKE_REMOVE_FILE;

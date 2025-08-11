@@ -76,19 +76,6 @@ void control_server() {
             // Parse the command
             lake_command_t* command = (lake_command_t*)buffer;
             switch (command->command) {
-                case LAKE_ADD_FILE: {
-                    std::string path = std::string(command->data, command->size);
-                    
-                    spdlog::info("Added file to database: {0}", path);
-
-                    int rc = db_add_file(path);
-
-                    if (rc != SQLITE_OK) {
-                        spdlog::error("Failed to add file to database: {0}", rc);
-                    }
-
-                    break;
-                }
                 case LAKE_TAG_FILE: {
                     std::string cmd_data = std::string(command->data, command->size);
 
