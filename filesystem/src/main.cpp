@@ -64,6 +64,10 @@ auto main(int argc, char** argv) -> int {
         .required()
         .help("The directory to mount the filesystem at");
 
+    program.add_argument("default_query")
+        .default_value("default")
+        .help("Specify the initial default query of the mount");
+
     program.add_argument("--tempdb")
         .flag()
         .help("Use an in-memory database instead of the file");
@@ -107,6 +111,10 @@ auto main(int argc, char** argv) -> int {
     const auto mount_point = std::filesystem::absolute(
         program.get<std::string>("mount_point")
     );
+
+    // Extract default query
+    const auto default_query = program.get<std::string>("default_query");
+    db_set_default_query(default_query);
 
     // Initialize file logger
     // auto file_logger = spdlog::basic_logger_mt("file_logger", "lakefs.log");

@@ -22,7 +22,7 @@ Initialize a LakeFS instance
 SYNOPSIS
 ========
 
-| lakefs [*OPTION*]... *mount_point*
+| lakefs [*OPTION*]... *mount_point* [*default_query*]
 
 
 DESCRIPTION
@@ -58,6 +58,9 @@ OPTIONS
 
 mount_point
     Folder to mount the LakeFS instance under.
+
+default_query
+    Optional argument to specify the initial default query of the mount.
 
 -f
     Run program in foreground rather than as a daemon.
