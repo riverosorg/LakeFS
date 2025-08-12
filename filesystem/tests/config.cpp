@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: 0BSD
 
 #include "config.hpp"
+#include "catch2/catch_test_macros.hpp"
 
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch_all.hpp>
@@ -34,21 +35,26 @@ TEST_CASE("Interval Parsing", "[config]") {
 
     SECTION("Hours") {
         auto interval = parse_interval_value("3 hours");
-        CHECK(interval.count() == 3 * minutes * seconds);
+        CHECK(interval->count() == 3 * minutes * seconds);
     }
 
     SECTION("Days") {
         auto interval = parse_interval_value("5 days");
-        CHECK(interval.count() == 5 * hours * minutes * seconds);
+        CHECK(interval->count() == 5 * hours * minutes * seconds);
     }
 
     SECTION("Weeks") {
         auto interval = parse_interval_value("2 weeks");
-        CHECK(interval.count() == 2 * days * hours * minutes * seconds);
+        CHECK(interval->count() == 2 * days * hours * minutes * seconds);
     }
 
     SECTION("Months") {
         auto interval = parse_interval_value("3 months");
-        CHECK(interval.count() == 3 * 2629746); // NOTE: std::chronos ratio for months is this magic value, which is I assume more accurate than the naive calculation
+        CHECK(interval->count() == 3 * 2629746); // NOTE: std::chronos ratio for months is this magic value, which is I assume more accurate than the naive calculation
+    }
+
+    SECTION("Invalid input") {
+        auto interval = parse_interval_value("3 dogs");
+        CHECK_FALSE(interval.has_value());
     }
 }

@@ -162,8 +162,18 @@ auto main(int argc, char** argv) -> int {
 
         const auto interval = parse_interval_value(config["backup_interval"]);
 
-        // Create backup timer
-        create_backup_timer(interval, std::stoi(config["max_backups"]), config["dir"]);
+        if (!interval.has_value()) {
+            spdlog::warn("backup_interval malformed. Continuing without backups");
+            
+        } else {
+            // Create backup timer
+            if (create_backup_timer(interval.value(), std::stoi(config["max_backups"]), config["dir"])) {
+                spdlog::info("Backup system started");
+            
+            } else {
+                spdlog::warn("Could not start backup system. Continuing without backups");
+            }
+        }
     }
 
     if (rc != SQLITE_OK) {

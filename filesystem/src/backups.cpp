@@ -20,7 +20,7 @@ std::string _backup_dir;
 
 static auto handle_backup(sigval val) -> void;
 
-auto create_backup_timer(std::chrono::seconds interval, uint32_t number_backups, std::string backup_path) -> void {
+auto create_backup_timer(std::chrono::seconds interval, uint32_t number_backups, std::string backup_path) -> bool {
     spdlog::info("Setting up backups to keep {0} copies and run every {1} hours", 
         number_backups, 
         std::chrono::duration_cast<std::chrono::hours>(interval).count());
@@ -42,7 +42,7 @@ auto create_backup_timer(std::chrono::seconds interval, uint32_t number_backups,
     timer_t timer_id;
     if (timer_create(CLOCK_MONOTONIC, &event, &timer_id) == -1) {
         spdlog::critical("Could not create timer! {0}", strerror(errno));
-        // todo: pass up
+        return false;
     }
 
     itimerspec timer_spec = {};
@@ -54,8 +54,10 @@ auto create_backup_timer(std::chrono::seconds interval, uint32_t number_backups,
     //start timer
     if (timer_settime(timer_id, 0, &timer_spec, nullptr) == -1) {
         spdlog::critical("Could not start timer! {0}", strerror(errno));
-        // todo: pass up
+        return false;
     }
+
+    return true;
 }
 
 static auto handle_backup(sigval val) -> void {

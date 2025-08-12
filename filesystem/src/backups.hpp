@@ -7,4 +7,4 @@
 #include <string>
 #include <cstdint>
 
-auto create_backup_timer(std::chrono::seconds interval, uint32_t number_backups, std::string backuppath) -> void;
+auto create_backup_timer(std::chrono::seconds interval, uint32_t number_backups, std::string backuppath) -> bool;

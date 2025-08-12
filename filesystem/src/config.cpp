@@ -8,6 +8,7 @@
 #include <fstream>
 #include <unordered_map>
 #include <utility>
+#include <optional>
 
 auto etc_conf_reader(const std::string path) -> std::unordered_map<std::string, std::string> {
     std::unordered_map<std::string, std::string> config;
@@ -46,10 +47,10 @@ auto parse_config_line(const std::string line) -> std::pair<std::string, std::st
     return std::make_pair(key, value);
 }
 
-auto parse_interval_value(const std::string interval_string) -> std::chrono::seconds {
+auto parse_interval_value(const std::string interval_string) -> std::optional<std::chrono::seconds> {
     using namespace std::chrono;
 
-    seconds interval;
+    std::optional<seconds> interval;
 
     const auto space_loc = interval_string.find_first_of(" ");
     const auto interval_length = std::stoi(interval_string.substr(0, space_loc));
@@ -73,7 +74,6 @@ auto parse_interval_value(const std::string interval_string) -> std::chrono::sec
 
     } else {
         spdlog::critical("Unknown interval type: {0}", interval_type);
-        // TODO: Pass up an error value
     }
 
     return interval;
