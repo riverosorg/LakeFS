@@ -12,7 +12,7 @@ echo "test2" >> $test_dir/test_file2
 $cli add $test_dir/test_file2
 $cli tag $test_dir/test_file2 not_default
 
-results=$(ls -A $lake_dir/'(not_default)' | wc -l)
+results="$(ls -A $lake_dir/'(not_default)' | wc -l)"
 
 if [ $(echo "$results" | xargs) != "1" ]; then
     echo "Error: Arbitrarily querying tags not working"
@@ -26,7 +26,7 @@ fi
 # And tag search
 $cli tag $test_dir/test_file2 tag2
 
-results=$(ls -A $lake_dir/'(not_default&tag2)' | wc -l)
+results="$(ls -A $lake_dir/'(not_default&tag2)' | wc -l)"
 
 if [ $(echo "$results" | xargs) != "1" ]; then
     echo "Error: Querying tags with & not working"
@@ -42,7 +42,7 @@ echo "test2" >> $test_dir/test_file1
 $cli add $test_dir/test_file1
 $cli tag $test_dir/test_file1 tag1
 
-results=$(ls -A $lake_dir/'(tag1|tag2)' | wc -l)
+results="$(ls -A $lake_dir/'(tag1|tag2)' | wc -l)"
 
 if [ $(echo "$results" | xargs) != "2" ]; then
     echo "Error: Querying tags with | not working"
@@ -56,7 +56,7 @@ fi
 # Set a new default query
 $cli default "(not_default)"
 
-results=$(ls -A $lake_dir | wc -l)
+results="$(ls -A $lake_dir | wc -l)"
 
 if [ $(echo "$results" | xargs) != "1" ]; then
     echo "Error: changing default query not working"
@@ -67,7 +67,7 @@ if [ $(echo "$results" | xargs) != "1" ]; then
 fi
 
 # Check that a file with 2 tags will not show up when one is negated (Issue #15)
-results=$(ls -A $lake_dir/'(!not_default)' | wc -l)
+results="$(ls -A $lake_dir/'(!not_default)' | wc -l)"
 
 if [ $(echo "$results" | xargs) != "1" ]; then
     echo "Error: tag negation not working"

@@ -14,7 +14,7 @@ $cli tag $test_dir/test_file default
 
 echo "test" >> "$lake_dir/test_file"
 
-results=$(tail -n 1 $lake_dir/test_file)
+results="$(tail -n 1 $lake_dir/test_file)"
 
 if [ "$results" != "test" ]; then
     echo "Error: Could not add contents to file"
