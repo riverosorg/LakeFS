@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Caleb Depatie
+//
+// SPDX-License-Identifier: BSD-3-Clause
 #include <spdlog/spdlog.h>
 #include <vector>
 
