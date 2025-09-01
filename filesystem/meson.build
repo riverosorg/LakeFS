@@ -22,6 +22,7 @@ sources = [
     'src/backups.cpp',
     'src/config.cpp',
     'src/control.cpp',
+    'src/utilities.cpp',
     'src/query_lang/ast.cpp',
     'src/query_lang/parser.cpp'
 ]
@@ -66,6 +67,7 @@ executable(
 
 tests_dict = {
     'SQLite' : ['tests/vendors/sqlite.cpp', sources],
+    'Utility Functions' : ['tests/utilities.cpp', sources],
     'Parsing' : ['tests/parsing.cpp', sources],
     'Config Reading' : ['tests/config.cpp', sources],
     'SQL generation' : ['tests/query_generation.cpp', sources],

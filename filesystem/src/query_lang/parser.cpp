@@ -142,24 +142,34 @@ std::vector<std::shared_ptr<AstNode>> parseRpn(std::vector<Token>::iterator* tok
     return rpn;
 }
 
-std::shared_ptr<AstNode> parse(std::string expression) {
+std::optional<std::shared_ptr<AstNode>> parse(std::string expression) {
+    spdlog::trace("Entering parse(expression={0})", expression);
+    
     std::vector<Token> tokens = tokenize(expression);
     std::vector<Token>::iterator token_iter = tokens.begin();
 
     //Parse the expression and convert to RPN
     std::vector<std::shared_ptr<AstNode>> rpn = parseRpn(&token_iter, tokens.end());
     
+    spdlog::debug("Complete RPN:");
+    for (const auto& rpn_item : rpn) {
+        spdlog::debug("{0}", rpn_item->str());
+    }
+    spdlog::debug("Printing RPN done!");
+
     //Convert the RPN representation to an AST
     std::vector<std::shared_ptr<AstNode>>::iterator rpn_iter = rpn.begin();
     while (rpn_iter != rpn.end()) {
-        spdlog::trace("RPN: {0}", (*rpn_iter)->str());
 
         // TODO: manipulating an iterator like this (deleting elements) is undefined behaviour
-        (*rpn_iter)->assembleAST(&rpn, &rpn_iter);
+        if (!((*rpn_iter)->assembleAST(&rpn, &rpn_iter))) {
+            return {};
+        }
+
         rpn_iter += 1;
     }
 
-    spdlog::trace("AST: {0}", rpn.back()->str());
+    spdlog::debug("AST: {0}", rpn.back()->str());
 
     return rpn.back();
 }

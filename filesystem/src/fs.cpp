@@ -21,17 +21,10 @@ extern "C" {
 #include "fs.hpp"
 #include "db.hpp"
 #include "command_interface.h"
-
-std::string reverse_query(const char* path);
-std::string extract_query(const char* path);
+#include "utilities.hpp"
 
 // Gets file attributes at <path>
-#ifdef __FreeBSD__
-int lake_getattr(const char *path, struct stat *stbuf, struct fuse_file_info* fi) {
-#else
 int lake_getattr(const char *path, struct stat *stbuf) {
-#endif
-
     spdlog::trace("Getting attributes for {0}", path);
 
     if ((strcmp(path, "/") == 0) || (path[strlen(path) - 1] == ')'))
@@ -49,43 +42,52 @@ int lake_getattr(const char *path, struct stat *stbuf) {
         return -ENOENT;
     }
 
-    stat(file.c_str(), stbuf);
+    spdlog::debug("stat'ing file at {0}", file);
+
+    if (stat(file.c_str(), stbuf) < 0)
+    {
+        spdlog::error("Error stat'ing: {0}", strerror(errno));
+
+        return -errno;
+    }
 
     return 0;
 }
 
-#ifdef __FreeBSD__
-int lake_readdir(
-    const char *path, void *buf, fuse_fill_dir_t filler,
-    off_t offset, struct fuse_file_info *fi, enum fuse_readdir_flags flags) {
-#else
+
 int lake_readdir(
     const char *path, void *buf, fuse_fill_dir_t filler,
     off_t offset, struct fuse_file_info *fi) {
-#endif 
 
     spdlog::trace("Reading directory {0}", path);
-    
 
     // Return items in dir
-#ifdef __FreeBSD__
-    filler(buf, ".", nullptr, 0, FUSE_FILL_DIR_PLUS);
-    filler(buf, "..", nullptr, 0, FUSE_FILL_DIR_PLUS);
-#else
     filler(buf, ".", nullptr, 0);
     filler(buf, "..", nullptr, 0);
-#endif
 
     std::vector<std::string> files;
+
+    // TODO: very nested, smelly
 
     // Check if path is a query
     if (path[strlen(path) - 1] == ')') {
         std::string query = extract_query(path);
 
         try {
-            files = db_run_query(parse(query));
+            const auto query_ast = parse(query);
+
+            if (query_ast.has_value()) {
+                files = db_run_query(query_ast.value());
+            
+            } else {
+                spdlog::error("Error while parsing, invalid query");
+
+                return -EINVAL;
+            }
         } catch (std::exception err) {
             spdlog::error("Error while parsing: {0}", err.what());
+
+            return -EINVAL;
         }
 
     } else {
@@ -97,11 +99,7 @@ int lake_readdir(
         
         spdlog::trace("Will show file {0} as {1}", file, file_name);
 
-#ifdef __FreeBSD__
-        filler(buf, file_name.c_str(), nullptr, 0, FUSE_FILL_DIR_PLUS);
-#else
         filler(buf, file_name.c_str(), nullptr, 0);
-#endif
     }
 
     return 0;
@@ -198,50 +196,4 @@ void lake_destroy(void* private_data) {
     if (rc != 0) {
         spdlog::error("Failed to unlink socket");
     }
-}
-
-std::string reverse_query(const char* path) {
-    auto path_s = std::string(path);
-
-    std::vector<std::string> query_files;
-
-    if (path_s.find_first_of('(') == std::string::npos) {
-        query_files = db_run_default_query();
-
-    } else {
-        std::string query = extract_query(path);
-
-        try {
-            query_files = db_run_query(parse(query));
-        
-        } catch (std::exception err) {
-            spdlog::error("Error while parsing: {0}", err.what());
-            // todo: exit?
-        }
-    }
-
-    // Get the file path by comparing the file name to the query results
-    std::string file_path;
-
-    const std::string looking_for_file = 
-        std::string(path_s).substr(std::string(path_s).find_last_of("/") + 1);
-
-    for (const auto& query_file : query_files) {
-        
-        const std::string query_file_name = 
-            query_file.substr(query_file.find_last_of("/") + 1);
-
-        if (query_file_name == looking_for_file) {
-            file_path = query_file;
-            break;
-        }
-    }
-
-    return file_path;
-}
-
-std::string extract_query(const char* path) {
-    auto path_s = std::string(path);
-
-    return path_s.substr(path_s.find_last_of('('), path_s.find_last_of(')') - path_s.find_last_of('('));
 }

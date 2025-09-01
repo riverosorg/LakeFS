@@ -172,7 +172,7 @@ std::optional<std::string> db_query_helper(const std::shared_ptr<AstNode> ast) {
         query_part += tmp_part.value();
     
     } else {
-        return std::optional<std::string>();
+        return {};
     }
      
     return query_part;
@@ -196,7 +196,7 @@ std::optional<std::string> db_create_query(const std::shared_ptr<AstNode> ast) {
         const auto query_part = db_query_helper(ast);
 
         if (!query_part.has_value()) {
-            return std::optional<std::string>();
+            return {};
         }
 
         query += query_part.value();
@@ -214,7 +214,13 @@ void db_set_default_query(const std::string query) {
 // TODO: I dont want the DB owning the default query, this was just easy for now
 // (im sleepy, sorry future me)
 std::vector<std::string> db_run_default_query() {
-    return db_run_query(parse(default_query));
+    const auto query_ast = parse(default_query);
+
+    if (query_ast.has_value()) {
+        return db_run_query(query_ast.value());
+    }
+
+    return {};
 }
 
 // TODO: return a file struct containing the unique file ID

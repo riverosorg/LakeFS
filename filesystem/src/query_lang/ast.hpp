@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2024 Conner Tenn
-// SPDX-FileCopyrightText: 2024 Caleb Depatie
+// SPDX-FileCopyrightText: 2024-2025 Caleb Depatie
 //
 // SPDX-License-Identifier: BSD-3-Clause
 #pragma once
@@ -18,7 +18,7 @@ public:
     virtual std::string str() const = 0;
     
     virtual bool match(const std::shared_ptr<AstNode> other) const = 0;
-    virtual void assembleAST(std::vector<std::shared_ptr<AstNode>> *rpn, std::vector<std::shared_ptr<AstNode>>::iterator *rpn_iter) = 0;
+    virtual bool assembleAST(std::vector<std::shared_ptr<AstNode>> *rpn, std::vector<std::shared_ptr<AstNode>>::iterator *rpn_iter) = 0;
     
     friend std::ostream& operator<<(std::ostream &out, const std::shared_ptr<AstNode> node);
 };
@@ -48,7 +48,7 @@ public:
 
     virtual std::string str() const;
 
-    void assembleAST(std::vector<std::shared_ptr<AstNode>> *rpn, std::vector<std::shared_ptr<AstNode>>::iterator *rpn_iter);
+    bool assembleAST(std::vector<std::shared_ptr<AstNode>> *rpn, std::vector<std::shared_ptr<AstNode>>::iterator *rpn_iter);
 };
 
 
@@ -61,7 +61,7 @@ public:
 
     virtual std::string str() const;
 
-    void assembleAST(std::vector<std::shared_ptr<AstNode>> *rpn, std::vector<std::shared_ptr<AstNode>>::iterator *rpn_iter);
+    bool assembleAST(std::vector<std::shared_ptr<AstNode>> *rpn, std::vector<std::shared_ptr<AstNode>>::iterator *rpn_iter);
 };
 
 
@@ -107,7 +107,7 @@ public:
     virtual std::string str() const;
     virtual bool match(const std::shared_ptr<AstNode> other) const;
 
-    void assembleAST(std::vector<std::shared_ptr<AstNode>> *rpn, std::vector<std::shared_ptr<AstNode>>::iterator *rpn_iter);
+    bool assembleAST(std::vector<std::shared_ptr<AstNode>> *rpn, std::vector<std::shared_ptr<AstNode>>::iterator *rpn_iter);
 };
 
 std::ostream& operator<<(std::ostream &out, const std::vector<std::shared_ptr<AstNode>> &nodes);

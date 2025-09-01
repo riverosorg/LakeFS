@@ -5,6 +5,7 @@
 #pragma once
 
 #include <memory>
+#include <expected>
 
 #include "ast.hpp"
 
@@ -28,4 +29,4 @@ public:
 std::ostream& operator<<(std::ostream &out, const std::vector<Token> &tokens);
 
 std::vector<Token> tokenize(std::string expression);
-std::shared_ptr<AstNode> parse(std::string expression);
+std::optional<std::shared_ptr<AstNode>> parse(std::string expression);

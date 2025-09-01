@@ -18,7 +18,7 @@ TEST_CASE("Basic Tag Retrieval", "[parsing][query]") {
     std::string expected_query;
 
     SECTION("Single Tag Retrieval") {
-        ast = parse("tag");
+        ast = parse("tag").value();
         query = db_create_query(ast);
         expected_query = 
             "SELECT path FROM data WHERE id IN "
@@ -29,7 +29,7 @@ TEST_CASE("Basic Tag Retrieval", "[parsing][query]") {
     }
 
     SECTION("Negation") {
-        ast = parse("!tag");
+        ast = parse("!tag").value();
         query = db_create_query(ast);
         expected_query = 
             "SELECT path FROM data WHERE id NOT IN "
@@ -40,7 +40,7 @@ TEST_CASE("Basic Tag Retrieval", "[parsing][query]") {
     }
 
     SECTION("Union Retrieval") {
-        ast = parse("tag1|tag2");
+        ast = parse("tag1|tag2").value();
         query = db_create_query(ast);
         expected_query = 
             "SELECT path FROM data WHERE id IN "
@@ -51,7 +51,7 @@ TEST_CASE("Basic Tag Retrieval", "[parsing][query]") {
     }
 
     SECTION("Intersection Retrieval") {
-        ast = parse("tag1&tag2");
+        ast = parse("tag1&tag2").value();
         query = db_create_query(ast);
         expected_query = 
             "SELECT path FROM data WHERE id IN "
@@ -61,11 +61,5 @@ TEST_CASE("Basic Tag Retrieval", "[parsing][query]") {
         
         REQUIRE(query.has_value());
         REQUIRE(query.value() == expected_query);
-    }
-
-    SECTION("Issue #34: Potential Runtime error") {
-        ast = parse("((tag1 | tag2) &)");
-
-        REQUIRE_FALSE(db_create_query(ast).has_value());
     }
 }

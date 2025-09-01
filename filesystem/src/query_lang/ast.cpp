@@ -57,14 +57,14 @@ std::string BinaryOperator::str() const {
 }
 
 // TODO: I cant remember why these are raw pointers but they should be smart
-void BinaryOperator::assembleAST(std::vector<std::shared_ptr<AstNode>>* rpn, std::vector<std::shared_ptr<AstNode>>::iterator* rpn_iter) {
+bool BinaryOperator::assembleAST(std::vector<std::shared_ptr<AstNode>>* rpn, std::vector<std::shared_ptr<AstNode>>::iterator* rpn_iter) {
     assert(rpn != nullptr);
     assert(rpn_iter != nullptr);
     
     // Check that memory access will be SAFE
     if (std::distance(rpn->begin(), *rpn_iter) < 2) {
-        spdlog::error("Incorrect AST provided!"); // TODO: Error handling should be better, filter up for more context
-        return; // PANIC
+        spdlog::error("Incorrect AST provided!");
+        return false; // PANIC
     }
     
     //Collect the arguments
@@ -73,6 +73,8 @@ void BinaryOperator::assembleAST(std::vector<std::shared_ptr<AstNode>>* rpn, std
 
     rpn->erase((*rpn_iter)-2, (*rpn_iter));
     (*rpn_iter) -= 2; //2 elements removed
+
+    return true;
 }
 
 
@@ -94,14 +96,14 @@ std::string UnaryOperator::str() const {
     return "UnaryOperator{" + node_str + "}";
 }
 
-void UnaryOperator::assembleAST(std::vector<std::shared_ptr<AstNode>>* rpn, std::vector<std::shared_ptr<AstNode>>::iterator *rpn_iter) {
+bool UnaryOperator::assembleAST(std::vector<std::shared_ptr<AstNode>>* rpn, std::vector<std::shared_ptr<AstNode>>::iterator *rpn_iter) {
     assert(rpn != nullptr);
     assert(rpn_iter != nullptr);
 
     // Check that memory access will be SAFE
     if (std::distance(rpn->begin(), *rpn_iter) < 1) {
-        spdlog::error("Incorrect AST provided!"); // TODO: Error handling should be better, filter up for more context
-        return; // PANIC
+        spdlog::error("Incorrect AST provided!");
+        return false; // PANIC
     }
     
     //Collect the arguments
@@ -109,6 +111,8 @@ void UnaryOperator::assembleAST(std::vector<std::shared_ptr<AstNode>>* rpn, std:
 
     rpn->erase((*rpn_iter)-1, (*rpn_iter));
     (*rpn_iter) -= 1; //1 element removed
+
+    return true;
 }
 
 
@@ -192,8 +196,10 @@ std::string Tag::str() const {
     return "Tag{" + this->name + "}";
 }
 
-void Tag::assembleAST(std::vector<std::shared_ptr<AstNode>>* rpn, std::vector<std::shared_ptr<AstNode>>::iterator *rpn_iter) {
+bool Tag::assembleAST(std::vector<std::shared_ptr<AstNode>>* rpn, std::vector<std::shared_ptr<AstNode>>::iterator *rpn_iter) {
     //Nothing needs to be done
+
+    return true;
 }
 
 bool Tag::match(const std::shared_ptr<AstNode> other) const {

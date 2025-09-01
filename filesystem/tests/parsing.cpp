@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2024 Conner Tenn
-// SPDX-FileCopyrightText: 2024 Caleb Depatie
+// SPDX-FileCopyrightText: 2024-2025 Caleb Depatie
 //
 // SPDX-License-Identifier: 0BSD
 
@@ -44,14 +44,14 @@ TEST_CASE("Parsing text into a AST query", "[parsing]") {
     std::shared_ptr<AstNode> expected_ast;
 
     SECTION("Single Letter Tags") {
-        ast = parse("a&b");
+        ast = parse("a&b").value();
         expected_ast = std::make_shared<Intersection>(
             std::make_shared<Tag>("a"),
             std::make_shared<Tag>("b")
         );
         REQUIRE(ast->match(expected_ast));
 
-        ast = parse("a&(b|c)");
+        ast = parse("a&(b|c)").value();
         expected_ast = std::make_shared<Intersection>(
             std::make_shared<Tag>("a"),
             std::make_shared<Union>(
@@ -61,7 +61,7 @@ TEST_CASE("Parsing text into a AST query", "[parsing]") {
         );
         REQUIRE(ast->match(expected_ast));
 
-        ast = parse("(b|c)&a");
+        ast = parse("(b|c)&a").value();
         expected_ast = std::make_shared<Intersection>(
             std::make_shared<Union>(
                 std::make_shared<Tag>("b"),
@@ -73,14 +73,14 @@ TEST_CASE("Parsing text into a AST query", "[parsing]") {
     }
 
     SECTION("Word Tags") {
-        ast = parse("tag1&tag2");
+        ast = parse("tag1&tag2").value();
         expected_ast = std::make_shared<Intersection>(
             std::make_shared<Tag>("tag1"),
             std::make_shared<Tag>("tag2")
         );
         REQUIRE(ast->match(expected_ast));
 
-        ast = parse("tag1&(tag2|tag3)");
+        ast = parse("tag1&(tag2|tag3)").value();
         expected_ast = std::make_shared<Intersection>(
             std::make_shared<Tag>("tag1"),
             std::make_shared<Union>(
@@ -92,7 +92,7 @@ TEST_CASE("Parsing text into a AST query", "[parsing]") {
     }
 
     SECTION("Complex Queries") {
-        ast = parse("(picture|video)&(year_2014&(!digital))");
+        ast = parse("(picture|video)&(year_2014&(!digital))").value();
         expected_ast = std::make_shared<Intersection>(
             std::make_shared<Union>(
                 std::make_shared<Tag>("picture"),
@@ -110,5 +110,11 @@ TEST_CASE("Parsing text into a AST query", "[parsing]") {
         std::cout << expected_ast->str() << std::endl;
 
         REQUIRE(ast->match(expected_ast));
+    }
+
+    SECTION("Issue #34: Potential Runtime error") {
+        const auto ast = parse("((tag1 | tag2) &)");
+
+        REQUIRE_FALSE(ast.has_value());
     }
 }
