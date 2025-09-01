@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: 2024 Conner Tenn
-// SPDX-FileCopyrightText: 2024 Caleb Depatie
+// SPDX-FileCopyrightText: 2024-2025 Caleb Depatie
 //
 // SPDX-License-Identifier: BSD-3-Clause
 #pragma once
 
 #include <memory>
-#include <expected>
+#include <optional>
 
 #include "ast.hpp"
 
