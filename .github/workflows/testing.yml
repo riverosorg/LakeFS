@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: 0BSD
 
 name: Testing Suite
+permissions:
+  contents: read
 
 on: [ push ]
 
