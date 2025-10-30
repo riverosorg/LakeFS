@@ -24,7 +24,12 @@ extern "C" {
 #include "utilities.hpp"
 
 // Gets file attributes at <path>
-int lake_getattr(const char *path, struct stat *stbuf) {
+#ifdef __FreeBSD__
+int lake_getattr(const char *path, struct stat *stbuf, struct fuse_file_info* fi)
+#else
+int lake_getattr(const char *path, struct stat *stbuf)
+#endif
+{
     spdlog::trace("Getting attributes for {0}", path);
 
     if ((strcmp(path, "/") == 0) || (path[strlen(path) - 1] == ')'))
@@ -55,15 +60,27 @@ int lake_getattr(const char *path, struct stat *stbuf) {
 }
 
 
+#ifdef __FreeBSD__
 int lake_readdir(
     const char *path, void *buf, fuse_fill_dir_t filler,
-    off_t offset, struct fuse_file_info *fi) {
+    off_t offset, struct fuse_file_info *fi, enum fuse_readdir_flags flags)
+#else
+int lake_readdir(
+    const char *path, void *buf, fuse_fill_dir_t filler,
+    off_t offset, struct fuse_file_info *fi)
+#endif
+{
 
     spdlog::trace("Reading directory {0}", path);
 
     // Return items in dir
+#ifdef __FreeBSD__
+    filler(buf, ".", nullptr, 0, FUSE_FILL_DIR_PLUS);
+    filler(buf, "..", nullptr, 0, FUSE_FILL_DIR_PLUS);
+#else
     filler(buf, ".", nullptr, 0);
     filler(buf, "..", nullptr, 0);
+#endif
 
     std::vector<std::string> files;
 
@@ -99,7 +116,11 @@ int lake_readdir(
         
         spdlog::trace("Will show file {0} as {1}", file, file_name);
 
+#ifdef __FreeBSD__
+        filler(buf, file_name.c_str(), nullptr, 0, FUSE_FILL_DIR_PLUS);
+#else
         filler(buf, file_name.c_str(), nullptr, 0);
+#endif
     }
 
     return 0;
