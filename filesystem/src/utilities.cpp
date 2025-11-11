@@ -73,3 +73,33 @@ std::string extract_query(const char* path) {
     spdlog::trace("Exiting parse() -> {0}", extracted_query);
     return extracted_query;
 }
+
+std::vector<std::string> split(const std::string str, const std::string delim) {
+    spdlog::trace("Entering split(str={0}, delim={1})", str, delim);
+
+    std::vector<std::string> parts;
+
+    int part_start = 0;
+    for (int i = 0; i < str.size(); i++)
+    {
+        const std::string delim_match = str.substr(i, delim.size());
+
+        if (delim_match == delim)
+        {
+            if (part_start != i)
+            {
+                parts.push_back(str.substr(part_start, i-part_start));
+            }
+
+            part_start = i + delim.size();
+        }
+    }
+
+    if (part_start < str.size())
+    {
+        parts.push_back(str.substr(part_start, str.size() - part_start));
+    }
+
+    spdlog::trace("Exiting split() -> vec.size()={0}", parts.size());
+    return parts;
+}
