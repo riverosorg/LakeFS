@@ -5,14 +5,15 @@
 #include "backups.hpp"
 #include "db.hpp"
 
+#include <algorithm>
 #include <filesystem>
-#include <optional>
 
 #include <pthread.h>
 #include <sys/signal.h>
 #include <time.h>
 
 #include <spdlog/spdlog.h>
+#include <vector>
 
 // better way to pass these in? handler args
 uint32_t _number_backups;
@@ -92,47 +93,45 @@ static auto handle_backup(sigval val) -> void {
     if (backup_count > _number_backups) {
         spdlog::info("Removing oldest backup");
 
+        // Derives the time from the file name
+        const auto get_time = [] (const std::filesystem::path entry) -> time_t
+        {
+            const auto file_stem = entry.stem();
+
+            spdlog::debug("Looking at file {0} {1}", entry.c_str(), entry.stem().c_str());
+            
+            std::tm file_date;
+            strptime(file_stem.c_str(), "%Y-%m-%d.%X", &file_date);
+            
+            return mktime(&file_date);
+        };
+
         dir_iter = std::filesystem::directory_iterator(_backup_dir);
-        auto oldest_entry = std::make_optional<std::filesystem::directory_entry>();
-        std::tm oldest_entry_date;
 
+        // Placing the iterator into a vector so its more straightforward to work with
+        std::vector<std::filesystem::path> files{};
         for (auto entry : dir_iter) {
+            const auto filename = entry.path().filename();
 
-            if (entry.is_regular_file()) {
-
-                // Get time from filename
-                const auto new_entry_name = entry.path().stem();
-
-                // TODO: if this is removed, the backup fails!
-                spdlog::debug("Looking at file {0} {1}", entry.path().c_str(), entry.path().stem().c_str());
-
-                std::tm new_entry_date;
-                strptime(new_entry_name.c_str(), "%Y-%m-%d.%X", &new_entry_date);
-
-                if (!oldest_entry.has_value()) {
-                    oldest_entry = entry;
-                    oldest_entry_date = new_entry_date;
-                    continue;
-                }
-
-                if (difftime(mktime(&new_entry_date), mktime(&oldest_entry_date)) < 0) {
-                    oldest_entry = entry;
-                    oldest_entry_date = new_entry_date;
-                }
-
+            if (entry.is_regular_file() && (filename.string().ends_with(".backup.db"))) {
+                files.push_back(entry.path());
             }
         }
 
-        if (oldest_entry.has_value()) {
-            if (std::filesystem::remove(oldest_entry->path())) {
-                spdlog::info("Removed file at {0}", oldest_entry->path().c_str());
+        std::sort(files.begin(), files.end(), 
+            [get_time](const std::filesystem::path& entry_a, const std::filesystem::path& entry_b) -> bool {
+                return get_time(entry_a) < get_time(entry_b);
+        });
+
+        // remove files
+        for (int i = 0; i < (backup_count - _number_backups); i++)
+        {
+            if (std::filesystem::remove(files[i])) {
+                spdlog::info("Removed file at {0}", files[i].c_str());
 
             } else {
-                spdlog::error("Could not remove file at {0}", oldest_entry->path().c_str());
+                spdlog::error("Could not remove file at {0}",files[i].c_str());
             }
-
-        } else {
-            spdlog::error("Could not remove entry, no file found");
         }
     }
 
