@@ -119,16 +119,19 @@ auto main(int argc, char** argv) -> int {
     db_set_default_query(default_query);
 
     // Initialize file logger
-    const std::string log_file_name = "/var/lakefs/lakefs.log";
+    if (!program.get<bool>("--tempdb"))
+    {
+        const std::string log_file_name = "/var/lakefs/lakefs.log";
+        
+        // create a rotating logger with a 5MB file size and three files
+        const auto max_size = 1048576 * 5;
+        const auto max_files = 3;
+        auto rotating_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(log_file_name, max_size, max_files);
+        auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
     
-    // create a rotating logger with a 5MB file size and three files
-    const auto max_size = 1048576 * 5;
-    const auto max_files = 3;
-    auto rotating_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(log_file_name, max_size, max_files);
-    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-
-    spdlog::logger logger("default", {console_sink, rotating_sink});
-    spdlog::default_logger()->swap(logger);
+        spdlog::logger logger("default", {console_sink, rotating_sink});
+        spdlog::default_logger()->swap(logger);
+    }
 
     // Fuse gets initiated like a program and needs its own args
     fuse_args args = FUSE_ARGS_INIT(0, nullptr);
