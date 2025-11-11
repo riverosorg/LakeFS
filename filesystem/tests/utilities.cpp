@@ -44,3 +44,27 @@ TEST_CASE("Query Extraction", "[utilities]") {
         CHECK(res == "(tag1 & ((!place) | (tag2 & tag3)))");
     }
 }
+
+TEST_CASE("String Splitting", "[utilities]") {
+    SECTION("Single char delim") {
+        const auto haystack = "wow/this/is/a/path/";
+        const auto needle = "/";
+
+        const auto found = split(haystack, needle);
+
+        CHECK(found.size() == 5);
+        CHECK(found[0] == "wow");
+        CHECK(found[4] == "path");
+    }
+
+    SECTION("Multi char delim") {
+        const auto haystack = "><i><love><testing";
+        const auto needle = "><";
+
+        const auto found = split(haystack, needle);
+        
+        CHECK(found.size() == 3);
+        CHECK(found[0] == "i");
+        CHECK(found[2] == "testing");
+    }
+} 

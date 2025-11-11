@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 Caleb Depatie
+# SPDX-FileCopyrightText: 2024-2025 Caleb Depatie
 #
 # SPDX-License-Identifier: 0BSD
 
@@ -9,6 +9,7 @@ tests_dict = {
     'Deleting Files': 'deletion.sh',
     'Relinking Files': 'relinking.sh',
     'Add multiple tags': 'multiple_tags.sh',
+    'Tag Folders': 'folder.sh',
     'Advanced Queries': 'adv_query.sh'
 }
 

@@ -17,9 +17,8 @@ extern "C" {
 #include <string>
 #include <spdlog/spdlog.h>
 
-#include "query_lang/parser.hpp"
-#include "fs.hpp"
 #include "db.hpp"
+#include "fs.hpp"
 #include "command_interface.h"
 #include "utilities.hpp"
 
@@ -41,15 +40,20 @@ int lake_getattr(const char *path, struct stat *stbuf)
 
     auto file = reverse_query(path);
 
-    if (file.empty()) {
+    if (!file.has_value())
+    {
+        return file.error();
+    }
+
+    if (file.value().empty()) {
         spdlog::error("No file found!");
 
         return -ENOENT;
     }
 
-    spdlog::debug("stat'ing file at {0}", file);
+    spdlog::debug("stat'ing file at {0}", file.value());
 
-    if (stat(file.c_str(), stbuf) < 0)
+    if (stat(file.value().c_str(), stbuf) < 0)
     {
         spdlog::error("Error stat'ing: {0}", strerror(errno));
 
@@ -82,36 +86,14 @@ int lake_readdir(
     filler(buf, "..", nullptr, 0);
 #endif
 
-    std::vector<std::string> files;
+    const auto files = get_files(path);
 
-    // TODO: very nested, smelly
-
-    // Check if path is a query
-    if (path[strlen(path) - 1] == ')') {
-        std::string query = extract_query(path);
-
-        try {
-            const auto query_ast = parse(query);
-
-            if (query_ast.has_value()) {
-                files = db_run_query(query_ast.value());
-            
-            } else {
-                spdlog::error("Error while parsing, invalid query");
-
-                return -EINVAL;
-            }
-        } catch (std::exception err) {
-            spdlog::error("Error while parsing: {0}", err.what());
-
-            return -EINVAL;
-        }
-
-    } else {
-        files = db_run_default_query();
+    if (!files.has_value())
+    {
+        return files.error();
     }
 
-    for (const auto& file : files) {
+    for (const auto& file : files.value()) {
         const std::string file_name = file.substr(file.find_last_of("/") + 1);
         
         spdlog::trace("Will show file {0} as {1}", file, file_name);
@@ -136,12 +118,19 @@ int lake_open(const char *path, struct fuse_file_info *fi) {
 
     auto file_path = reverse_query(path);
 
-    if (file_path.empty())
+    if (!file_path.has_value())
+    {
+        return file_path.error();
+    }
+
+    if (file_path.value().empty()) 
+    {
         return -ENOENT;
+    }
 
-    spdlog::trace("Found file {0} to open", file_path);
+    spdlog::trace("Found file {0} to open", file_path.value());
 
-    fi->fh = open(file_path.c_str(), fi->flags);
+    fi->fh = open(file_path.value().c_str(), fi->flags);
 
     if (fi->fh == -1) {
         spdlog::error("Could not open file err: {0}", strerror(errno));

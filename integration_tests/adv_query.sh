@@ -8,7 +8,7 @@ source integration_tests/test_core.sh
 
 # Issue #34 :: Exit gracefully with an incorrect query
 # TODO: Seems to work but I only get 0 in $rc.
-# /usr/bin/env ls $lake_dir/'((default | not_default) & )'
+# ls $lake_dir/'((default | not_default) & )' && echo 'not ok!!'
 # rc=$?
 
 # if [ $rc != 1 ]; then
