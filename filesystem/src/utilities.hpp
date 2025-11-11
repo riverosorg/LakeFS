@@ -5,9 +5,13 @@
 
 #include <string>
 #include <vector>
+#include <expected>
+
+// Runs a query normally. Handles special logic to pull out folders
+std::expected<std::vector<std::string>, int> get_files(const char* path);
 
 // Takes a query path that involves a tag query and returns the real FS path
-std::string reverse_query(const char* path);
+std::expected<std::string, int> reverse_query(const char* path);
 
 // Takes a path and returns the query segment
 std::string extract_query(const char* path);
