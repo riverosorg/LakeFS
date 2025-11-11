@@ -12,7 +12,7 @@ $cli tag $test_dir/test_file default
 mv $test_dir/test_file $test_dir/test_file2_1
 $cli relink $test_dir/test_file $test_dir/test_file2_1
 
-results=$(ls -A $lake_dir | grep test_file2_1 | wc -l)
+results="$(ls -A $lake_dir | grep test_file2_1 | wc -l)"
 
 if [ $(echo "$results" | xargs) != "1" ]; then
     echo "Error: relinking not working"

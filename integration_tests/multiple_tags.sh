@@ -11,7 +11,7 @@ echo "test" >> $test_dir/test_file
 
 $cli tag $test_dir/test_file tag1 tag2
 
-results=$(ls -A $lake_dir/'(tag1&tag2)' | wc -l)
+results="$(ls -A $lake_dir/'(tag1&tag2)' | wc -l)"
 
 if [ $(echo "$results" | xargs) != "1" ]; then
     echo "Error: Tagging a file with 2 tags at once not working"

@@ -5,59 +5,56 @@
 
 #include "parser.hpp"
 
-#include <sstream>
 #include <memory>
+#include <sstream>
 
-#include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
+#include <spdlog/spdlog.h>
 
-Token::Token() 
-    : token("") {}
+Token::Token() : token("") {}
 
-Token::Token(std::string str) 
-    : token(str) {}
+Token::Token(std::string str) : token(str) {}
 
-std::ostream& operator<<(std::ostream &out, const Token &token) {
+std::ostream& operator<<(std::ostream& out, const Token& token)
+{
     out << token.str();
     return out;
 }
 
-bool Token::operator==(const Token& other) const {
-    return this->token == other.token;
-}
+bool Token::operator==(const Token& other) const { return this->token == other.token; }
 
-size_t Token::len() const {
-    return this->token.length();
-}
+size_t Token::len() const { return this->token.length(); }
 
-std::string Token::str() const {
-    return this->token;
-}
+std::string Token::str() const { return this->token; }
 
-void Token::append(char character) {
-    this->token.push_back(character);
-}
+void Token::append(char character) { this->token.push_back(character); }
 
-
-std::vector<Token> tokenize(std::string expression) {
+std::vector<Token> tokenize(std::string expression)
+{
     std::vector<Token> token_list;
     Token token_accum;
 
-    auto captureToken = [&]() {
-        if (token_accum.len() > 0) {
+    auto captureToken = [&]()
+    {
+        if (token_accum.len() > 0)
+        {
             token_list.push_back(token_accum);
         }
         token_accum = Token();
     };
 
-    for (const auto &character : expression) {
-        if (isspace(character)) {
+    for (const auto& character : expression)
+    {
+        if (isspace(character))
+        {
             captureToken();
         }
-        else if (isalnum(character) || character == '_') {
+        else if (isalnum(character) || character == '_')
+        {
             token_accum.append(character);
         }
-        else {
+        else
+        {
             switch (character)
             {
             case '&':
@@ -84,17 +81,22 @@ std::vector<Token> tokenize(std::string expression) {
     return token_list;
 }
 
-std::vector<std::shared_ptr<AstNode>> parseRpn(std::vector<Token>::iterator* token_iter, std::vector<Token>::iterator end_iter) {
+std::vector<std::shared_ptr<AstNode>> parseRpn(std::vector<Token>::iterator* token_iter,
+                                               std::vector<Token>::iterator end_iter)
+{
     std::vector<std::shared_ptr<AstNode>> rpn;
     std::vector<std::shared_ptr<Operator>> stack;
 
-    auto putStack = [&](std::shared_ptr<Operator> op) {
-        if (stack.size() > 0) {
+    auto putStack = [&](std::shared_ptr<Operator> op)
+    {
+        if (stack.size() > 0)
+        {
             auto last = stack.back();
-            //Check if the last operator is equal or higher precedence.
-            //This is done when equal in order to preserve argument ordering.
-            //This ensures {1+2+3 --> 1 2 + 3 +} instead of {1+2+3 --> 1 2 3 + +}
-            if (last >= op) {
+            // Check if the last operator is equal or higher precedence.
+            // This is done when equal in order to preserve argument ordering.
+            // This ensures {1+2+3 --> 1 2 + 3 +} instead of {1+2+3 --> 1 2 3 + +}
+            if (last >= op)
+            {
                 rpn.push_back(last);
                 stack.pop_back();
             }
@@ -102,39 +104,47 @@ std::vector<std::shared_ptr<AstNode>> parseRpn(std::vector<Token>::iterator* tok
         stack.push_back(op);
     };
 
-    //Loop through the tokens
-    while(*token_iter != end_iter) {
+    // Loop through the tokens
+    while (*token_iter != end_iter)
+    {
         Token token = **token_iter;
         (*token_iter)++;
 
         std::string token_str = token.str();
 
-        if (token_str == "&" || token_str == "*") {
+        if (token_str == "&" || token_str == "*")
+        {
             putStack(std::make_shared<Intersection>());
         }
-        else if (token_str == "|" || token_str == "+") {
+        else if (token_str == "|" || token_str == "+")
+        {
             putStack(std::make_shared<Union>());
         }
-        else if (token_str == "!" || token_str == "-") {
+        else if (token_str == "!" || token_str == "-")
+        {
             putStack(std::make_shared<Negation>());
         }
-        else if (token_str == "(") {
-            //Parse the sub-expression
+        else if (token_str == "(")
+        {
+            // Parse the sub-expression
             auto sub_expr = parseRpn(token_iter, end_iter);
             rpn.insert(rpn.end(), sub_expr.begin(), sub_expr.end());
         }
-        else if (token_str == ")") {
-            //Exit the for loop
+        else if (token_str == ")")
+        {
+            // Exit the for loop
             break;
         }
-        else {
+        else
+        {
             auto node = std::make_shared<Tag>(token_str);
             rpn.push_back(node);
         }
     }
 
-    //Remove all remaining items from the stack
-    while (stack.size() > 0) {
+    // Remove all remaining items from the stack
+    while (stack.size() > 0)
+    {
         rpn.push_back(stack.back());
         stack.pop_back();
     }
@@ -142,31 +152,47 @@ std::vector<std::shared_ptr<AstNode>> parseRpn(std::vector<Token>::iterator* tok
     return rpn;
 }
 
-std::shared_ptr<AstNode> parse(std::string expression) {
+std::optional<std::shared_ptr<AstNode>> parse(std::string expression)
+{
+    spdlog::trace("Entering parse(expression={0})", expression);
+
     std::vector<Token> tokens = tokenize(expression);
     std::vector<Token>::iterator token_iter = tokens.begin();
 
-    //Parse the expression and convert to RPN
+    // Parse the expression and convert to RPN
     std::vector<std::shared_ptr<AstNode>> rpn = parseRpn(&token_iter, tokens.end());
-    
-    //Convert the RPN representation to an AST
+
+    spdlog::debug("Complete RPN:");
+    for (const auto& rpn_item : rpn)
+    {
+        spdlog::debug("{0}", rpn_item->str());
+    }
+    spdlog::debug("Printing RPN done!");
+
+    // Convert the RPN representation to an AST
     std::vector<std::shared_ptr<AstNode>>::iterator rpn_iter = rpn.begin();
-    while (rpn_iter != rpn.end()) {
-        spdlog::trace("RPN: {0}", (*rpn_iter)->str());
+    while (rpn_iter != rpn.end())
+    {
 
         // TODO: manipulating an iterator like this (deleting elements) is undefined behaviour
-        (*rpn_iter)->assembleAST(&rpn, &rpn_iter);
+        if (!((*rpn_iter)->assembleAST(&rpn, &rpn_iter)))
+        {
+            return {};
+        }
+
         rpn_iter += 1;
     }
 
-    spdlog::trace("AST: {0}", rpn.back()->str());
+    spdlog::debug("AST: {0}", rpn.back()->str());
 
     return rpn.back();
 }
 
-std::ostream& operator<<(std::ostream &out, const std::vector<Token> &tokens) {
+std::ostream& operator<<(std::ostream& out, const std::vector<Token>& tokens)
+{
     out << "Tokens{";
-    for (const auto &token : tokens) {
+    for (const auto& token : tokens)
+    {
         out << token << ", ";
     }
     out << "}";

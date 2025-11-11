@@ -4,10 +4,11 @@
 #pragma once
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-// Command Interface
+    // Command Interface
 
 #define LAKE_SOCKET_PATH "/tmp/lakefs.sock"
 
@@ -18,13 +19,13 @@ extern "C" {
 #define LAKE_REMOVE_TAG 4
 #define LAKE_RELINK_FILE 5
 
-typedef struct __attribute__((packed)) lake_command_t {
-    int command;
-    int size;
-    char data[];
-} lake_command_t;
+    typedef struct __attribute__((packed)) lake_command_t
+    {
+        int command;
+        int size;
+        char data[];
+    } lake_command_t;
 
 #ifdef __cplusplus
 }
 #endif
-

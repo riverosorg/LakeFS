@@ -15,7 +15,7 @@ MAINTAINER=youremail@example.com
 COMMENT=tag based file system
 WWW=https://github.com/riverosorg/LakeFS
 
-USES=7z meson
+USES=7z meson sqlite
 
 USE_GCC=yes
 
@@ -41,7 +41,7 @@ do-configure:
 	meson setup ${WRKSRC} ${WRKSRC}/${MESON_BUILD_DIR}
 
 post-stage:	
-	cp ${WRKSRC}/${MESON_BUILD_DIR}/docs/*.1.gz ${STAGEDIR}/${PREFIX}/man/man1/
+	cp ${WRKSRC}/${MESON_BUILD_DIR}/docs/*.1.gz ${STAGEDIR}/${PREFIX}/share/man/man1/
 
 	cp ${WRKSRC}/lakefs.conf ${STAGEDIR}/${PREFIX}/etc/lakefs.conf.sample
 
