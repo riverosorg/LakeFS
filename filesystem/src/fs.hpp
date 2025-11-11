@@ -3,7 +3,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #pragma once
 
-extern "C" {
+extern "C"
+{
 #define FUSE_USE_VERSION 31
 
 #ifdef __FreeBSD__
@@ -14,29 +15,26 @@ extern "C" {
 }
 
 #ifdef __FreeBSD__
-int lake_getattr(const char *path, struct stat *stbuf, struct fuse_file_info* fi);
+int lake_getattr(const char* path, struct stat* stbuf, struct fuse_file_info* fi);
 #else
-int lake_getattr(const char *path, struct stat *stbuf);
+int lake_getattr(const char* path, struct stat* stbuf);
 #endif
 
 #ifdef __FreeBSD__
-int lake_readdir(
-    const char *path, void *buf, fuse_fill_dir_t filler,
-    off_t offset, struct fuse_file_info *fi, enum fuse_readdir_flags flags);
+int lake_readdir(const char* path, void* buf, fuse_fill_dir_t filler, off_t offset,
+                 struct fuse_file_info* fi, enum fuse_readdir_flags flags);
 #else
-int lake_readdir(
-    const char *path, void *buf, fuse_fill_dir_t filler,
-    off_t offset, struct fuse_file_info *fi);
+int lake_readdir(const char* path, void* buf, fuse_fill_dir_t filler, off_t offset,
+                 struct fuse_file_info* fi);
 #endif
 
-int lake_open(const char *path, struct fuse_file_info *fi);
+int lake_open(const char* path, struct fuse_file_info* fi);
 
-int lake_release(const char *path, struct fuse_file_info *fi);
+int lake_release(const char* path, struct fuse_file_info* fi);
 
-int lake_read(const char *path, char *buf, size_t size, off_t offset,
-            struct fuse_file_info *fi);
+int lake_read(const char* path, char* buf, size_t size, off_t offset, struct fuse_file_info* fi);
 
-int lake_write(const char *path, const char *buf, size_t size, off_t offset,
-            struct fuse_file_info *fi);
+int lake_write(const char* path, const char* buf, size_t size, off_t offset,
+               struct fuse_file_info* fi);
 
 void lake_destroy(void* private_data);

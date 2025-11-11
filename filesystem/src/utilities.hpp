@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #pragma once
 
+#include <expected>
 #include <string>
 #include <vector>
-#include <expected>
 
 // Runs a query normally. Handles special logic to pull out folders
 std::expected<std::vector<std::string>, int> get_files(const char* path);

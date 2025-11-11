@@ -4,7 +4,8 @@
 #pragma once
 
 #include <chrono>
-#include <string>
 #include <cstdint>
+#include <string>
 
-auto create_backup_timer(std::chrono::seconds interval, uint32_t number_backups, std::string backuppath) -> bool;
+auto create_backup_timer(std::chrono::seconds interval, uint32_t number_backups,
+                         std::string backuppath) -> bool;

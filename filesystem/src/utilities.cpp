@@ -2,15 +2,16 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 #include <algorithm>
+#include <filesystem>
 #include <spdlog/spdlog.h>
 #include <vector>
-#include <filesystem>
 
-#include "query_lang/parser.hpp"
 #include "db.hpp"
+#include "query_lang/parser.hpp"
 #include "utilities.hpp"
 
-std::expected<std::vector<std::string>, int> get_files(const char* path) {
+std::expected<std::vector<std::string>, int> get_files(const char* path)
+{
     spdlog::trace("Entering get_files(path={0})", path);
 
     std::vector<std::string> files;
@@ -25,10 +26,12 @@ std::expected<std::vector<std::string>, int> get_files(const char* path) {
         const auto query = extract_query(path);
         const auto query_ast = parse(query);
 
-        if (query_ast.has_value()) {
+        if (query_ast.has_value())
+        {
             files = db_run_query(query_ast.value());
-        
-        } else {
+        }
+        else
+        {
             spdlog::error("Error while parsing, invalid query");
 
             return std::unexpected(-EINVAL);
@@ -41,7 +44,6 @@ std::expected<std::vector<std::string>, int> get_files(const char* path) {
 
     if (path_segments.size() > 1)
     {
-
         // Get the file path by comparing the file name to the query results
         std::string file_path;
         std::string looking_for_file;
@@ -55,13 +57,12 @@ std::expected<std::vector<std::string>, int> get_files(const char* path) {
             looking_for_file = path_segments[0];
         }
 
+        for (const auto& query_file : files)
+        {
+            const std::string query_file_name = query_file.substr(query_file.find_last_of("/") + 1);
 
-        for (const auto& query_file : files) {
-            
-            const std::string query_file_name = 
-                query_file.substr(query_file.find_last_of("/") + 1);
-
-            if (query_file_name == looking_for_file) {
+            if (query_file_name == looking_for_file)
+            {
                 file_path = query_file;
                 break;
             }
@@ -106,18 +107,19 @@ std::expected<std::vector<std::string>, int> get_files(const char* path) {
     return files;
 }
 
-std::expected<std::string, int> reverse_query(const char* path) {
+std::expected<std::string, int> reverse_query(const char* path)
+{
     auto path_s = std::string(path);
 
     spdlog::trace("Entering reverse_query(path={0})", path_s);
 
     const auto path_segments = split(path, "/");
 
-    std::string looking_for_file = path_segments[path_segments.size()-1];
+    std::string looking_for_file = path_segments[path_segments.size() - 1];
 
     std::string reconstructed_path;
 
-    for (int i = 0; i < path_segments.size()-1; i++)
+    for (int i = 0; i < path_segments.size() - 1; i++)
     {
         reconstructed_path += "/" + path_segments[i];
     }
@@ -129,29 +131,31 @@ std::expected<std::string, int> reverse_query(const char* path) {
         return std::unexpected(files.error());
     }
 
-    const auto file_path = std::find_if(files->begin(), files->end(), 
-        [looking_for_file] (const std::string& file_name) -> bool {
-            return std::filesystem::path(file_name).filename() == looking_for_file;
-    });
+    const auto file_path = std::find_if(
+        files->begin(), files->end(), [looking_for_file](const std::string& file_name) -> bool
+        { return std::filesystem::path(file_name).filename() == looking_for_file; });
 
     spdlog::trace("Exiting reverse_query() -> {0}", *file_path);
     return *file_path;
 }
 
-std::string extract_query(const char* path) {
+std::string extract_query(const char* path)
+{
     spdlog::trace("Entering extract_query(path={0})", std::string(path));
 
     auto path_s = std::string(path);
 
-    // TODO: This is pretty niave. quickly 'fixed' for now but a real algorithm should be used
-    const auto extracted_query = 
-        path_s.substr(path_s.find_first_of('('), path_s.find_last_of(')') - path_s.find_first_of('(') + 1);
+    // TODO: This is pretty niave. quickly 'fixed' for now but a real algorithm
+    // should be used
+    const auto extracted_query = path_s.substr(
+        path_s.find_first_of('('), path_s.find_last_of(')') - path_s.find_first_of('(') + 1);
 
     spdlog::trace("Exiting extract_query() -> {0}", extracted_query);
     return extracted_query;
 }
 
-std::vector<std::string> split(const std::string str, const std::string delim) {
+std::vector<std::string> split(const std::string str, const std::string delim)
+{
     spdlog::trace("Entering split(str={0}, delim={1})", str, delim);
 
     std::vector<std::string> parts;
@@ -165,9 +169,8 @@ std::vector<std::string> split(const std::string str, const std::string delim) {
         {
             if (part_start != i)
             {
-                parts.push_back(str.substr(part_start, i-part_start));
+                parts.push_back(str.substr(part_start, i - part_start));
             }
-
             part_start = i + delim.size();
         }
     }

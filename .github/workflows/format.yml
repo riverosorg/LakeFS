@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: 2025 Caleb Depatie
+#
+# SPDX-License-Identifier: 0BSD
+
+name: Format Checker
+permissions:
+  contents: read
+
+on: [push]
+jobs:
+  formatting-check:
+    name: Clang Formatting Check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        path:
+          - 'filesystem/src'
+          - 'filesystem/tests'
+    steps:
+    - uses: actions/checkout@v4
+    - name: Run clang-format style check
+      uses: jidicula/clang-format-action@v4.16.0
+      with:
+        clang-format-version: '13'
+        check-path: ${{ matrix.path }}

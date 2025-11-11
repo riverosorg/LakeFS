@@ -19,6 +19,7 @@ help:
 	@echo "  install    - Runs mesons install command. Will overwrite /etc/lakefs.conf"
 	@echo "  test       - Runs all project tests"
 	@echo "  local-test - Runs project tests, but uses unshare to create a seperate cgroup for lakefs. Helps mitigate issues while testing due to fuse locking the filesystem during a failure in lakefs"
+	@echo "  format     - Formats the project files"
 	@echo "  clean      - Cleans mesons build directory"
 
 .PHONY: setup
@@ -42,6 +43,11 @@ test: build
 .PHONY: local-test
 local-test:
 	unshare -pfr --user --mount --kill-child meson test -C $(BUILD_DIR) --print-errorlogs
+
+.PHONY: format
+format:
+	-clang-format filesystem/tests/** -i
+	-clang-format filesystem/src/** -i
 
 .PHONY: clean
 clean:
