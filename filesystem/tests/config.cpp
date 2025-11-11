@@ -3,26 +3,31 @@
 // SPDX-License-Identifier: 0BSD
 
 #include "config.hpp"
+#include "catch2/catch_test_macros.hpp"
 
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch_all.hpp>
 
-TEST_CASE("Config Parsing", "[config]") {
+TEST_CASE("Config Parsing", "[config]")
+{
 
-    SECTION("Simple Key Value") {
+    SECTION("Simple Key Value")
+    {
         auto kv_pair = parse_config_line("test=1");
         CHECK(kv_pair.first == "test");
         CHECK(kv_pair.second == "1");
     }
 
-    SECTION("Key Value with spaces") {
+    SECTION("Key Value with spaces")
+    {
         auto kv_pair = parse_config_line("key name=value is something");
         CHECK(kv_pair.first == "key name");
         CHECK(kv_pair.second == "value is something");
     }
 }
 
-TEST_CASE("Interval Parsing", "[config]") {
+TEST_CASE("Interval Parsing", "[config]")
+{
 
     // Conversions
     const auto seconds = 60;
@@ -31,24 +36,35 @@ TEST_CASE("Interval Parsing", "[config]") {
     const auto days = 7;
     const auto weeks = 4;
 
-
-    SECTION("Hours") {
+    SECTION("Hours")
+    {
         auto interval = parse_interval_value("3 hours");
-        CHECK(interval.count() == 3 * minutes * seconds);
+        CHECK(interval->count() == 3 * minutes * seconds);
     }
 
-    SECTION("Days") {
+    SECTION("Days")
+    {
         auto interval = parse_interval_value("5 days");
-        CHECK(interval.count() == 5 * hours * minutes * seconds);
+        CHECK(interval->count() == 5 * hours * minutes * seconds);
     }
 
-    SECTION("Weeks") {
+    SECTION("Weeks")
+    {
         auto interval = parse_interval_value("2 weeks");
-        CHECK(interval.count() == 2 * days * hours * minutes * seconds);
+        CHECK(interval->count() == 2 * days * hours * minutes * seconds);
     }
 
-    SECTION("Months") {
+    SECTION("Months")
+    {
         auto interval = parse_interval_value("3 months");
-        CHECK(interval.count() == 3 * 2629746); // NOTE: std::chronos ratio for months is this magic value, which is I assume more accurate than the naive calculation
+        CHECK(interval->count() == 3 * 2629746); // NOTE: std::chronos ratio for months is this
+                                                 // magic value, which is I assume more accurate
+                                                 // than the naive calculation
+    }
+
+    SECTION("Invalid input")
+    {
+        auto interval = parse_interval_value("3 dogs");
+        CHECK_FALSE(interval.has_value());
     }
 }

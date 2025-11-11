@@ -14,7 +14,7 @@ $cli add $test_dir/test_file
 $cli tag $test_dir/test_file default
 
 # test reading the file
-results=$(cat $lake_dir/test_file)
+results="$(cat $lake_dir/test_file)"
 
 if [ "$rng" != "$results" ]; then
     echo "Error: file contents do not match"

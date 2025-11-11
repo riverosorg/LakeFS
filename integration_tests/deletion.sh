@@ -12,7 +12,7 @@ $cli tag $test_dir/test_file2_1 default
 $cli tag $test_dir/test_file2_1 not_default
 
 # check file was added
-results=$(ls $lake_dir | wc -l)
+results="$(ls $lake_dir | wc -l)"
 
 if [ $(echo "$results" | xargs) != "1" ]; then
     echo "Error: adding file not working"
@@ -25,7 +25,7 @@ fi
 # Remove a tag
 $cli del-tag $test_dir/test_file2_1 not_default
 
-results=$(ls -A $lake_dir/'(not_default)' | wc -l)
+results="$(ls -A $lake_dir/'(not_default)' | wc -l)"
 
 if [ $(echo "$results" | xargs) != "0" ]; then
     echo "Error: removing tag not working"
@@ -38,7 +38,7 @@ fi
 # Remove a file
 $cli del $test_dir/test_file2_1
 
-results=$(ls $lake_dir | wc -l)
+results="$(ls $lake_dir | wc -l)"
 
 if [ $(echo "$results" | xargs) != "0" ]; then
     echo "Error: removing file not working"

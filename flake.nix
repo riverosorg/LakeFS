@@ -40,7 +40,7 @@
           # Built via `nix build` and run via `nix run`
           packages.default = pkgs.stdenv.mkDerivation rec {
             pname   = "lakefs";
-            version = "0.2.1";
+            version = "0.2.3";
             
             src = self;
 

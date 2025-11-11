@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: 2025 Caleb Depatie
+#
+# SPDX-License-Identifier: 0BSD
+
+BasedOnStyle: LLVM
+IndentWidth: 4
+
+ColumnLimit: 100
+
+# Force pointers to the type for C++.
+DerivePointerAlignment: false
+PointerAlignment: Left
+
+BreakStringLiterals: true
+BreakBeforeBraces: Allman
