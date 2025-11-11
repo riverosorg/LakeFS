@@ -144,7 +144,16 @@ std::optional<std::string> db_query_helper(const std::shared_ptr<AstNode> ast) {
         query_part += tmp_part.value();
     
     } else if (auto intersection_op = std::dynamic_pointer_cast<Intersection>(ast)) {
-        query_part += "IN (";
+        // TODO: Unfortunate special case for NOT IN
+        if (!std::dynamic_pointer_cast<Negation>(intersection_op->left_node))
+        {
+            query_part += "IN (";
+        }
+        else 
+        {
+            query_part += "";
+        }
+
         auto tmp_part = db_query_helper(intersection_op->left_node);
 
         if (!tmp_part.has_value()) {
@@ -152,7 +161,18 @@ std::optional<std::string> db_query_helper(const std::shared_ptr<AstNode> ast) {
         }
 
         query_part += tmp_part.value();
-        query_part += ") AND id IN (";
+        
+        // TODO: Unfortunate special case for NOT IN
+        if (!std::dynamic_pointer_cast<Negation>(intersection_op->right_node))
+        {
+            query_part += ") AND id IN (";
+        }
+        else 
+        {
+            query_part += ") AND id ";
+        }
+        
+        
         tmp_part = db_query_helper(intersection_op->right_node);
 
         if (!tmp_part.has_value()) {

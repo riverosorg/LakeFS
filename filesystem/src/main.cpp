@@ -130,8 +130,6 @@ auto main(int argc, char** argv) -> int {
     spdlog::logger logger("default", {console_sink, rotating_sink});
     spdlog::default_logger()->swap(logger);
 
-    // spdlog::set_default_logger(logger_s);
-
     // Fuse gets initiated like a program and needs its own args
     fuse_args args = FUSE_ARGS_INIT(0, nullptr);
 
