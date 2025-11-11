@@ -44,10 +44,12 @@ test: build
 local-test:
 	unshare -pfr --user --mount --kill-child meson test -C $(BUILD_DIR) --print-errorlogs
 
+TEST_SRC != find filesystem/tests/ -type f | xargs
+SRC != find filesystem/src/ -type f | xargs
+
 .PHONY: format
 format:
-	-clang-format filesystem/tests/** -i
-	-clang-format filesystem/src/** -i
+	clang-format $(SRC) $(TEST_SRC) -i
 
 .PHONY: clean
 clean:

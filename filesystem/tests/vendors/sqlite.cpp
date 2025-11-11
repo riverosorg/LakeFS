@@ -24,14 +24,12 @@ TEST_CASE("SQLite3 Querying", "[vendor]")
 
     REQUIRE(rc == SQLITE_OK);
 
-    rc = sqlite3_exec(db,
-                      "CREATE TABLE test (id INTEGER PRIMARY KEY, name TEXT);",
-                      nullptr, nullptr, nullptr);
+    rc = sqlite3_exec(db, "CREATE TABLE test (id INTEGER PRIMARY KEY, name TEXT);", nullptr,
+                      nullptr, nullptr);
 
     REQUIRE(rc == SQLITE_OK);
 
-    rc = sqlite3_exec(db, "INSERT INTO test (name) VALUES ('Test!');", nullptr,
-                      nullptr, nullptr);
+    rc = sqlite3_exec(db, "INSERT INTO test (name) VALUES ('Test!');", nullptr, nullptr, nullptr);
 
     REQUIRE(rc == SQLITE_OK);
 
@@ -46,8 +44,7 @@ TEST_CASE("SQLite3 Querying", "[vendor]")
     while (sqlite3_step(stmt) == SQLITE_ROW)
     {
         // Retrieve the value of the "name" column
-        const char* name =
-            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+        const char* name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
 
         REQUIRE(std::string(name) == "Test!");
     }

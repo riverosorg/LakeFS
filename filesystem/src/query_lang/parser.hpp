@@ -9,11 +9,12 @@
 
 #include "ast.hpp"
 
-class Token {
-private:
+class Token
+{
+  private:
     std::string token;
 
-public:
+  public:
     Token();
     Token(std::string str);
 
@@ -23,10 +24,10 @@ public:
     std::string str() const;
     void append(char character);
 
-    friend std::ostream& operator<<(std::ostream &out, const Token &token);
+    friend std::ostream& operator<<(std::ostream& out, const Token& token);
 };
 
-std::ostream& operator<<(std::ostream &out, const std::vector<Token> &tokens);
+std::ostream& operator<<(std::ostream& out, const std::vector<Token>& tokens);
 
 std::vector<Token> tokenize(std::string expression);
 std::optional<std::shared_ptr<AstNode>> parse(std::string expression);
