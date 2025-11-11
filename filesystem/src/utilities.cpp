@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2025 Caleb Depatie
 //
 // SPDX-License-Identifier: BSD-3-Clause
+#include <algorithm>
 #include <spdlog/spdlog.h>
 #include <vector>
 #include <filesystem>
@@ -110,78 +111,31 @@ std::expected<std::string, int> reverse_query(const char* path) {
 
     spdlog::trace("Entering reverse_query(path={0})", path_s);
 
-    // TODO: Refactor & reuse this shared code once working for subdirs
-    std::vector<std::string> files;
-
-    // Get path segments from query
     const auto path_segments = split(path, "/");
 
-    const bool path_has_query = path_segments[0].contains('(');
+    std::string looking_for_file = path_segments[path_segments.size()-1];
 
-    if (path_has_query)
+    std::string reconstructed_path;
+
+    for (int i = 0; i < path_segments.size()-1; i++)
     {
-        const auto query = extract_query(path);
-        const auto query_ast = parse(query);
-
-        if (query_ast.has_value()) {
-            files = db_run_query(query_ast.value());
-        
-        } else {
-            spdlog::error("Error while parsing, invalid query");
-
-            return std::unexpected(-EINVAL);
-        }
-    } else {
-        files = db_run_default_query();
+        reconstructed_path += "/" + path_segments[i];
     }
 
-    // Get the file path by comparing the file name to the query results
-    std::string file_path;
-    std::string looking_for_file;
+    const auto files = get_files(reconstructed_path.c_str());
 
-    if (path_has_query)
+    if (!files.has_value())
     {
-        looking_for_file = path_segments[1];
-    }
-    else
-    {
-        looking_for_file = path_segments[0];
+        return std::unexpected(files.error());
     }
 
+    const auto file_path = std::find_if(files->begin(), files->end(), 
+        [looking_for_file] (const std::string& file_name) -> bool {
+            return std::filesystem::path(file_name).filename() == looking_for_file;
+    });
 
-    for (const auto& query_file : files) {
-        
-        const std::string query_file_name = 
-            query_file.substr(query_file.find_last_of("/") + 1);
-
-        if (query_file_name == looking_for_file) {
-            file_path = query_file;
-            break;
-        }
-    }
-
-    // Have to drill down arbitry path lengths
-    // Take current real path, get dir entries
-    // look for next folder, get that real path
-    // repeat
-    for (int i = 1 + path_has_query; i < path_segments.size(); i++)
-    {
-        auto finding_dir = path_segments[i];
-
-        const auto dir_iter = std::filesystem::directory_iterator(file_path);
-
-        for (const auto& dir_entry : dir_iter)
-        {
-            if (dir_entry.path().filename() == finding_dir)
-            {
-                file_path = dir_entry.path();
-                break;
-            }
-        }
-    }
-
-    spdlog::trace("Exiting reverse_query() -> {0}", file_path);
-    return file_path;
+    spdlog::trace("Exiting reverse_query() -> {0}", *file_path);
+    return *file_path;
 }
 
 std::string extract_query(const char* path) {
