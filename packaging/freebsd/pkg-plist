@@ -1,8 +1,8 @@
 bin/lakefs
 bin/lakefs-ctl
 
-man/man1/lakefs.1.gz
-man/man1/lakefs-ctl.1.gz
-man/man1/lakefs.conf.1.gz
+share/man/man1/lakefs.1.gz
+share/man/man1/lakefs-ctl.1.gz
+share/man/man1/lakefs.conf.1.gz
 
 @sample etc/lakefs.conf.sample
