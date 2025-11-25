@@ -15,11 +15,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Cache Nix pkgs
+      - name: Cache Nix pkgs & Build
         id: cache-nix
         uses: actions/cache@v4
         with:
-          path: /nix/store
+          path: | 
+            /nix/store
+            build
           key: ${{ runner.os }}-build-cache-nix
 
       - uses: cachix/install-nix-action@v18
