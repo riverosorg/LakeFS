@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# rc.d initialization script for lakefs
+
+. /etc/rc.subr
+
+name="lakefs"
+rcvar="${name}_enable"
+
+command="/usr/local/bin/${name}"
+
+required_files="/etc/${name}.conf"
+
+load_rc_config $name
+: ${lakefs_mount:="/lake"}
+
+lakefs_flags="${lakefs_mount}"
+
+run_rc_command "$1"
